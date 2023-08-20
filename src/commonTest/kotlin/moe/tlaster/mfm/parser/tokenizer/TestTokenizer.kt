@@ -1,15 +1,16 @@
 package moe.tlaster.mfm.parser.tokenizer
 
 internal class TestTokenizer(
-    var state: State = DataState,
+    var state: State = DataState
 ) : Tokenizer {
     val acceptIndex = arrayListOf<Int>()
     val rejectIndex = arrayListOf<Int>()
     val tokens = arrayListOf<TokenCharacter>()
-    override fun parse(reader: Reader) {
+    override fun parse(reader: Reader): List<Token> {
         while (reader.hasNext()) {
             state.read(this, reader)
         }
+        return emptyList()
     }
 
     override fun emit(tokenCharacter: TokenCharacter) {

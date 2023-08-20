@@ -19,12 +19,12 @@ class StateTest {
         assertEquals(content, token)
         assertContentEquals(
             listOf(
-                EmojiNameCharacter(':'),
+                EmojiNameStartCharacter,
                 EmojiNameCharacter('t'),
                 EmojiNameCharacter('e'),
                 EmojiNameCharacter('s'),
                 EmojiNameCharacter('t'),
-                EmojiNameCharacter(':'),
+                EmojiNameStartCharacter,
                 EOFTokenCharacter
             ),
             tokenizer.tokens
@@ -70,7 +70,7 @@ class StateTest {
         assertEquals(content, token)
         assertContentEquals(
             listOf(
-                HashTagCharacter('#'),
+                HashTagStartCharacter,
                 HashTagCharacter('t'),
                 HashTagCharacter('e'),
                 HashTagCharacter('s'),
@@ -122,7 +122,7 @@ class StateTest {
                 Character('a'),
                 Character('s'),
                 Character('d'),
-                HashTagCharacter('#'),
+                HashTagStartCharacter,
                 HashTagCharacter('t'),
                 HashTagCharacter('e'),
                 HashTagCharacter('s'),
@@ -171,7 +171,7 @@ class StateTest {
         assertEquals(content, token)
         assertContentEquals(
             listOf(
-                UserNameCharacter('@'),
+                UserAtCharacter,
                 UserNameCharacter('t'),
                 UserNameCharacter('e'),
                 UserNameCharacter('s'),
@@ -196,12 +196,12 @@ class StateTest {
         assertEquals(content, token)
         assertContentEquals(
             listOf(
-                UserNameCharacter('@'),
+                UserAtCharacter,
                 UserNameCharacter('t'),
                 UserNameCharacter('e'),
                 UserNameCharacter('s'),
                 UserNameCharacter('t'),
-                UserHostCharacter('@'),
+                UserAtCharacter,
                 UserHostCharacter('h'),
                 UserHostCharacter('o'),
                 UserHostCharacter('s'),
@@ -229,12 +229,12 @@ class StateTest {
                 Character('a'),
                 Character('s'),
                 Character('d'),
-                UserNameCharacter('@'),
+                UserAtCharacter,
                 UserNameCharacter('t'),
                 UserNameCharacter('e'),
                 UserNameCharacter('s'),
                 UserNameCharacter('t'),
-                UserHostCharacter('@'),
+                UserAtCharacter,
                 UserHostCharacter('h'),
                 UserHostCharacter('o'),
                 UserHostCharacter('s'),
@@ -268,7 +268,7 @@ class StateTest {
                 Character('e'),
                 Character('s'),
                 Character('t'),
-                UserNameCharacter('@'),
+                UserAtCharacter,
                 UserNameCharacter('h'),
                 UserNameCharacter('o'),
                 UserNameCharacter('s'),
@@ -293,7 +293,7 @@ class StateTest {
         assertEquals(content, token)
         assertContentEquals(
             listOf(
-                CashCharacter('$'),
+                CashStartCharacter,
                 CashCharacter('t'),
                 CashCharacter('e'),
                 CashCharacter('s'),
@@ -318,12 +318,12 @@ class StateTest {
         assertEquals(content, token)
         assertContentEquals(
             listOf(
-                InlineCodeCharacter('`'),
+                InlineCodeStartCharacter,
                 InlineCodeCharacter('t'),
                 InlineCodeCharacter('e'),
                 InlineCodeCharacter('s'),
                 InlineCodeCharacter('t'),
-                InlineCodeCharacter('`'),
+                InlineCodeStartCharacter,
                 EOFTokenCharacter
             ),
             tokenizer.tokens
@@ -369,24 +369,24 @@ class StateTest {
         assertEquals(content, token)
         assertContentEquals(
             listOf(
-                CodeBlockCharacter('`'),
-                CodeBlockCharacter('`'),
-                CodeBlockCharacter('`'),
+                CodeBlockStartCharacter,
+                CodeBlockStartCharacter,
+                CodeBlockStartCharacter,
                 CodeBlockLanguageCharacter('k'),
                 CodeBlockLanguageCharacter('o'),
                 CodeBlockLanguageCharacter('t'),
                 CodeBlockLanguageCharacter('l'),
                 CodeBlockLanguageCharacter('i'),
                 CodeBlockLanguageCharacter('n'),
-                CodeBlockCharacter('\n'),
+                CodeBlockLanguageEndCharacter,
                 CodeBlockCharacter('t'),
                 CodeBlockCharacter('e'),
                 CodeBlockCharacter('s'),
                 CodeBlockCharacter('t'),
                 CodeBlockCharacter('\n'),
-                CodeBlockCharacter('`'),
-                CodeBlockCharacter('`'),
-                CodeBlockCharacter('`'),
+                CodeBlockStartCharacter,
+                CodeBlockStartCharacter,
+                CodeBlockStartCharacter,
                 EOFTokenCharacter
             ),
             tokenizer.tokens
@@ -444,14 +444,14 @@ class StateTest {
         assertEquals(content, token)
         assertContentEquals(
             listOf(
-                BoldCharacter('*'),
-                BoldCharacter('*'),
+                AsteriskBoldStartCharacter,
+                AsteriskBoldStartCharacter,
                 BoldCharacter('t'),
                 BoldCharacter('e'),
                 BoldCharacter('s'),
                 BoldCharacter('t'),
-                BoldCharacter('*'),
-                BoldCharacter('*'),
+                AsteriskBoldStartCharacter,
+                AsteriskBoldStartCharacter,
                 EOFTokenCharacter
             ),
             tokenizer.tokens
@@ -472,12 +472,12 @@ class StateTest {
         assertEquals(content, token)
         assertContentEquals(
             listOf(
-                ItalicCharacter('*'),
+                AsteriskItalicStartCharacter,
                 ItalicCharacter('t'),
                 ItalicCharacter('e'),
                 ItalicCharacter('s'),
                 ItalicCharacter('t'),
-                ItalicCharacter('*'),
+                AsteriskItalicStartCharacter,
                 EOFTokenCharacter
             ),
             tokenizer.tokens
@@ -548,14 +548,14 @@ class StateTest {
         assertEquals(content, token)
         assertContentEquals(
             listOf(
-                BoldCharacter('_'),
-                BoldCharacter('_'),
+                UnderscoreBoldStartCharacter,
+                UnderscoreBoldStartCharacter,
                 BoldCharacter('t'),
                 BoldCharacter('e'),
                 BoldCharacter('s'),
                 BoldCharacter('t'),
-                BoldCharacter('_'),
-                BoldCharacter('_'),
+                UnderscoreBoldStartCharacter,
+                UnderscoreBoldStartCharacter,
                 EOFTokenCharacter
             ),
             tokenizer.tokens
@@ -576,12 +576,12 @@ class StateTest {
         assertEquals(content, token)
         assertContentEquals(
             listOf(
-                ItalicCharacter('_'),
+                UnderscoreItalicStartCharacter,
                 ItalicCharacter('t'),
                 ItalicCharacter('e'),
                 ItalicCharacter('s'),
                 ItalicCharacter('t'),
-                ItalicCharacter('_'),
+                UnderscoreItalicStartCharacter,
                 EOFTokenCharacter
             ),
             tokenizer.tokens
@@ -653,10 +653,10 @@ class StateTest {
             listOf(
                 InlineMathCharacter('\\'),
                 InlineMathCharacter('('),
-                InlineMathCharacter('t'),
-                InlineMathCharacter('e'),
-                InlineMathCharacter('s'),
-                InlineMathCharacter('t'),
+                InlineMathContentCharacter('t'),
+                InlineMathContentCharacter('e'),
+                InlineMathContentCharacter('s'),
+                InlineMathContentCharacter('t'),
                 InlineMathCharacter('\\'),
                 InlineMathCharacter(')'),
                 EOFTokenCharacter
@@ -680,10 +680,10 @@ class StateTest {
             listOf(
                 MathBlockCharacter('\\'),
                 MathBlockCharacter('['),
-                MathBlockCharacter('t'),
-                MathBlockCharacter('e'),
-                MathBlockCharacter('s'),
-                MathBlockCharacter('t'),
+                MathBlockContentCharacter('t'),
+                MathBlockContentCharacter('e'),
+                MathBlockContentCharacter('s'),
+                MathBlockContentCharacter('t'),
                 MathBlockCharacter('\\'),
                 MathBlockCharacter(']'),
                 EOFTokenCharacter
@@ -734,7 +734,7 @@ class StateTest {
                 TagCharacter('e'),
                 TagCharacter('s'),
                 TagCharacter('t'),
-                TagCharacter('>'),
+                TagCloseCharacter,
                 EOFTokenCharacter
             ),
             tokenizer.tokens
@@ -759,14 +759,14 @@ class StateTest {
                 TagCharacter('e'),
                 TagCharacter('s'),
                 TagCharacter('t'),
-                TagCharacter('>'),
+                TagCloseCharacter,
                 EndTagOpenCharacter('<'),
                 EndTagOpenCharacter('/'),
                 TagCharacter('t'),
                 TagCharacter('e'),
                 TagCharacter('s'),
                 TagCharacter('t'),
-                TagCharacter('>'),
+                TagCloseCharacter,
                 EOFTokenCharacter
             ),
             tokenizer.tokens
@@ -787,28 +787,28 @@ class StateTest {
         assertContentEquals(
             listOf(
                 BracketCharacter('['),
-                BracketCharacter('t'),
-                BracketCharacter('e'),
-                BracketCharacter('s'),
-                BracketCharacter('t'),
+                BracketContentCharacter('t'),
+                BracketContentCharacter('e'),
+                BracketContentCharacter('s'),
+                BracketContentCharacter('t'),
                 BracketCharacter(']'),
                 RoundBracketCharacter('('),
-                RoundBracketCharacter('h'),
-                RoundBracketCharacter('t'),
-                RoundBracketCharacter('t'),
-                RoundBracketCharacter('p'),
-                RoundBracketCharacter('s'),
-                RoundBracketCharacter(':'),
-                RoundBracketCharacter('/'),
-                RoundBracketCharacter('/'),
-                RoundBracketCharacter('t'),
-                RoundBracketCharacter('e'),
-                RoundBracketCharacter('s'),
-                RoundBracketCharacter('t'),
-                RoundBracketCharacter('.'),
-                RoundBracketCharacter('c'),
-                RoundBracketCharacter('o'),
-                RoundBracketCharacter('m'),
+                RoundBracketContentCharacter('h'),
+                RoundBracketContentCharacter('t'),
+                RoundBracketContentCharacter('t'),
+                RoundBracketContentCharacter('p'),
+                RoundBracketContentCharacter('s'),
+                RoundBracketContentCharacter(':'),
+                RoundBracketContentCharacter('/'),
+                RoundBracketContentCharacter('/'),
+                RoundBracketContentCharacter('t'),
+                RoundBracketContentCharacter('e'),
+                RoundBracketContentCharacter('s'),
+                RoundBracketContentCharacter('t'),
+                RoundBracketContentCharacter('.'),
+                RoundBracketContentCharacter('c'),
+                RoundBracketContentCharacter('o'),
+                RoundBracketContentCharacter('m'),
                 RoundBracketCharacter(')'),
                 EOFTokenCharacter
             ),
@@ -831,28 +831,28 @@ class StateTest {
             listOf(
                 BracketCharacter('?'),
                 BracketCharacter('['),
-                BracketCharacter('t'),
-                BracketCharacter('e'),
-                BracketCharacter('s'),
-                BracketCharacter('t'),
+                BracketContentCharacter('t'),
+                BracketContentCharacter('e'),
+                BracketContentCharacter('s'),
+                BracketContentCharacter('t'),
                 BracketCharacter(']'),
                 RoundBracketCharacter('('),
-                RoundBracketCharacter('h'),
-                RoundBracketCharacter('t'),
-                RoundBracketCharacter('t'),
-                RoundBracketCharacter('p'),
-                RoundBracketCharacter('s'),
-                RoundBracketCharacter(':'),
-                RoundBracketCharacter('/'),
-                RoundBracketCharacter('/'),
-                RoundBracketCharacter('t'),
-                RoundBracketCharacter('e'),
-                RoundBracketCharacter('s'),
-                RoundBracketCharacter('t'),
-                RoundBracketCharacter('.'),
-                RoundBracketCharacter('c'),
-                RoundBracketCharacter('o'),
-                RoundBracketCharacter('m'),
+                RoundBracketContentCharacter('h'),
+                RoundBracketContentCharacter('t'),
+                RoundBracketContentCharacter('t'),
+                RoundBracketContentCharacter('p'),
+                RoundBracketContentCharacter('s'),
+                RoundBracketContentCharacter(':'),
+                RoundBracketContentCharacter('/'),
+                RoundBracketContentCharacter('/'),
+                RoundBracketContentCharacter('t'),
+                RoundBracketContentCharacter('e'),
+                RoundBracketContentCharacter('s'),
+                RoundBracketContentCharacter('t'),
+                RoundBracketContentCharacter('.'),
+                RoundBracketContentCharacter('c'),
+                RoundBracketContentCharacter('o'),
+                RoundBracketContentCharacter('m'),
                 RoundBracketCharacter(')'),
                 EOFTokenCharacter
             ),
@@ -878,12 +878,12 @@ class StateTest {
                 Character('d'),
                 BracketCharacter('?'),
                 BracketCharacter('['),
-                BracketCharacter('S'),
-                BracketCharacter('e'),
-                BracketCharacter('a'),
-                BracketCharacter('r'),
-                BracketCharacter('c'),
-                BracketCharacter('h'),
+                BracketContentCharacter('S'),
+                BracketContentCharacter('e'),
+                BracketContentCharacter('a'),
+                BracketContentCharacter('r'),
+                BracketContentCharacter('c'),
+                BracketContentCharacter('h'),
                 BracketCharacter(']'),
                 EOFTokenCharacter
             ),
@@ -939,14 +939,14 @@ class StateTest {
             listOf(
                 FnCharacter('$'),
                 FnCharacter('['),
-                FnCharacter('f'),
-                FnCharacter('l'),
-                FnCharacter('i'),
-                FnCharacter('p'),
-                FnCharacter('.'),
-                FnCharacter('h'),
-                FnCharacter(','),
-                FnCharacter('v'),
+                FnContentCharacter('f'),
+                FnContentCharacter('l'),
+                FnContentCharacter('i'),
+                FnContentCharacter('p'),
+                FnContentCharacter('.'),
+                FnContentCharacter('h'),
+                FnContentCharacter(','),
+                FnContentCharacter('v'),
                 Character('M'),
                 Character('i'),
                 Character('s'),
@@ -973,13 +973,58 @@ class StateTest {
                 Character('り'),
                 Character('ま'),
                 Character('す'),
-                FnBracketCharacter(']'),
+                FnEndBracketCharacter,
                 EOFTokenCharacter
             ),
             tokenizer.tokens
         )
-
     }
 
-}
+    @Test
+    fun testTildeStrikethrough() {
+        val tokenizer = TestTokenizer()
+        val content = "~~test~~"
+        tokenizer.parse(StringReader(content))
+        assertEquals(content.length, tokenizer.tokens.size - 1)
+        assertEquals(2, tokenizer.acceptIndex.size)
+        assertEquals(content.length, tokenizer.acceptIndex.last())
+        assertEquals(0, tokenizer.rejectIndex.size)
+        val token = tokenizer.tokens.subList(0, tokenizer.acceptIndex.last()).map { it.value }.joinToString("")
+        assertEquals(content, token)
+        assertContentEquals(
+            listOf(
+                StrikeCharacter,
+                StrikeCharacter,
+                Character('t'),
+                Character('e'),
+                Character('s'),
+                Character('t'),
+                StrikeCharacter,
+                StrikeCharacter,
+                EOFTokenCharacter
+            ),
+            tokenizer.tokens
+        )
+    }
 
+    @Test
+    fun testNonTildeStrikethrough() {
+        val tokenizer = TestTokenizer()
+        val content = "~test"
+        tokenizer.parse(StringReader(content))
+        assertEquals(content.length, tokenizer.tokens.size - 1)
+        assertEquals(0, tokenizer.acceptIndex.size)
+        assertEquals(0, tokenizer.rejectIndex.size)
+        assertContentEquals(
+            listOf(
+                Character('~'),
+                Character('t'),
+                Character('e'),
+                Character('s'),
+                Character('t'),
+                EOFTokenCharacter
+            ),
+            tokenizer.tokens
+        )
+    }
+}

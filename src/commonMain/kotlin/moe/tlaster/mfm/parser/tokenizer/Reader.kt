@@ -1,6 +1,5 @@
 package moe.tlaster.mfm.parser.tokenizer
 
-
 internal const val eof: Char = (-1).toChar()
 
 internal interface Reader {

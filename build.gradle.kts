@@ -1,11 +1,13 @@
-import java.util.Properties
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
+
 import org.jetbrains.kotlin.konan.target.HostManager
+import java.util.Properties
 
 plugins {
     kotlin("multiplatform") version "1.9.0"
+    id("org.jetbrains.kotlinx.kover") version "0.7.3"
     id("maven-publish")
     id("signing")
+    id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
 }
 
 group = "moe.tlaster"
@@ -28,12 +30,12 @@ kotlin {
         browser()
         nodejs()
     }
-    @OptIn(ExperimentalWasmDsl::class)
-    wasm {
-        browser()
-        nodejs()
-        d8()
-    }
+//    @OptIn(ExperimentalWasmDsl::class)
+//    wasm {
+//        browser()
+//        nodejs()
+//        d8()
+//    }
     if (HostManager.hostIsMac) {
         ios()
         iosSimulatorArm64()
@@ -52,7 +54,6 @@ kotlin {
         linuxArm64()
     }
 
-    
     sourceSets {
         val commonMain by getting
         val commonTest by getting {
@@ -62,7 +63,6 @@ kotlin {
         }
     }
 }
-
 
 ext {
     val publishPropFile = rootProject.file("publish.properties")
