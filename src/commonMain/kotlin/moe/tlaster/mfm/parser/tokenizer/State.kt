@@ -4,6 +4,22 @@ internal sealed interface State {
     fun read(tokenizer: Tokenizer, reader: Reader)
 }
 
+private fun prevIsNotAsciiAlphanumeric(tokenizer: Tokenizer, reader: Reader): Boolean {
+    if (reader.position != 2) {
+        reader.pushback(3) // push back 1 for char before *, 1 for *
+        val before = reader.consume() // char before *
+        reader.consume() // *
+        if (before !in asciiAlphanumeric) {
+            tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
+            tokenizer.switch(DataState)
+            return true
+        } else {
+            reader.consume() // back to current char
+        }
+    }
+    return false
+}
+
 private val asciiUppercase = 'A'..'Z'
 private val asciiLowercase = 'a'..'z'
 private val asciiAlpha = asciiUppercase + asciiLowercase
@@ -24,7 +40,7 @@ private val hashTagExclude = "[ \u3000\t.,!?'\"#:/[]【】()「」（）<>]".toL
 internal data object DataState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
-            ']' -> tokenizer.emit(FnEndBracketCharacter)
+            ']' -> tokenizer.emit(TokenCharacterType.FnEndBracket, reader.position)
             'h' -> tokenizer.switch(HState)
             '?' -> tokenizer.switch(QuestionState)
             '[' -> tokenizer.switch(BracketOpenState)
@@ -39,8 +55,9 @@ internal data object DataState : State {
             '@' -> tokenizer.switch(AtState)
             '#' -> tokenizer.switch(HashState)
             ':' -> tokenizer.switch(ColonState)
-            eof -> tokenizer.emit(EOFTokenCharacter)
-            else -> tokenizer.emit(Character(current))
+            eof -> tokenizer.emit(TokenCharacterType.Eof, reader.position)
+            LF -> tokenizer.emit(TokenCharacterType.LineBreak, reader.position)
+            else -> tokenizer.emit(TokenCharacterType.Character, reader.position)
         }
     }
 }
@@ -48,28 +65,15 @@ internal data object DataState : State {
 internal data object HState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         if (reader.isFollowedBy("ttps://", ignoreCase = true)) {
-            tokenizer.emit(UrlCharacter('h'))
-            tokenizer.emit(UrlCharacter('t'))
-            tokenizer.emit(UrlCharacter('t'))
-            tokenizer.emit(UrlCharacter('p'))
-            tokenizer.emit(UrlCharacter('s'))
-            tokenizer.emit(UrlCharacter(':'))
-            tokenizer.emit(UrlCharacter('/'))
-            tokenizer.emit(UrlCharacter('/'))
+            tokenizer.emitRange(TokenCharacterType.Url, reader.position, reader.position + "ttps://".length)
             tokenizer.switch(UrlState)
             reader.consume("ttps://".length)
         } else if (reader.isFollowedBy("ttp://", ignoreCase = true)) {
-            tokenizer.emit(UrlCharacter('h'))
-            tokenizer.emit(UrlCharacter('t'))
-            tokenizer.emit(UrlCharacter('t'))
-            tokenizer.emit(UrlCharacter('p'))
-            tokenizer.emit(UrlCharacter(':'))
-            tokenizer.emit(UrlCharacter('/'))
-            tokenizer.emit(UrlCharacter('/'))
+            tokenizer.emitRange(TokenCharacterType.Url, reader.position, reader.position + "ttp://".length)
             tokenizer.switch(UrlState)
             reader.consume("ttp://".length)
         } else {
-            tokenizer.emit(Character('h'))
+            tokenizer.emit(TokenCharacterType.Character, reader.position)
         }
     }
 }
@@ -84,7 +88,7 @@ internal data object UrlState : State {
             }
 
             else -> {
-                tokenizer.emit(UrlCharacter(current))
+                tokenizer.emit(TokenCharacterType.Url, reader.position)
             }
         }
     }
@@ -94,20 +98,81 @@ internal data object QuestionState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             '[' -> {
-                if (reader.next() !in listOf('[', ']', '<', '>')) {
-                    tokenizer.emit(BracketCharacter('?'))
-                    tokenizer.switch(BracketOpenState)
-                } else {
-                    tokenizer.emit(Character('?'))
+                if (reader.isFollowedBy("Search]", ignoreCase = true)) {
+                    tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
+                    tokenizer.emitRange(TokenCharacterType.Search, reader.position, reader.position + "Search]".length)
+                    tokenizer.accept()
                     tokenizer.switch(DataState)
-                    reader.pushback()
+                    reader.consume("Search]".length)
+                } else if (reader.isFollowedBy("検索]")) {
+                    tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
+                    tokenizer.emitRange(TokenCharacterType.Search, reader.position, reader.position + "検索]".length)
+                    tokenizer.accept()
+                    tokenizer.switch(DataState)
+                    reader.consume("検索]".length)
+                } else {
+                    // link
+                    tokenizer.emit(TokenCharacterType.SilentLink, reader.position - 1)
+                    tokenizer.emit(TokenCharacterType.LinkOpen, reader.position)
+                    tokenizer.switch(LinkNameState)
                 }
             }
 
             else -> {
-                tokenizer.emit(Character('?'))
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.switch(DataState)
                 reader.pushback()
+            }
+        }
+    }
+}
+
+internal data object LinkNameState : State {
+    override fun read(tokenizer: Tokenizer, reader: Reader) {
+        when (val current = reader.consume()) {
+            ']' -> {
+                if (reader.next() == '(') {
+                    tokenizer.emit(TokenCharacterType.LinkClose, reader.position)
+                    tokenizer.emit(TokenCharacterType.LinkHrefOpen, reader.position + 1)
+                    tokenizer.switch(LinkHrefState)
+                    reader.consume()
+                } else {
+                    tokenizer.reject()
+                    tokenizer.emit(TokenCharacterType.Character, reader.position)
+                    tokenizer.switch(DataState)
+                }
+            }
+
+            in emptyChar + eof + '[' -> {
+                tokenizer.reject()
+                tokenizer.switch(DataState)
+                reader.pushback()
+            }
+
+            else -> {
+                tokenizer.emit(TokenCharacterType.LinkContent, reader.position)
+            }
+        }
+    }
+}
+
+internal data object LinkHrefState : State {
+    override fun read(tokenizer: Tokenizer, reader: Reader) {
+        when (val current = reader.consume()) {
+            ')' -> {
+                tokenizer.emit(TokenCharacterType.LinkHrefClose, reader.position)
+                tokenizer.accept()
+                tokenizer.switch(DataState)
+            }
+
+            in emptyChar + eof -> {
+                tokenizer.reject()
+                tokenizer.switch(DataState)
+                reader.pushback()
+            }
+
+            else -> {
+                tokenizer.emit(TokenCharacterType.LinkHref, reader.position)
             }
         }
     }
@@ -115,79 +180,29 @@ internal data object QuestionState : State {
 
 internal data object BracketOpenState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
-        when (val current = reader.consume()) {
-            in listOf('[', ']', '<', '>') -> {
-                tokenizer.emit(Character('['))
-                tokenizer.switch(DataState)
-                reader.pushback()
-            }
-
-            else -> {
-                tokenizer.emit(BracketCharacter('['))
-                tokenizer.switch(BracketBodyState)
-                reader.pushback()
-            }
-        }
-    }
-}
-
-internal data object BracketBodyState : State {
-    override fun read(tokenizer: Tokenizer, reader: Reader) {
-        when (val current = reader.consume()) {
-            ']' -> {
-                tokenizer.emit(BracketCharacter(']'))
-                tokenizer.accept()
-                if (reader.next() == '(') {
-                    tokenizer.switch(RoundBracketOpenState)
-                    reader.consume()
-                } else {
+        if (reader.isFollowedBy("Search]", ignoreCase = true)) {
+            tokenizer.emitRange(TokenCharacterType.Search, reader.position, reader.position + "Search]".length)
+            tokenizer.accept()
+            tokenizer.switch(DataState)
+            reader.consume("Search]".length)
+        } else if (reader.isFollowedBy("検索]")) {
+            tokenizer.emitRange(TokenCharacterType.Search, reader.position, reader.position + "検索]".length)
+            tokenizer.accept()
+            tokenizer.switch(DataState)
+            reader.consume("検索]".length)
+        } else {
+            when (val current = reader.consume()) {
+                in listOf('[', ']', '<', '>') -> {
+                    tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                     tokenizer.switch(DataState)
+                    reader.pushback()
                 }
-            }
 
-            in listOf('[', '<') -> {
-                tokenizer.reject()
-                tokenizer.emit(Character('['))
-                tokenizer.switch(DataState)
-                reader.pushback()
-            }
-
-            else -> {
-                tokenizer.emit(BracketContentCharacter(current))
-            }
-        }
-    }
-}
-
-internal data object RoundBracketOpenState : State {
-    override fun read(tokenizer: Tokenizer, reader: Reader) {
-        when (val current = reader.consume()) {
-            in listOf('[', ']', '<', '>') -> {
-                tokenizer.emit(Character('('))
-                tokenizer.switch(DataState)
-                reader.pushback()
-            }
-
-            else -> {
-                tokenizer.emit(RoundBracketCharacter('('))
-                tokenizer.switch(RoundBracketBodyState)
-                reader.pushback()
-            }
-        }
-    }
-}
-
-internal data object RoundBracketBodyState : State {
-    override fun read(tokenizer: Tokenizer, reader: Reader) {
-        when (val current = reader.consume()) {
-            ')' -> {
-                tokenizer.emit(RoundBracketCharacter(')'))
-                tokenizer.accept()
-                tokenizer.switch(DataState)
-            }
-
-            else -> {
-                tokenizer.emit(RoundBracketContentCharacter(current))
+                else -> {
+                    tokenizer.emit(TokenCharacterType.LinkOpen, reader.position - 1)
+                    tokenizer.switch(LinkNameState)
+                    reader.pushback()
+                }
             }
         }
     }
@@ -197,19 +212,19 @@ internal data object TagOpenState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             '/' -> {
-                tokenizer.emit(EndTagOpenCharacter('<'))
-                tokenizer.emit(EndTagOpenCharacter('/'))
+                tokenizer.emit(TokenCharacterType.EndTagOpen, reader.position - 1)
+                tokenizer.emit(TokenCharacterType.EndTagOpen, reader.position)
                 tokenizer.switch(TagNameState)
             }
 
             in asciiAlpha -> {
-                tokenizer.emit(TagOpenCharacter)
+                tokenizer.emit(TokenCharacterType.TagOpen, reader.position - 1)
                 tokenizer.switch(TagNameState)
                 reader.pushback()
             }
 
             else -> {
-                tokenizer.emit(Character('<'))
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.switch(DataState)
                 reader.pushback()
             }
@@ -227,13 +242,13 @@ internal data object TagNameState : State {
             }
 
             '>' -> {
-                tokenizer.emit(TagCloseCharacter)
+                tokenizer.emit(TokenCharacterType.TagClose, reader.position)
                 tokenizer.accept()
                 tokenizer.switch(DataState)
             }
 
             else -> {
-                tokenizer.emit(TagCharacter(current))
+                tokenizer.emit(TokenCharacterType.Tag, reader.position)
             }
         }
     }
@@ -241,7 +256,11 @@ internal data object TagNameState : State {
 
 internal data object BlockquoteState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
-        tokenizer.emit(BlockquoteCharacter)
+        tokenizer.emit(TokenCharacterType.Blockquote, reader.position)
+        if (reader.next() == ' ') {
+            tokenizer.emit(TokenCharacterType.Blockquote, reader.position)
+            reader.consume()
+        }
         tokenizer.switch(DataState)
     }
 }
@@ -251,20 +270,20 @@ internal data object EscapeState : State {
         when (val current = reader.consume()) {
             '[' -> {
                 // math block
-                tokenizer.emit(MathBlockCharacter('\\'))
-                tokenizer.emit(MathBlockCharacter('['))
+                tokenizer.emit(TokenCharacterType.MathBlock, reader.position - 1)
+                tokenizer.emit(TokenCharacterType.MathBlock, reader.position)
                 tokenizer.switch(MathBlockBodyState)
             }
 
             '(' -> {
                 // inline math
-                tokenizer.emit(InlineMathCharacter('\\'))
-                tokenizer.emit(InlineMathCharacter('('))
+                tokenizer.emit(TokenCharacterType.InlineMath, reader.position - 1)
+                tokenizer.emit(TokenCharacterType.InlineMath, reader.position)
                 tokenizer.switch(InlineMathBodyState)
             }
 
             else -> {
-                tokenizer.emit(Character('\\'))
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.switch(DataState)
                 reader.pushback()
             }
@@ -282,12 +301,12 @@ internal data object InlineMathBodyState : State {
             }
 
             '\\' -> {
-                tokenizer.emit(InlineMathCharacter('\\'))
+                tokenizer.emit(TokenCharacterType.InlineMath, reader.position)
                 tokenizer.switch(InlineMathBodyMightEndState)
             }
 
             else -> {
-                tokenizer.emit(InlineMathContentCharacter(current))
+                tokenizer.emit(TokenCharacterType.InlineMathContent, reader.position)
             }
         }
     }
@@ -297,13 +316,13 @@ internal data object InlineMathBodyMightEndState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             ')' -> {
-                tokenizer.emit(InlineMathCharacter(')'))
+                tokenizer.emit(TokenCharacterType.InlineMath, reader.position)
                 tokenizer.accept()
                 tokenizer.switch(DataState)
             }
 
             else -> {
-                tokenizer.emit(InlineMathContentCharacter(current))
+                tokenizer.emit(TokenCharacterType.InlineMathContent, reader.position)
                 tokenizer.switch(InlineMathBodyState)
             }
         }
@@ -314,12 +333,12 @@ internal data object MathBlockBodyState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             '\\' -> {
-                tokenizer.emit(MathBlockCharacter('\\'))
+                tokenizer.emit(TokenCharacterType.MathBlock, reader.position)
                 tokenizer.switch(MathBlockBodyMightEndState)
             }
 
             else -> {
-                tokenizer.emit(MathBlockContentCharacter(current))
+                tokenizer.emit(TokenCharacterType.MathBlockContent, reader.position)
             }
         }
     }
@@ -329,13 +348,13 @@ internal data object MathBlockBodyMightEndState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             ']' -> {
-                tokenizer.emit(MathBlockCharacter(']'))
+                tokenizer.emit(TokenCharacterType.MathBlock, reader.position)
                 tokenizer.accept()
                 tokenizer.switch(DataState)
             }
 
             else -> {
-                tokenizer.emit(MathBlockContentCharacter(current))
+                tokenizer.emit(TokenCharacterType.MathBlockContent, reader.position)
                 tokenizer.switch(MathBlockBodyState)
             }
         }
@@ -346,14 +365,14 @@ internal data object TildeState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             '~' -> {
-                tokenizer.emit(StrikeCharacter)
-                tokenizer.emit(StrikeCharacter)
+                tokenizer.emit(TokenCharacterType.Strike, reader.position - 1)
+                tokenizer.emit(TokenCharacterType.Strike, reader.position)
                 tokenizer.accept()
                 tokenizer.switch(DataState)
             }
 
             else -> {
-                tokenizer.emit(Character('~'))
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.switch(DataState)
                 reader.pushback()
             }
@@ -363,20 +382,13 @@ internal data object TildeState : State {
 
 internal data object UnderscoreState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
-        if (reader.position != 1) {
-            reader.pushback(2) // push back 1 for char before _, 1 for _
-            val before = reader.consume() // char before _
-            reader.consume() // *
-            if (before !in asciiAlphanumeric) {
-                tokenizer.emit(Character('_'))
-                tokenizer.switch(DataState)
-                return
-            }
-        }
         when (val current = reader.consume()) {
             in asciiAlphanumeric + ' ' + TAB -> {
+                if (prevIsNotAsciiAlphanumeric(tokenizer, reader)) {
+                    return
+                }
                 tokenizer.switch(UnderscoreItalicState)
-                tokenizer.emit(UnderscoreItalicStartCharacter)
+                tokenizer.emit(TokenCharacterType.UnderscoreItalicStart, reader.position - 1)
                 reader.pushback()
             }
 
@@ -385,7 +397,7 @@ internal data object UnderscoreState : State {
             }
 
             else -> {
-                tokenizer.emit(Character('_'))
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.switch(DataState)
                 reader.pushback()
             }
@@ -397,15 +409,15 @@ internal data object UnderscoreBoldStartState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             in asciiAlphanumeric + ' ' + TAB -> {
-                tokenizer.emit(UnderscoreBoldStartCharacter)
-                tokenizer.emit(UnderscoreBoldStartCharacter)
+                tokenizer.emit(TokenCharacterType.UnderscoreBoldStart, reader.position - 1)
+                tokenizer.emit(TokenCharacterType.UnderscoreBoldStart, reader.position)
                 tokenizer.switch(UnderscoreBoldState)
                 reader.pushback()
             }
 
             else -> {
-                tokenizer.emit(Character('_'))
-                tokenizer.emit(Character('_'))
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
+                tokenizer.emit(TokenCharacterType.Character, reader.position)
                 tokenizer.switch(DataState)
                 reader.pushback()
             }
@@ -417,7 +429,7 @@ internal data object UnderscoreBoldState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             in asciiAlphanumeric + ' ' + TAB -> {
-                tokenizer.emit(BoldCharacter(current))
+                tokenizer.emit(TokenCharacterType.Bold, reader.position)
             }
 
             '_' -> {
@@ -437,23 +449,23 @@ internal data object UnderscoreBoldEndState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             '_' -> {
-                tokenizer.emit(UnderscoreBoldStartCharacter)
-                tokenizer.emit(UnderscoreBoldStartCharacter)
+                tokenizer.emit(TokenCharacterType.UnderscoreBoldStart, reader.position - 1)
+                tokenizer.emit(TokenCharacterType.UnderscoreBoldStart, reader.position)
                 tokenizer.accept()
                 tokenizer.switch(DataState)
             }
 
             in asciiAlphanumeric -> {
-                tokenizer.emit(Character('_'))
                 tokenizer.reject()
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.switch(DataState)
                 reader.pushback()
             }
 
             else -> {
                 // TODO: fallback to italic
-                tokenizer.emit(Character('_'))
                 tokenizer.reject()
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.switch(DataState)
                 reader.pushback()
             }
@@ -465,11 +477,11 @@ internal data object UnderscoreItalicState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             in asciiAlphanumeric + ' ' + TAB -> {
-                tokenizer.emit(ItalicCharacter(current))
+                tokenizer.emit(TokenCharacterType.Italic, reader.position)
             }
 
             '_' -> {
-                tokenizer.emit(UnderscoreItalicStartCharacter)
+                tokenizer.emit(TokenCharacterType.UnderscoreItalicStart, reader.position)
                 tokenizer.accept()
                 tokenizer.switch(DataState)
             }
@@ -485,97 +497,25 @@ internal data object UnderscoreItalicState : State {
 
 internal data object AsteriskState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
-        if (reader.position != 1) {
-            reader.pushback(2) // push back 1 for char before *, 1 for *
-            val before = reader.consume() // char before *
-            reader.consume() // *
-            if (before !in asciiAlphanumeric) {
-                tokenizer.emit(Character('*'))
-                tokenizer.switch(DataState)
-                return
-            }
-        }
         when (val current = reader.consume()) {
             in asciiAlphanumeric + ' ' + TAB -> {
+                if (prevIsNotAsciiAlphanumeric(tokenizer, reader)) {
+                    return
+                }
+                tokenizer.emit(TokenCharacterType.AsteriskItalicStart, reader.position - 1)
                 tokenizer.switch(AsteriskItalicState)
-                tokenizer.emit(AsteriskItalicStartCharacter)
                 reader.pushback()
             }
 
             '*' -> {
-                tokenizer.switch(AsteriskBoldStartState)
-            }
-
-            else -> {
-                tokenizer.emit(Character('*'))
-                tokenizer.switch(DataState)
-                reader.pushback()
-            }
-        }
-    }
-}
-
-internal data object AsteriskBoldStartState : State {
-    override fun read(tokenizer: Tokenizer, reader: Reader) {
-        when (val current = reader.consume()) {
-            in asciiAlphanumeric + ' ' + TAB -> {
-                tokenizer.emit(AsteriskBoldStartCharacter)
-                tokenizer.emit(AsteriskBoldStartCharacter)
-                tokenizer.switch(AsteriskBoldState)
-                reader.pushback()
-            }
-
-            else -> {
-                tokenizer.emit(Character('*'))
-                tokenizer.emit(Character('*'))
-                tokenizer.switch(DataState)
-                reader.pushback()
-            }
-        }
-    }
-}
-
-internal data object AsteriskBoldState : State {
-    override fun read(tokenizer: Tokenizer, reader: Reader) {
-        when (val current = reader.consume()) {
-            in asciiAlphanumeric + ' ' + TAB -> {
-                tokenizer.emit(BoldCharacter(current))
-            }
-
-            '*' -> {
-                tokenizer.switch(AsteriskBoldEndState)
-            }
-
-            else -> {
-                tokenizer.reject()
-                tokenizer.switch(DataState)
-                reader.pushback()
-            }
-        }
-    }
-}
-
-internal data object AsteriskBoldEndState : State {
-    override fun read(tokenizer: Tokenizer, reader: Reader) {
-        when (val current = reader.consume()) {
-            '*' -> {
-                tokenizer.emit(AsteriskBoldStartCharacter)
-                tokenizer.emit(AsteriskBoldStartCharacter)
+                tokenizer.emit(TokenCharacterType.AsteriskBold, reader.position - 1)
+                tokenizer.emit(TokenCharacterType.AsteriskBold, reader.position)
                 tokenizer.accept()
                 tokenizer.switch(DataState)
             }
 
-            in asciiAlphanumeric -> {
-                tokenizer.emit(Character('*'))
-                tokenizer.reject()
-                tokenizer.switch(DataState)
-                reader.pushback()
-            }
-
             else -> {
-                // TODO: fallback to italic
-                tokenizer.emit(Character('*'))
-                tokenizer.reject()
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.switch(DataState)
                 reader.pushback()
             }
@@ -587,11 +527,11 @@ internal data object AsteriskItalicState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             in asciiAlphanumeric + ' ' + TAB -> {
-                tokenizer.emit(ItalicCharacter(current))
+                tokenizer.emit(TokenCharacterType.Italic, reader.position)
             }
 
             '*' -> {
-                tokenizer.emit(AsteriskItalicStartCharacter)
+                tokenizer.emit(TokenCharacterType.AsteriskItalicStart, reader.position)
                 tokenizer.accept()
                 tokenizer.switch(DataState)
             }
@@ -612,25 +552,23 @@ internal data object BacktickState : State {
                 if (reader.hasNext() && reader.next() == '`') {
                     // code block
                     tokenizer.switch(CodeBlockOpenState)
-                    tokenizer.emit(CodeBlockStartCharacter)
-                    tokenizer.emit(CodeBlockStartCharacter)
-                    tokenizer.emit(CodeBlockStartCharacter)
+                    tokenizer.emitRange(TokenCharacterType.CodeBlockStart, reader.position - 1, reader.position + 1)
                     reader.consume() // consume next `
                 } else {
-                    tokenizer.emit(Character('`'))
-                    tokenizer.emit(Character('`'))
+                    tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
+                    tokenizer.emit(TokenCharacterType.Character, reader.position)
                     tokenizer.switch(DataState)
                 }
             }
 
             LF -> {
-                tokenizer.emit(Character('`'))
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.switch(DataState)
                 reader.pushback()
             }
 
             else -> {
-                tokenizer.emit(InlineCodeStartCharacter)
+                tokenizer.emit(TokenCharacterType.InlineCodeStart, reader.position - 1)
                 tokenizer.switch(InlineCodeState)
                 reader.pushback()
             }
@@ -643,12 +581,12 @@ internal data object CodeBlockOpenState : State {
         when (val current = reader.consume()) {
             in asciiAlphanumericUnderscore -> {
                 // language
-                tokenizer.emit(CodeBlockLanguageCharacter(current))
+                tokenizer.emit(TokenCharacterType.CodeBlockLanguage, reader.position)
             }
 
             LF -> {
                 // code body
-                tokenizer.emit(CodeBlockLanguageEndCharacter)
+                tokenizer.emit(TokenCharacterType.CodeBlockLanguageEnd, reader.position)
                 tokenizer.switch(CodeBlockBodyState)
             }
 
@@ -665,7 +603,7 @@ internal data object CodeBlockBodyState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             '`' -> {
-                tokenizer.emit(CodeBlockStartCharacter)
+                tokenizer.emit(TokenCharacterType.CodeBlockStart, reader.position)
                 tokenizer.switch(CodeBlockBodyMightEndState)
             }
 
@@ -676,7 +614,7 @@ internal data object CodeBlockBodyState : State {
             }
 
             else -> {
-                tokenizer.emit(CodeBlockCharacter(current))
+                tokenizer.emit(TokenCharacterType.CodeBlock, reader.position)
             }
         }
     }
@@ -686,9 +624,9 @@ internal data object CodeBlockBodyMightEndState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             '`' -> {
-                tokenizer.emit(CodeBlockStartCharacter)
+                tokenizer.emit(TokenCharacterType.CodeBlockStart, reader.position)
                 if (reader.hasNext() && reader.next() == '`') {
-                    tokenizer.emit(CodeBlockStartCharacter)
+                    tokenizer.emit(TokenCharacterType.CodeBlockStart, reader.position + 1)
                     tokenizer.accept()
                     tokenizer.switch(DataState)
                     reader.consume() // consume next `
@@ -704,7 +642,7 @@ internal data object CodeBlockBodyMightEndState : State {
             }
 
             else -> {
-                tokenizer.emit(CodeBlockCharacter(current))
+                tokenizer.emit(TokenCharacterType.CodeBlock, reader.position)
                 tokenizer.switch(CodeBlockBodyState)
             }
         }
@@ -722,7 +660,7 @@ internal data object InlineCodeState : State {
 
             '`' -> {
                 // end inlinecode
-                tokenizer.emit(InlineCodeStartCharacter)
+                tokenizer.emit(TokenCharacterType.InlineCodeStart, reader.position)
                 tokenizer.accept()
                 tokenizer.switch(DataState)
             }
@@ -734,7 +672,7 @@ internal data object InlineCodeState : State {
             }
 
             else -> {
-                tokenizer.emit(InlineCodeCharacter(current))
+                tokenizer.emit(TokenCharacterType.InlineCode, reader.position)
             }
         }
     }
@@ -744,7 +682,7 @@ internal data object DollarState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             in asciiAlphanumeric -> {
-                tokenizer.emit(CashStartCharacter)
+                tokenizer.emit(TokenCharacterType.CashStart, reader.position - 1)
                 tokenizer.switch(CashTagState)
                 reader.pushback()
             }
@@ -754,7 +692,7 @@ internal data object DollarState : State {
             }
 
             else -> {
-                tokenizer.emit(Character('$'))
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.switch(DataState)
                 reader.pushback()
             }
@@ -766,15 +704,15 @@ internal data object FnOpenState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             in asciiAlphanumeric -> {
-                tokenizer.emit(FnCharacter('$'))
-                tokenizer.emit(FnCharacter('['))
+                tokenizer.emit(TokenCharacterType.Fn, reader.position - 2)
+                tokenizer.emit(TokenCharacterType.Fn, reader.position - 1)
                 tokenizer.switch(FnNameState)
                 reader.pushback()
             }
 
             else -> {
-                tokenizer.emit(Character('$'))
-                tokenizer.emit(Character('['))
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 2)
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.switch(DataState)
                 reader.pushback()
             }
@@ -786,17 +724,18 @@ internal data object FnNameState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             in emptyChar -> {
-                // ignore empty char since we're accepting
-//                tokenizer.emit(FnCharacter(current))
+                tokenizer.emit(TokenCharacterType.Fn, reader.position)
                 tokenizer.accept()
                 tokenizer.switch(DataState)
             }
+
             in asciiAlphanumericUnderscore -> {
-                tokenizer.emit(FnContentCharacter(current))
+                tokenizer.emit(TokenCharacterType.FnContent, reader.position)
             }
+
             in listOf('.', ',', '=') -> {
                 if (reader.next() in asciiAlphanumericUnderscore) {
-                    tokenizer.emit(FnContentCharacter(current))
+                    tokenizer.emit(TokenCharacterType.FnContent, reader.position)
                 } else {
                     tokenizer.reject()
                     tokenizer.switch(DataState)
@@ -811,7 +750,7 @@ internal data object CashTagState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             in asciiAlphanumeric -> {
-                tokenizer.emit(CashCharacter(current))
+                tokenizer.emit(TokenCharacterType.Cash, reader.position)
             }
 
             else -> {
@@ -830,20 +769,20 @@ internal data object AtState : State {
             val before = reader.consume() // char before @
             reader.consume() // @
             if (before !in asciiAlphanumeric) {
-                tokenizer.emit(Character('@'))
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.switch(DataState)
                 return
             }
         }
         when (val current = reader.consume()) {
             in asciiAlphanumericUnderscoreDash -> {
-                tokenizer.emit(UserAtCharacter)
+                tokenizer.emit(TokenCharacterType.UserAt, reader.position - 1)
                 tokenizer.switch(UserNameState)
                 reader.pushback()
             }
 
             else -> {
-                tokenizer.emit(Character('@'))
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.switch(DataState)
                 reader.pushback()
             }
@@ -855,7 +794,7 @@ internal data object UserNameState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             in asciiAlphanumericUnderscore -> {
-                tokenizer.emit(UserNameCharacter(current))
+                tokenizer.emit(TokenCharacterType.UserName, reader.position)
             }
 
             '-' -> {
@@ -864,16 +803,16 @@ internal data object UserNameState : State {
                     tokenizer.switch(DataState)
                     reader.pushback()
                 } else {
-                    tokenizer.emit(UserNameCharacter(current))
+                    tokenizer.emit(TokenCharacterType.UserName, reader.position)
                 }
             }
 
             '@' -> {
                 if (reader.hasNext() && reader.next() in asciiAlphanumericUnderscore) {
-                    tokenizer.emit(UserAtCharacter)
+                    tokenizer.emit(TokenCharacterType.UserAt, reader.position)
                     tokenizer.switch(UserHostState)
                 } else {
-                    tokenizer.emit(Character('@'))
+                    tokenizer.emit(TokenCharacterType.Character, reader.position)
                     tokenizer.switch(DataState)
                 }
             }
@@ -891,7 +830,7 @@ internal data object UserHostState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             in asciiAlphanumericUnderscore -> {
-                tokenizer.emit(UserHostCharacter(current))
+                tokenizer.emit(TokenCharacterType.UserHost, reader.position)
             }
 
             '-', '.' -> {
@@ -900,7 +839,7 @@ internal data object UserHostState : State {
                     tokenizer.switch(DataState)
                     reader.pushback()
                 } else {
-                    tokenizer.emit(UserHostCharacter(current))
+                    tokenizer.emit(TokenCharacterType.UserHost, reader.position)
                 }
             }
 
@@ -920,7 +859,7 @@ internal data object HashState : State {
             val before = reader.consume() // char before #
             reader.consume() // #
             if (before !in asciiAlphanumeric) {
-                tokenizer.emit(Character('#'))
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.switch(DataState)
                 return
             }
@@ -929,13 +868,13 @@ internal data object HashState : State {
         when (val current = reader.consume()) {
             in hashTagExclude -> {
                 // TODO: 括弧は対になっている時のみ内容に含めることができる。対象: () [] 「」 （）
-                tokenizer.emit(Character('#'))
-                tokenizer.emit(Character(current))
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
+                tokenizer.emit(TokenCharacterType.Character, reader.position)
                 tokenizer.switch(DataState)
             }
 
             else -> {
-                tokenizer.emit(HashTagStartCharacter)
+                tokenizer.emit(TokenCharacterType.HashTagStart, reader.position - 1)
                 tokenizer.switch(HashNameState)
                 reader.pushback()
             }
@@ -954,7 +893,7 @@ internal data object HashNameState : State {
             }
 
             else -> {
-                tokenizer.emit(HashTagCharacter(current))
+                tokenizer.emit(TokenCharacterType.HashTag, reader.position)
             }
         }
     }
@@ -965,13 +904,13 @@ internal data object ColonState : State {
         when (val current = reader.consume()) {
             in asciiAlphanumericUnderscoreDashPlus -> {
                 tokenizer.switch(EmojiNameState)
-                tokenizer.emit(EmojiNameStartCharacter)
+                tokenizer.emit(TokenCharacterType.EmojiNameStart, reader.position - 1)
                 reader.pushback()
             }
 
             else -> {
-                tokenizer.emit(Character(':'))
-                tokenizer.emit(Character(current))
+                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
+                tokenizer.emit(TokenCharacterType.Character, reader.position)
                 tokenizer.switch(DataState)
             }
         }
@@ -982,11 +921,11 @@ internal data object EmojiNameState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
             in asciiAlphanumericUnderscoreDashPlus -> {
-                tokenizer.emit(EmojiNameCharacter(current))
+                tokenizer.emit(TokenCharacterType.EmojiName, reader.position)
             }
 
             ':' -> {
-                tokenizer.emit(EmojiNameStartCharacter)
+                tokenizer.emit(TokenCharacterType.EmojiNameStart, reader.position)
                 tokenizer.accept()
                 tokenizer.switch(DataState)
             }

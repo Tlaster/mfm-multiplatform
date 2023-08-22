@@ -1,0 +1,481 @@
+package moe.tlaster.mfm.parser.tokenizer
+
+import moe.tlaster.mfm.parser.tree.BoldNode
+import moe.tlaster.mfm.parser.tree.CashNode
+import moe.tlaster.mfm.parser.tree.CodeBlockNode
+import moe.tlaster.mfm.parser.tree.EmojiCodeNode
+import moe.tlaster.mfm.parser.tree.FnNode
+import moe.tlaster.mfm.parser.tree.HashtagNode
+import moe.tlaster.mfm.parser.tree.InlineCodeNode
+import moe.tlaster.mfm.parser.tree.ItalicNode
+import moe.tlaster.mfm.parser.tree.LinkNode
+import moe.tlaster.mfm.parser.tree.MathBlockNode
+import moe.tlaster.mfm.parser.tree.MathInlineNode
+import moe.tlaster.mfm.parser.tree.MentionNode
+import moe.tlaster.mfm.parser.tree.QuoteNode
+import moe.tlaster.mfm.parser.tree.RootNode
+import moe.tlaster.mfm.parser.tree.SearchNode
+import moe.tlaster.mfm.parser.tree.StrikeNode
+import moe.tlaster.mfm.parser.tree.TextNode
+import moe.tlaster.mfm.parser.tree.TreeBuilder
+import moe.tlaster.mfm.parser.tree.UrlNode
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+class TreeBuilderTest {
+    @Test
+    fun testText() {
+        val tokenizer = MFMTokenizer()
+        val content = ":test:"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    EmojiCodeNode(
+                        emoji = "test"
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testUserName() {
+        val tokenizer = MFMTokenizer()
+        val content = "@test"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    MentionNode(
+                        userName = "test",
+                        host = null
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testUserNameWithHost() {
+        val tokenizer = MFMTokenizer()
+        val content = "@test@host"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    MentionNode(
+                        userName = "test",
+                        host = "host"
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testHashTag() {
+        val tokenizer = MFMTokenizer()
+        val content = "#test"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    HashtagNode(
+                        tag = "test"
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testCashTag() {
+        val tokenizer = MFMTokenizer()
+        val content = "\$test"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    CashNode(
+                        content = "test"
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testInlineCode() {
+        val tokenizer = MFMTokenizer()
+        val content = "`test`"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    InlineCodeNode(
+                        code = "test"
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testCodeBlock() {
+        val tokenizer = MFMTokenizer()
+        val content = "```test```"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    CodeBlockNode(
+                        code = "test",
+                        language = null
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testCodeBlockWithLanguage() {
+        val tokenizer = MFMTokenizer()
+        val content = "```kotlin\ntest```"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    CodeBlockNode(
+                        code = "test",
+                        language = "kotlin"
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testAsteriskBold() {
+        val tokenizer = MFMTokenizer()
+        val content = "**test**"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    BoldNode(
+                        start = 0,
+                        content = arrayListOf(
+                            TextNode(
+                                content = "test"
+                            )
+                        )
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testAsteriskItalic() {
+        val tokenizer = MFMTokenizer()
+        val content = "*test*"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    ItalicNode(
+                        start = 0,
+                        content = arrayListOf(
+                            TextNode(
+                                content = "test"
+                            )
+                        )
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testUnderscoreBold() {
+        val tokenizer = MFMTokenizer()
+        val content = "__test__"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    BoldNode(
+                        start = 0,
+                        content = arrayListOf(
+                            TextNode(
+                                content = "test"
+                            )
+                        )
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testUnderscoreItalic() {
+        val tokenizer = MFMTokenizer()
+        val content = "_test_"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    ItalicNode(
+                        start = 0,
+                        content = arrayListOf(
+                            TextNode(
+                                content = "test"
+                            )
+                        )
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testInelineMath() {
+        val tokenizer = MFMTokenizer()
+        val content = "\\(test\\)"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    MathInlineNode(
+                        formula = "test"
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testMathBlock() {
+        val tokenizer = MFMTokenizer()
+        val content = "\\[test\\]"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(RootNode(content = arrayListOf(MathBlockNode(formula = "test"))), builderResult)
+    }
+
+    @Test
+    fun testQuote() {
+        val tokenizer = MFMTokenizer()
+        val content = "> test"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    QuoteNode(
+                        start = 0,
+                        content = arrayListOf(
+                            TextNode(
+                                content = "test"
+                            )
+                        )
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testLink() {
+        val tokenizer = MFMTokenizer()
+        val content = "[test](https://test.com)"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    LinkNode(
+                        content = "test",
+                        url = "https://test.com",
+                        silent = false
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testSilentLink() {
+        val tokenizer = MFMTokenizer()
+        val content = "?[test](https://test.com)"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    LinkNode(
+                        content = "test",
+                        url = "https://test.com",
+                        silent = true
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testUrl() {
+        val tokenizer = MFMTokenizer()
+        val content = "https://test.com"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    UrlNode(
+                        url = "https://test.com"
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testFn() {
+        val tokenizer = MFMTokenizer()
+        val content = "\$[flip.h,v MisskeyでFediverseの世界が広がります]"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    FnNode(
+                        start = 0,
+                        name = "flip.h,v",
+                        content = arrayListOf(TextNode(content = "MisskeyでFediverseの世界が広がります"))
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testNonFn() {
+        val tokenizer = MFMTokenizer()
+        val content = "\$[flip.h,v Miss~~keyでFedivers*eの世**界が広_が__ります"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    TextNode(
+                        content = "\$[flip.h,v Miss~~keyでFedivers*eの世**界が広_が__ります"
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testTildeStrikethrough() {
+        val tokenizer = MFMTokenizer()
+        val content = "~~test~~"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    StrikeNode(
+                        start = 0,
+                        content = arrayListOf(
+                            TextNode(
+                                content = "test"
+                            )
+                        )
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+
+    @Test
+    fun testSearch() {
+        val tokenizer = MFMTokenizer()
+        val content = "misskey [Search]"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    SearchNode(
+                        query = "misskey",
+                        search = "[Search]"
+                    )
+                )
+            ),
+            builderResult
+        )
+    }
+}

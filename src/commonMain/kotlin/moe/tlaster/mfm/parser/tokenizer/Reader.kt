@@ -9,7 +9,10 @@ internal interface Reader {
     fun next(): Char
     fun hasNext(): Boolean
     fun pushback(length: Int = 1)
+    fun reset()
     fun isFollowedBy(value: String, ignoreCase: Boolean = false): Boolean
+    fun readAt(position: Int): Char
+    fun readAt(position: Int, length: Int): String
 }
 
 internal class StringReader(string: String) : Reader {
@@ -46,6 +49,18 @@ internal class StringReader(string: String) : Reader {
         }
         val s = string.substring(_position, end)
         return s.equals(value, ignoreCase = ignoreCase)
+    }
+
+    override fun reset() {
+        _position = 0
+    }
+
+    override fun readAt(position: Int): Char {
+        return string[position]
+    }
+
+    override fun readAt(position: Int, length: Int): String {
+        return string.substring(position, position + length)
     }
 
     init {

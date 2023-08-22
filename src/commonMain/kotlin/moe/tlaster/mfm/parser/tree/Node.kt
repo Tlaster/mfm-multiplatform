@@ -1,20 +1,27 @@
-package moe.tlaster.mfm.parser
+package moe.tlaster.mfm.parser.tree
 
 sealed interface Node
 
 sealed interface BlockNode : Node
 sealed interface InlineNode : Node
 internal sealed interface ContainerNode : Node {
-    val content: List<Node>
+    val content: ArrayList<Node>
+    val start: Int
 }
 
+data class RootNode(
+    override val start: Int = 0,
+    override val content: ArrayList<Node> = arrayListOf()
+) : Node, ContainerNode
+
 data class QuoteNode(
-    override val content: List<Node>
+    override val start: Int,
+    override val content: ArrayList<Node> = arrayListOf()
 ) : BlockNode, ContainerNode
 
 data class SearchNode(
     val query: String,
-    val content: String
+    val search: String
 ) : BlockNode
 
 data class CodeBlockNode(
@@ -27,31 +34,32 @@ data class MathBlockNode(
 ) : BlockNode
 
 data class CenterNode(
-    override val content: List<InlineNode>
+    override val start: Int,
+    override val content: ArrayList<Node> = arrayListOf()
 ) : BlockNode, ContainerNode
-
-data class UnicodeEmojiNode(
-    val emoji: String
-) : InlineNode
 
 data class EmojiCodeNode(
     val emoji: String
 ) : InlineNode
 
 data class BoldNode(
-    override val content: List<InlineNode>
+    override val start: Int,
+    override val content: ArrayList<Node> = arrayListOf()
 ) : InlineNode, ContainerNode
 
 data class SmallNode(
-    override val content: List<InlineNode>
+    override val start: Int,
+    override val content: ArrayList<Node> = arrayListOf()
 ) : InlineNode, ContainerNode
 
 data class ItalicNode(
-    override val content: List<InlineNode>
+    override val start: Int,
+    override val content: ArrayList<Node> = arrayListOf()
 ) : InlineNode, ContainerNode
 
 data class StrikeNode(
-    override val content: List<InlineNode>
+    override val start: Int,
+    override val content: ArrayList<Node> = arrayListOf()
 ) : InlineNode, ContainerNode
 
 data class InlineCodeNode(
@@ -64,8 +72,7 @@ data class MathInlineNode(
 
 data class MentionNode(
     val userName: String,
-    val host: String?,
-    val acct: String
+    val host: String?
 ) : InlineNode
 
 data class HashtagNode(
@@ -73,27 +80,33 @@ data class HashtagNode(
 ) : InlineNode
 
 data class UrlNode(
-    val url: String,
-    val brackets: Boolean?
+    val url: String
 ) : InlineNode
 
 data class LinkNode(
+    val content: String,
     val url: String,
-    val silent: Boolean,
-    override val content: List<InlineNode>
-) : InlineNode, ContainerNode
+    val silent: Boolean
+) : InlineNode
 
 data class FnNode(
+    override val start: Int,
     val name: String,
-    override val content: List<InlineNode>,
+    override val content: ArrayList<Node> = arrayListOf(),
     // Record<string, string | true>
-    val args: Map<String, String>
+    val args: HashMap<String, String> = hashMapOf()
 ) : InlineNode, ContainerNode
-
-data class PlainNode(
-    val content: String
-) : InlineNode
 
 data class TextNode(
     val content: String
 ) : InlineNode
+
+data class CashNode(
+    val content: String
+) : InlineNode
+
+data class TagNode(
+    override val start: Int,
+    val name: String,
+    override val content: ArrayList<Node> = arrayListOf()
+) : ContainerNode
