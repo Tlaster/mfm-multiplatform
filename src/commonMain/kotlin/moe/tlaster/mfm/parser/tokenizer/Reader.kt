@@ -13,6 +13,7 @@ internal interface Reader {
     fun isFollowedBy(value: String, ignoreCase: Boolean = false): Boolean
     fun readAt(position: Int): Char
     fun readAt(position: Int, length: Int): String
+    val length: Int
 }
 
 internal class StringReader(string: String) : Reader {
@@ -62,6 +63,9 @@ internal class StringReader(string: String) : Reader {
     override fun readAt(position: Int, length: Int): String {
         return string.substring(position, position + length)
     }
+
+    override val length: Int
+        get() = string.length
 
     init {
         this.string = string + eof

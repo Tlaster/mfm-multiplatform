@@ -37,7 +37,8 @@ internal class TreeBuilder {
                     TokenCharacterType.Fn -> FnState
                     TokenCharacterType.FnEndBracket -> FnEndState
                     TokenCharacterType.Eof -> EofState
-                    else -> throw Exception("Unknown token ${tokenCharacterTypes[reader.position]}")
+                    // fallback to text state
+                    else -> TextState
                 }.apply {
                     with(this) {
                         build()

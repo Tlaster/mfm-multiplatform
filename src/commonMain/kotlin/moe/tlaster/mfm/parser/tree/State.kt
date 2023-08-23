@@ -60,6 +60,24 @@ internal data class TreeBuilderContext(
         val next = tokenCharacterTypes.getOrNull(end + 1)
         return (previous == LineBreak || previous == null) && (next == LineBreak || next == null || next == Eof)
     }
+    inline fun <reified T : Node> endNode(start: Int) {
+        val node = stack.findLast { it is T } as? Node
+        if (node != null) {
+            val index = stack.indexOf(node)
+            if (index != stack.lastIndex) {
+                // reject inner state
+                val startIndex = stack[index + 1].start
+                stack[index + 1].content.add(TextNode(reader.consume(startIndex - start)))
+            }
+            val count = stack.size - index
+            repeat(count) {
+                stack.removeAt(index)
+            }
+            currentContainer = stack.last()
+        } else {
+            currentContainer.content.add(TextNode(reader.readAt(start, 1)))
+        }
+    }
 }
 
 internal sealed interface State {
@@ -393,10 +411,51 @@ internal data object TagState : State {
         if (name.startsWith("http://") || name.startsWith("https://")) {
             currentContainer.content.add(UrlNode(name.toString()))
         } else {
-            // TODO: parse tag content, TagNode should not exsit
-            val node = TagNode(start, name.toString())
-            currentContainer.content.add(node)
-            currentContainer = node
+            when (name.toString()) {
+                "center" -> {
+                    // TODO: check center start
+//                    val prev = tokenCharacterTypes.getOrNull(start - 1)
+//                    if (prev == LineBreak || prev == null) {
+//                        currentContainer.content.add(CenterNode(start))
+//                        val node = CenterNode(start)
+//                        currentContainer.content.add(node)
+//                        currentContainer = node
+//                    } else {
+//                        currentContainer.content.add(TextNode(reader.readAt(start, reader.position - start)))
+//                    }
+                    val node = CenterNode(start)
+                    currentContainer.content.add(node)
+                    stack.add(node)
+                    currentContainer = node
+                }
+                "b" -> {
+                    val node = BoldNode(start)
+                    currentContainer.content.add(node)
+                    stack.add(node)
+                    currentContainer = node
+                }
+                "small" -> {
+                    val node = SmallNode(start)
+                    currentContainer.content.add(node)
+                    stack.add(node)
+                    currentContainer = node
+                }
+                "i" -> {
+                    val node = ItalicNode(start)
+                    currentContainer.content.add(node)
+                    stack.add(node)
+                    currentContainer = node
+                }
+                "s" -> {
+                    val node = StrikeNode(start)
+                    currentContainer.content.add(node)
+                    stack.add(node)
+                    currentContainer = node
+                }
+                else -> {
+                    currentContainer.content.add(TextNode(reader.readAt(start, reader.position - start)))
+                }
+            }
         }
     }
 }
@@ -421,21 +480,32 @@ internal data object EndTagState : State {
             }
         }
 
-        val node = stack.findLast { it is TagNode && it.name == name.toString() } as? TagNode
-        if (node != null) {
-            val index = stack.indexOf(node)
-            if (index != stack.lastIndex) {
-                // reject inner state
-                val startIndex = stack[index + 1].start
-                stack[index + 1].content.add(TextNode(reader.consume(startIndex - start)))
+        when (name.toString()) {
+            "center" -> {
+                // TODO: check center end
+                endNode<CenterNode>(start)
+//                val next = tokenCharacterTypes.getOrNull(reader.position)
+//                if (next == LineBreak || next == null || next == Eof) {
+//                    endNode<CenterNode>(start)
+//                } else {
+//                    currentContainer.content.add(TextNode(reader.readAt(start, reader.position - start)))
+//                }
             }
-            val count = stack.size - index
-            repeat(count) {
-                stack.removeAt(index)
+            "b" -> {
+                endNode<BoldNode>(start)
             }
-            currentContainer = stack.last()
-        } else {
-            currentContainer.content.add(TextNode(reader.readAt(start, 1)))
+            "small" -> {
+                endNode<SmallNode>(start)
+            }
+            "i" -> {
+                endNode<ItalicNode>(start)
+            }
+            "s" -> {
+                endNode<StrikeNode>(start)
+            }
+            else -> {
+                currentContainer.content.add(TextNode(reader.readAt(start, reader.position - start)))
+            }
         }
     }
 }
@@ -535,23 +605,7 @@ internal data object FnState : State {
 
 internal data object FnEndState : State {
     override fun TreeBuilderContext.build() {
-        val start = reader.position
-        val node = stack.findLast { it is FnNode } as? FnNode
-        if (node != null) {
-            val index = stack.indexOf(node)
-            if (index != stack.lastIndex) {
-                // reject inner state
-                val startIndex = stack[index + 1].start
-                stack[index + 1].content.add(TextNode(reader.consume(startIndex - start)))
-            }
-            val count = stack.size - index
-            repeat(count) {
-                stack.removeAt(index)
-            }
-            currentContainer = stack.last()
-        } else {
-            currentContainer.content.add(TextNode(reader.readAt(start, 1)))
-        }
+        endNode<FnNode>(reader.position)
         while (reader.hasNext()) {
             val token = tokenCharacterTypes[reader.position]
             if (token == FnEndBracket) {

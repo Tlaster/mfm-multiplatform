@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 class TokenizerTest {
     @Test
     fun testEmoji() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = ":test:"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -27,7 +27,7 @@ class TokenizerTest {
 
     @Test
     fun testColonNonEmoji() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = ":test"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -46,7 +46,7 @@ class TokenizerTest {
 
     @Test
     fun testHashTag() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "#test"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -65,7 +65,7 @@ class TokenizerTest {
 
     @Test
     fun testHashNonTag() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "#!test"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -85,7 +85,7 @@ class TokenizerTest {
 
     @Test
     fun testHashtagBefore() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "asd#test"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -107,7 +107,7 @@ class TokenizerTest {
 
     @Test
     fun testNonHashtagBefore() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = ":#test"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -127,7 +127,7 @@ class TokenizerTest {
 
     @Test
     fun testAtUserName() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "@test"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -146,7 +146,7 @@ class TokenizerTest {
 
     @Test
     fun testAtUserNameWithHost() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "@test@host"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -170,7 +170,7 @@ class TokenizerTest {
 
     @Test
     fun testAtUserNameWithHostBefore() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "asd@test@host"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -197,7 +197,7 @@ class TokenizerTest {
 
     @Test
     fun testAtNonUserNameWithHostBefore() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "asd!@test@host"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -225,7 +225,7 @@ class TokenizerTest {
 
     @Test
     fun testCash() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "\$test"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -244,7 +244,7 @@ class TokenizerTest {
 
     @Test
     fun testInlineCode() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "`test`"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -264,7 +264,7 @@ class TokenizerTest {
 
     @Test
     fun testNonInlineCode() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "`test"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -283,7 +283,7 @@ class TokenizerTest {
 
     @Test
     fun testCodeBlock() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "```kotlin\ntest\n```"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -315,7 +315,7 @@ class TokenizerTest {
 
     @Test
     fun testNonCodeBlock() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "```kotlin\ntest\n``"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -346,7 +346,7 @@ class TokenizerTest {
 
     @Test
     fun testAsteriskBold() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "**test**"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -368,7 +368,7 @@ class TokenizerTest {
 
     @Test
     fun testAsteriskItalic() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "*test*"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -388,7 +388,7 @@ class TokenizerTest {
 
     @Test
     fun testAsteriskNonBold() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "*test"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -407,7 +407,7 @@ class TokenizerTest {
 
     @Test
     fun testAsteriskNonItalic() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "!*test*"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -423,7 +423,7 @@ class TokenizerTest {
 
     @Test
     fun testUnderscoreBold() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "__test__"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -445,7 +445,7 @@ class TokenizerTest {
 
     @Test
     fun testUnderscoreItalic() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "_test_"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -465,7 +465,7 @@ class TokenizerTest {
 
     @Test
     fun testUnderscoreNonBold() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "_test"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -484,7 +484,7 @@ class TokenizerTest {
 
     @Test
     fun testUnderscoreNonItalic() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "!_test_"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -505,7 +505,7 @@ class TokenizerTest {
 
     @Test
     fun testInelineMath() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "\\(test\\)"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -527,7 +527,7 @@ class TokenizerTest {
 
     @Test
     fun testMathBlock() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "\\[test\\]"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -549,7 +549,7 @@ class TokenizerTest {
 
     @Test
     fun testQuote() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = ">test"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -568,7 +568,7 @@ class TokenizerTest {
 
     @Test
     fun testQuoteWithSpace() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "> test"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -588,7 +588,7 @@ class TokenizerTest {
 
     @Test
     fun testTag() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "<test>"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -608,7 +608,7 @@ class TokenizerTest {
 
     @Test
     fun testTagWithEndTag() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "<test></test>"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -635,7 +635,7 @@ class TokenizerTest {
 
     @Test
     fun testLink() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "[test](https://test.com)"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -673,7 +673,7 @@ class TokenizerTest {
 
     @Test
     fun testSilentLink() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "?[test](https://test.com)"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -712,7 +712,7 @@ class TokenizerTest {
 
     @Test
     fun testBracket() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "asd?[Search]"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -738,7 +738,7 @@ class TokenizerTest {
 
     @Test
     fun testSearch() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "misskey [Search]"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -768,7 +768,7 @@ class TokenizerTest {
 
     @Test
     fun testUrl() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "https://test.com"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -798,7 +798,7 @@ class TokenizerTest {
 
     @Test
     fun testFn() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "\$[flip.h,v MisskeyでFediverseの世界が広がります]"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -850,7 +850,7 @@ class TokenizerTest {
 
     @Test
     fun testTildeStrikethrough() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "~~test~~"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -872,7 +872,7 @@ class TokenizerTest {
 
     @Test
     fun testNonTildeStrikethrough() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "~test"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -891,7 +891,7 @@ class TokenizerTest {
 
     @Test
     fun testNonFn() {
-        val tokenizer = MFMTokenizer()
+        val tokenizer = Tokenizer()
         val content = "\$[flip.h,v Miss~~keyでFedivers*eの世**界が広_が__ります"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
@@ -910,6 +910,64 @@ class TokenizerTest {
                 "が".map { TokenCharacterType.Character } +
                 "__".map { TokenCharacterType.Character } +
                 "ります".map { TokenCharacterType.Character } +
+                listOf(TokenCharacterType.Eof),
+            result
+        )
+    }
+
+    @Test
+    fun testMixed() {
+        val tokenizer = Tokenizer()
+        val content = "test **test** *test* ~~test~~ `test` [test](https://test.com) \$[test] \$[test](https://test.com) #test @test@host \$test"
+        val result = tokenizer.parse(StringReader(content))
+        assertEquals(content.length, result.size - 1)
+        assertContentEquals(
+            "test ".map { TokenCharacterType.Character } +
+                "**".map { TokenCharacterType.AsteriskBold } +
+                "test".map { TokenCharacterType.Character } +
+                "**".map { TokenCharacterType.AsteriskBold } +
+                " ".map { TokenCharacterType.Character } +
+                "*".map { TokenCharacterType.AsteriskItalicStart } +
+                "test".map { TokenCharacterType.Italic } +
+                "*".map { TokenCharacterType.AsteriskItalicStart } +
+                " ".map { TokenCharacterType.Character } +
+                "~~".map { TokenCharacterType.Strike } +
+                "test".map { TokenCharacterType.Character } +
+                "~~".map { TokenCharacterType.Strike } +
+                " ".map { TokenCharacterType.Character } +
+                "`".map { TokenCharacterType.InlineCodeStart } +
+                "test".map { TokenCharacterType.InlineCode } +
+                "`".map { TokenCharacterType.InlineCodeStart } +
+                " ".map { TokenCharacterType.Character } +
+                "[".map { TokenCharacterType.LinkOpen } +
+                "test".map { TokenCharacterType.LinkContent } +
+                "]".map { TokenCharacterType.LinkClose } +
+                "(".map { TokenCharacterType.LinkHrefOpen } +
+                "https://test.com".map { TokenCharacterType.LinkHref } +
+                ")".map { TokenCharacterType.LinkHrefClose } +
+                " ".map { TokenCharacterType.Character } +
+                "\$[".map { TokenCharacterType.Character } +
+                "test".map { TokenCharacterType.Character } +
+                "]".map { TokenCharacterType.FnEndBracket } +
+                " ".map { TokenCharacterType.Character } +
+                "\$".map { TokenCharacterType.Character } +
+                "[".map { TokenCharacterType.Character } +
+                "test".map { TokenCharacterType.Character } +
+                "]".map { TokenCharacterType.FnEndBracket } +
+                "(".map { TokenCharacterType.Character } +
+                "https://test.com".map { TokenCharacterType.Url } +
+                ")".map { TokenCharacterType.Url } +
+                " ".map { TokenCharacterType.Character } +
+                "#".map { TokenCharacterType.HashTagStart } +
+                "test".map { TokenCharacterType.HashTag } +
+                " ".map { TokenCharacterType.Character } +
+                "@".map { TokenCharacterType.UserAt } +
+                "test".map { TokenCharacterType.UserName } +
+                "@".map { TokenCharacterType.UserAt } +
+                "host".map { TokenCharacterType.UserHost } +
+                " ".map { TokenCharacterType.Character } +
+                "\$".map { TokenCharacterType.CashStart } +
+                "test".map { TokenCharacterType.Cash } +
                 listOf(TokenCharacterType.Eof),
             result
         )

@@ -46,7 +46,9 @@ internal enum class TokenCharacterType {
     Url,
     FnEndBracket,
     Fn,
-    FnContent
+    FnContent,
+
+    UnKnown
 }
 
 internal enum class TokenType {
