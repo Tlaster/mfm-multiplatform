@@ -52,7 +52,7 @@ import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.UserName
 internal data class TreeBuilderContext(
     var currentContainer: ContainerNode,
     val tokenCharacterTypes: List<TokenCharacterType>,
-    val reader: Reader
+    val reader: Reader,
 ) {
     val stack: ArrayList<ContainerNode> = arrayListOf()
     fun isInNewLine(start: Int, end: Int): Boolean {

@@ -36,11 +36,11 @@ class TreeBuilderTest {
             RootNode(
                 content = arrayListOf(
                     EmojiCodeNode(
-                        emoji = "test"
-                    )
-                )
+                        emoji = "test",
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -56,11 +56,11 @@ class TreeBuilderTest {
                 content = arrayListOf(
                     MentionNode(
                         userName = "test",
-                        host = null
-                    )
-                )
+                        host = null,
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -76,11 +76,11 @@ class TreeBuilderTest {
                 content = arrayListOf(
                     MentionNode(
                         userName = "test",
-                        host = "host"
-                    )
-                )
+                        host = "host",
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -95,11 +95,11 @@ class TreeBuilderTest {
             RootNode(
                 content = arrayListOf(
                     HashtagNode(
-                        tag = "test"
-                    )
-                )
+                        tag = "test",
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -114,11 +114,11 @@ class TreeBuilderTest {
             RootNode(
                 content = arrayListOf(
                     CashNode(
-                        content = "test"
-                    )
-                )
+                        content = "test",
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -133,11 +133,11 @@ class TreeBuilderTest {
             RootNode(
                 content = arrayListOf(
                     InlineCodeNode(
-                        code = "test"
-                    )
-                )
+                        code = "test",
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -153,11 +153,11 @@ class TreeBuilderTest {
                 content = arrayListOf(
                     CodeBlockNode(
                         code = "test",
-                        language = null
-                    )
-                )
+                        language = null,
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -173,11 +173,11 @@ class TreeBuilderTest {
                 content = arrayListOf(
                     CodeBlockNode(
                         code = "test",
-                        language = "kotlin"
-                    )
-                )
+                        language = "kotlin",
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -195,13 +195,13 @@ class TreeBuilderTest {
                         start = 0,
                         content = arrayListOf(
                             TextNode(
-                                content = "test"
-                            )
-                        )
-                    )
-                )
+                                content = "test",
+                            ),
+                        ),
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -219,13 +219,13 @@ class TreeBuilderTest {
                         start = 0,
                         content = arrayListOf(
                             TextNode(
-                                content = "test"
-                            )
-                        )
-                    )
-                )
+                                content = "test",
+                            ),
+                        ),
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -243,13 +243,13 @@ class TreeBuilderTest {
                         start = 0,
                         content = arrayListOf(
                             TextNode(
-                                content = "test"
-                            )
-                        )
-                    )
-                )
+                                content = "test",
+                            ),
+                        ),
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -267,13 +267,13 @@ class TreeBuilderTest {
                         start = 0,
                         content = arrayListOf(
                             TextNode(
-                                content = "test"
-                            )
-                        )
-                    )
-                )
+                                content = "test",
+                            ),
+                        ),
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -288,11 +288,11 @@ class TreeBuilderTest {
             RootNode(
                 content = arrayListOf(
                     MathInlineNode(
-                        formula = "test"
-                    )
-                )
+                        formula = "test",
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -321,13 +321,13 @@ class TreeBuilderTest {
                         start = 0,
                         content = arrayListOf(
                             TextNode(
-                                content = "test"
-                            )
-                        )
-                    )
-                )
+                                content = "test",
+                            ),
+                        ),
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -345,11 +345,11 @@ class TreeBuilderTest {
                     LinkNode(
                         content = "test",
                         url = "https://test.com",
-                        silent = false
-                    )
-                )
+                        silent = false,
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -367,11 +367,11 @@ class TreeBuilderTest {
                     LinkNode(
                         content = "test",
                         url = "https://test.com",
-                        silent = true
-                    )
-                )
+                        silent = true,
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -387,11 +387,11 @@ class TreeBuilderTest {
             RootNode(
                 content = arrayListOf(
                     UrlNode(
-                        url = "https://test.com"
-                    )
-                )
+                        url = "https://test.com",
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -408,11 +408,11 @@ class TreeBuilderTest {
                     FnNode(
                         start = 0,
                         name = "flip.h,v",
-                        content = arrayListOf(TextNode(content = "MisskeyでFediverseの世界が広がります"))
-                    )
-                )
+                        content = arrayListOf(TextNode(content = "MisskeyでFediverseの世界が広がります")),
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -427,11 +427,11 @@ class TreeBuilderTest {
             RootNode(
                 content = arrayListOf(
                     TextNode(
-                        content = "\$[flip.h,v Miss~~keyでFedivers*eの世**界が広_が__ります"
-                    )
-                )
+                        content = "\$[flip.h,v Miss~~keyでFedivers*eの世**界が広_が__ります",
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -450,13 +450,13 @@ class TreeBuilderTest {
                         start = 0,
                         content = arrayListOf(
                             TextNode(
-                                content = "test"
-                            )
-                        )
-                    )
-                )
+                                content = "test",
+                            ),
+                        ),
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -473,11 +473,11 @@ class TreeBuilderTest {
                 content = arrayListOf(
                     SearchNode(
                         query = "misskey",
-                        search = "[Search]"
-                    )
-                )
+                        search = "[Search]",
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -496,13 +496,13 @@ class TreeBuilderTest {
                         start = 0,
                         content = arrayListOf(
                             TextNode(
-                                content = "test"
-                            )
-                        )
-                    )
-                )
+                                content = "test",
+                            ),
+                        ),
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -521,13 +521,13 @@ class TreeBuilderTest {
                         start = 0,
                         content = arrayListOf(
                             TextNode(
-                                content = "test"
-                            )
-                        )
-                    )
-                )
+                                content = "test",
+                            ),
+                        ),
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -546,13 +546,13 @@ class TreeBuilderTest {
                         start = 0,
                         content = arrayListOf(
                             TextNode(
-                                content = "test"
-                            )
-                        )
-                    )
-                )
+                                content = "test",
+                            ),
+                        ),
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -571,13 +571,13 @@ class TreeBuilderTest {
                         start = 0,
                         content = arrayListOf(
                             TextNode(
-                                content = "test"
-                            )
-                        )
-                    )
-                )
+                                content = "test",
+                            ),
+                        ),
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -596,13 +596,13 @@ class TreeBuilderTest {
                         start = 0,
                         content = arrayListOf(
                             TextNode(
-                                content = "test"
-                            )
-                        )
-                    )
-                )
+                                content = "test",
+                            ),
+                        ),
+                    ),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -619,10 +619,10 @@ class TreeBuilderTest {
                 content = arrayListOf(
                     TextNode(content = "<test>"),
                     TextNode(content = "test"),
-                    TextNode(content = "</test>")
-                )
+                    TextNode(content = "</test>"),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -637,10 +637,10 @@ class TreeBuilderTest {
         assertEquals(
             RootNode(
                 content = arrayListOf(
-                    TextNode(content = "<b>test<small</center>")
-                )
+                    TextNode(content = "<b>test<small</center>"),
+                ),
             ),
-            builderResult
+            builderResult,
         )
     }
 
@@ -659,22 +659,22 @@ class TreeBuilderTest {
                 BoldNode(
                     start = 5,
                     content = arrayListOf(
-                        TextNode(content = "test")
-                    )
+                        TextNode(content = "test"),
+                    ),
                 ),
                 TextNode(content = " "),
                 ItalicNode(
                     start = 14,
                     content = arrayListOf(
-                        TextNode(content = "test")
-                    )
+                        TextNode(content = "test"),
+                    ),
                 ),
                 TextNode(content = " "),
                 StrikeNode(
                     start = 21,
                     content = arrayListOf(
-                        TextNode(content = "test")
-                    )
+                        TextNode(content = "test"),
+                    ),
                 ),
                 TextNode(content = " "),
                 InlineCodeNode(code = "test"),
@@ -682,7 +682,7 @@ class TreeBuilderTest {
                 LinkNode(
                     content = "test",
                     url = "https://test.com",
-                    silent = false
+                    silent = false,
                 ),
                 TextNode(content = " \$[test"),
                 TextNode(content = "]"),
@@ -695,11 +695,11 @@ class TreeBuilderTest {
                 TextNode(content = " "),
                 MentionNode(
                     userName = "test",
-                    host = "host"
+                    host = "host",
                 ),
                 TextNode(content = " "),
-                CashNode(content = "test")
-            )
+                CashNode(content = "test"),
+            ),
         )
 
         assertEquals(expected, builderResult)

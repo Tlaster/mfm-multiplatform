@@ -9,7 +9,7 @@ internal class TreeBuilder {
         val context = TreeBuilderContext(
             currentContainer = root,
             tokenCharacterTypes = tokenCharacterTypes,
-            reader = reader
+            reader = reader,
         )
         context.stack.add(root)
         while (context.reader.hasNext()) {

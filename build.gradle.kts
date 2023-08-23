@@ -135,3 +135,7 @@ publishing {
         }
     }
 }
+
+ktlint {
+    version.set("0.50.0")
+}

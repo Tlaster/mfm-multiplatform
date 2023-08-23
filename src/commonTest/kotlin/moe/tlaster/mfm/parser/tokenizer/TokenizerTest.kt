@@ -19,9 +19,9 @@ class TokenizerTest {
                 TokenCharacterType.EmojiName,
                 TokenCharacterType.EmojiName,
                 TokenCharacterType.EmojiNameStart,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -38,9 +38,9 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -57,9 +57,9 @@ class TokenizerTest {
                 TokenCharacterType.HashTag,
                 TokenCharacterType.HashTag,
                 TokenCharacterType.HashTag,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -77,9 +77,9 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -99,9 +99,9 @@ class TokenizerTest {
                 TokenCharacterType.HashTag,
                 TokenCharacterType.HashTag,
                 TokenCharacterType.HashTag,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -119,9 +119,9 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -138,9 +138,9 @@ class TokenizerTest {
                 TokenCharacterType.UserName,
                 TokenCharacterType.UserName,
                 TokenCharacterType.UserName,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -162,9 +162,9 @@ class TokenizerTest {
                 TokenCharacterType.UserHost,
                 TokenCharacterType.UserHost,
                 TokenCharacterType.UserHost,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -189,9 +189,9 @@ class TokenizerTest {
                 TokenCharacterType.UserHost,
                 TokenCharacterType.UserHost,
                 TokenCharacterType.UserHost,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -217,9 +217,9 @@ class TokenizerTest {
                 TokenCharacterType.UserName,
                 TokenCharacterType.UserName,
                 TokenCharacterType.UserName,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -236,9 +236,9 @@ class TokenizerTest {
                 TokenCharacterType.Cash,
                 TokenCharacterType.Cash,
                 TokenCharacterType.Cash,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -256,9 +256,9 @@ class TokenizerTest {
                 TokenCharacterType.InlineCode,
                 TokenCharacterType.InlineCode,
                 TokenCharacterType.InlineCodeStart,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -275,9 +275,9 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -307,9 +307,9 @@ class TokenizerTest {
                 TokenCharacterType.CodeBlockStart,
                 TokenCharacterType.CodeBlockStart,
                 TokenCharacterType.CodeBlockStart,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -338,9 +338,9 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -360,9 +360,9 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.AsteriskBold,
                 TokenCharacterType.AsteriskBold,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -380,9 +380,9 @@ class TokenizerTest {
                 TokenCharacterType.Italic,
                 TokenCharacterType.Italic,
                 TokenCharacterType.AsteriskItalicStart,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -399,9 +399,9 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -415,9 +415,9 @@ class TokenizerTest {
             content.map {
                 TokenCharacterType.Character
             }.plus(
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -437,9 +437,9 @@ class TokenizerTest {
                 TokenCharacterType.Bold,
                 TokenCharacterType.UnderscoreBoldStart,
                 TokenCharacterType.UnderscoreBoldStart,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -457,9 +457,9 @@ class TokenizerTest {
                 TokenCharacterType.Italic,
                 TokenCharacterType.Italic,
                 TokenCharacterType.UnderscoreItalicStart,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -476,9 +476,9 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -497,9 +497,9 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -519,9 +519,9 @@ class TokenizerTest {
                 TokenCharacterType.InlineMathContent,
                 TokenCharacterType.InlineMath,
                 TokenCharacterType.InlineMath,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -541,9 +541,9 @@ class TokenizerTest {
                 TokenCharacterType.MathBlockContent,
                 TokenCharacterType.MathBlock,
                 TokenCharacterType.MathBlock,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -560,9 +560,9 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -580,9 +580,9 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -600,9 +600,9 @@ class TokenizerTest {
                 TokenCharacterType.Tag,
                 TokenCharacterType.Tag,
                 TokenCharacterType.TagClose,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -627,9 +627,9 @@ class TokenizerTest {
                 TokenCharacterType.Tag,
                 TokenCharacterType.Tag,
                 TokenCharacterType.TagClose,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -665,9 +665,9 @@ class TokenizerTest {
                 TokenCharacterType.LinkHref,
                 TokenCharacterType.LinkHref,
                 TokenCharacterType.LinkHrefClose,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -704,9 +704,9 @@ class TokenizerTest {
                 TokenCharacterType.LinkHref,
                 TokenCharacterType.LinkHref,
                 TokenCharacterType.LinkHrefClose,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -730,9 +730,9 @@ class TokenizerTest {
                 TokenCharacterType.Search,
                 TokenCharacterType.Search,
                 TokenCharacterType.Search,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -760,9 +760,9 @@ class TokenizerTest {
                 TokenCharacterType.Search,
                 TokenCharacterType.Search,
                 TokenCharacterType.Search,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -790,9 +790,9 @@ class TokenizerTest {
                 TokenCharacterType.Url,
                 TokenCharacterType.Url,
                 TokenCharacterType.Url,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -842,9 +842,9 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
                 TokenCharacterType.FnEndBracket,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -864,9 +864,9 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.Strike,
                 TokenCharacterType.Strike,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -883,9 +883,9 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
-                TokenCharacterType.Eof
+                TokenCharacterType.Eof,
             ),
-            result
+            result,
         )
     }
 
@@ -911,7 +911,7 @@ class TokenizerTest {
                 "__".map { TokenCharacterType.Character } +
                 "ります".map { TokenCharacterType.Character } +
                 listOf(TokenCharacterType.Eof),
-            result
+            result,
         )
     }
 
@@ -969,7 +969,7 @@ class TokenizerTest {
                 "\$".map { TokenCharacterType.CashStart } +
                 "test".map { TokenCharacterType.Cash } +
                 listOf(TokenCharacterType.Eof),
-            result
+            result,
         )
     }
 }
