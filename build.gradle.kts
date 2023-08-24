@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "moe.tlaster"
-version = "0.0.2"
+version = "0.0.3"
 
 repositories {
     mavenCentral()
@@ -26,33 +26,33 @@ kotlin {
             }
         }
     }
-    js {
-        browser()
-        nodejs()
-    }
-//    @OptIn(ExperimentalWasmDsl::class)
-//    wasm {
-//        browser()
-//        nodejs()
-//        d8()
-//    }
-    if (HostManager.hostIsMac) {
-        ios()
-        iosSimulatorArm64()
-        macosX64()
-        macosArm64()
-        watchos()
-        watchosSimulatorArm64()
-        tvos()
-        tvosSimulatorArm64()
-    }
-    if (HostManager.hostIsMingw) {
-        mingwX64()
-    }
-    if (HostManager.hostIsLinux) {
-        linuxX64()
-        linuxArm64()
-    }
+//     js {
+//         browser()
+//         nodejs()
+//     }
+// //    @OptIn(ExperimentalWasmDsl::class)
+// //    wasm {
+// //        browser()
+// //        nodejs()
+// //        d8()
+// //    }
+//     if (HostManager.hostIsMac) {
+//         ios()
+//         iosSimulatorArm64()
+//         macosX64()
+//         macosArm64()
+//         watchos()
+//         watchosSimulatorArm64()
+//         tvos()
+//         tvosSimulatorArm64()
+//     }
+//     if (HostManager.hostIsMingw) {
+//         mingwX64()
+//     }
+//     if (HostManager.hostIsLinux) {
+//         linuxX64()
+//         linuxArm64()
+//     }
 
     sourceSets {
         val commonMain by getting
