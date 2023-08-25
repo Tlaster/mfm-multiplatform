@@ -67,11 +67,15 @@ internal data class TreeBuilderContext(
             if (index != stack.lastIndex) {
                 // reject inner state
                 val startIndex = stack[index + 1].start
-                stack[index + 1].content.add(TextNode(reader.consume(startIndex - start)))
-            }
-            val count = stack.size - index
-            repeat(count) {
-                stack.removeAt(index)
+                stack[index].content.apply {
+                    val count = stack.size - index
+                    repeat(count) {
+                        remove(stack.removeLast())
+                    }
+                    add(TextNode(reader.readAt(startIndex, start - startIndex)))
+                }
+            } else {
+                stack.remove(node)
             }
             currentContainer = stack.last()
         } else {

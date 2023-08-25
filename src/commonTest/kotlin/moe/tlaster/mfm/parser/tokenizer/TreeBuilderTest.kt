@@ -704,4 +704,30 @@ class TreeBuilderTest {
 
         assertEquals(expected, builderResult)
     }
+
+    @Test
+    fun testMixed2() {
+        val tokenizer = Tokenizer()
+        val content = "\$[flip eefewfe~~fds<b>afd</b>f]~~"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                0,
+                arrayListOf(
+                    FnNode(
+                        start = 0,
+                        name = "flip",
+                        content = arrayListOf(
+                            TextNode(content = "eefewfe"),
+                            TextNode(content = "~~fds<b>afd</b>f"),
+                        ),
+                    ),
+                    TextNode(content = "~~"),
+                ),
+            ),
+            builderResult,
+        )
+    }
 }
