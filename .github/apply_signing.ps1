@@ -1,4 +1,5 @@
-echo $Env:SIGNING_KEY | base64 -d > ./key.gpg
+$bytes = [Convert]::FromBase64String($Env:SIGNING_KEY)
+[IO.File]::WriteAllBytes("./key.gpg", $bytes)
 echo "signing.keyId=${Env:SIGNING_KEY_ID}
 signing.password=${Env:SIGNING_PASSWORD}
 signing.secretKeyRingFile=./key.gpg
