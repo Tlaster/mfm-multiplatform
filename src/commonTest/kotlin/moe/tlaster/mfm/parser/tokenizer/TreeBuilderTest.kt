@@ -730,4 +730,38 @@ class TreeBuilderTest {
             builderResult,
         )
     }
+
+    @Test
+    fun testMixed3() {
+        val tokenizer = Tokenizer()
+        val content = "~~\$[flip.h,v Misskeyで\$[flip.h,v MisskeyでFediverseの世界が広がります]]~~"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        val expected = RootNode(
+            0,
+            arrayListOf(
+                StrikeNode(
+                    start = 0,
+                    content = arrayListOf(
+                        FnNode(
+                            start = 2,
+                            name = "flip.h,v",
+                            content = arrayListOf(
+                                TextNode(content = "Misskeyで"),
+                                FnNode(
+                                    start = 21,
+                                    name = "flip.h,v",
+                                    content = arrayListOf(
+                                        TextNode(content = "MisskeyでFediverseの世界が広がります"),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        assertEquals(expected, builderResult)
+    }
 }

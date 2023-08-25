@@ -19,7 +19,6 @@ import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.EndTagOpen
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.Eof
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.Fn
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.FnContent
-import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.FnEndBracket
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.HashTag
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.HashTagStart
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.InlineCode
@@ -246,7 +245,7 @@ internal data object ItalicState : State {
             if (index != stack.lastIndex) {
                 // reject inner state
                 val startIndex = stack[index + 1].start
-                stack[index + 1].content.add(TextNode(reader.consume(startIndex - start)))
+                stack[index + 1].content.add(TextNode(reader.readAt(startIndex, start - startIndex)))
             }
             val count = stack.size - index
             repeat(count) {
@@ -278,7 +277,7 @@ internal data object BoldState : State {
             if (index != stack.lastIndex) {
                 // reject inner state
                 val startIndex = stack[index + 1].start
-                stack[index + 1].content.add(TextNode(reader.consume(startIndex - start)))
+                stack[index + 1].content.add(TextNode(reader.readAt(startIndex, start - startIndex)))
             }
             val count = stack.size - index
             repeat(count) {
@@ -310,7 +309,7 @@ internal data object StrikeState : State {
             if (index != stack.lastIndex) {
                 // reject inner state
                 val startIndex = stack[index + 1].start
-                stack[index + 1].content.add(TextNode(reader.consume(startIndex - start)))
+                stack[index + 1].content.add(TextNode(reader.readAt(startIndex, start - startIndex)))
             }
             val count = stack.size - index
             repeat(count) {
@@ -610,14 +609,15 @@ internal data object FnState : State {
 internal data object FnEndState : State {
     override fun TreeBuilderContext.build() {
         endNode<FnNode>(reader.position)
-        while (reader.hasNext()) {
-            val token = tokenCharacterTypes[reader.position]
-            if (token == FnEndBracket) {
-                reader.consume()
-            } else {
-                break
-            }
-        }
+        reader.consume()
+//        while (reader.hasNext()) {
+//            val token = tokenCharacterTypes[reader.position]
+//            if (token == FnEndBracket) {
+//                reader.consume()
+//            } else {
+//                break
+//            }
+//        }
     }
 }
 
