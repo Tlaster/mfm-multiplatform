@@ -972,4 +972,12 @@ class TokenizerTest {
             result,
         )
     }
+
+    @Test
+    fun testMixed2() {
+        val tokenizer = Tokenizer()
+        val content = ":petthex_syuilo_9597: haha! #blender @Tlaster@mstdn.jp wow! @Tlaster@pawoo.net o!"
+        val result = tokenizer.parse(StringReader(content))
+        assertEquals(content.length, result.size - 1)
+    }
 }

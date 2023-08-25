@@ -74,6 +74,7 @@ internal data object HState : State {
             reader.consume("ttp://".length)
         } else {
             tokenizer.emit(TokenCharacterType.Character, reader.position)
+            tokenizer.switch(DataState)
         }
     }
 }
