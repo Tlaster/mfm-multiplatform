@@ -764,4 +764,48 @@ class TreeBuilderTest {
         )
         assertEquals(expected, builderResult)
     }
+
+    @Test
+    fun testSearch2() {
+        val tokenizer = Tokenizer()
+        val content = "111111111111\nfewfew few few [Search]"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        val expected = RootNode(
+            0,
+            arrayListOf(
+                TextNode(content = "111111111111"),
+                TextNode("\n"),
+                SearchNode(
+                    query = "fewfew few few",
+                    search = "[Search]",
+                ),
+            ),
+        )
+        assertEquals(expected, builderResult)
+    }
+
+    @Test
+    fun testQuote2() {
+        val tokenizer = Tokenizer()
+        val content = "> haha!\nwo!"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        val expected = RootNode(
+            0,
+            arrayListOf(
+                QuoteNode(
+                    start = 0,
+                    content = arrayListOf(
+                        TextNode(content = "haha!"),
+                    ),
+                ),
+                TextNode("\n"),
+                TextNode(content = "wo!"),
+            ),
+        )
+        assertEquals(expected, builderResult)
+    }
 }

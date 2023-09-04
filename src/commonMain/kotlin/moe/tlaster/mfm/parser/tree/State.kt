@@ -89,6 +89,12 @@ internal sealed interface State {
 
 internal data object LineBreakState : State {
     override fun TreeBuilderContext.build() {
+        val start = reader.position
+
+        stack.findLast { it is QuoteNode }?.let {
+            endNode<QuoteNode>(start)
+        }
+
         val text = StringBuilder()
         while (reader.hasNext()) {
             val token = tokenCharacterTypes[reader.position]
@@ -381,6 +387,7 @@ internal data object BlockquoteState : State {
         val node = QuoteNode(start)
         currentContainer.content.add(node)
         currentContainer = node
+        stack.add(node)
         while (reader.hasNext()) {
             val token = tokenCharacterTypes[reader.position]
             if (token == Blockquote) {
@@ -623,6 +630,12 @@ internal data object FnEndState : State {
 
 internal data object EofState : State {
     override fun TreeBuilderContext.build() {
+        val start = reader.position
+
+        stack.findLast { it is QuoteNode }?.let {
+            endNode<QuoteNode>(start)
+        }
+
         if (stack.size > 1) {
             val node = stack.get(1)
             val root = stack.get(0)
