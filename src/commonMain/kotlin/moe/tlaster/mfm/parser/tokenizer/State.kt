@@ -9,7 +9,7 @@ private fun prevIsNotAsciiAlphanumeric(tokenizer: Tokenizer, reader: Reader): Bo
         reader.pushback(3) // push back 1 for char before *, 1 for *
         val before = reader.consume() // char before *
         reader.consume() // *
-        if (before !in asciiAlphanumeric + ' ' + TAB) {
+        if (before !in asciiAlphanumericAndEmpty) {
             tokenizer.emit(TokenCharacterType.Character, reader.position)
             tokenizer.switch(DataState)
             return true
@@ -36,6 +36,7 @@ private const val TAB = '\u0009'
 private const val LF = '\u000A'
 private val emptyChar = listOf(TAB, LF, '\u000C', '\u0020')
 private val hashTagExclude = "[ \u3000\t.,!?'\"#:/[]【】()「」（）<>]".toList() + eof
+private val asciiAlphanumericAndEmpty = asciiAlphanumeric + ' ' + TAB + LF
 
 internal data object DataState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
@@ -384,7 +385,7 @@ internal data object TildeState : State {
 internal data object UnderscoreState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
-            in asciiAlphanumeric + ' ' + TAB -> {
+            in asciiAlphanumericAndEmpty -> {
                 if (prevIsNotAsciiAlphanumeric(tokenizer, reader)) {
                     return
                 }
@@ -409,7 +410,7 @@ internal data object UnderscoreState : State {
 internal data object UnderscoreBoldStartState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
-            in asciiAlphanumeric + ' ' + TAB -> {
+            in asciiAlphanumericAndEmpty -> {
                 tokenizer.emit(TokenCharacterType.UnderscoreBoldStart, reader.position - 2)
                 tokenizer.emit(TokenCharacterType.UnderscoreBoldStart, reader.position - 1)
                 tokenizer.switch(UnderscoreBoldState)
@@ -429,7 +430,7 @@ internal data object UnderscoreBoldStartState : State {
 internal data object UnderscoreBoldState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
-            in asciiAlphanumeric + ' ' + TAB -> {
+            in asciiAlphanumericAndEmpty -> {
                 tokenizer.emit(TokenCharacterType.Bold, reader.position)
             }
 
@@ -477,7 +478,7 @@ internal data object UnderscoreBoldEndState : State {
 internal data object UnderscoreItalicState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
-            in asciiAlphanumeric + ' ' + TAB -> {
+            in asciiAlphanumericAndEmpty -> {
                 tokenizer.emit(TokenCharacterType.Italic, reader.position)
             }
 
@@ -499,7 +500,7 @@ internal data object UnderscoreItalicState : State {
 internal data object AsteriskState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
-            in asciiAlphanumeric + ' ' + TAB -> {
+            in asciiAlphanumericAndEmpty -> {
                 if (prevIsNotAsciiAlphanumeric(tokenizer, reader)) {
                     return
                 }
@@ -527,7 +528,7 @@ internal data object AsteriskState : State {
 internal data object AsteriskItalicState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
         when (val current = reader.consume()) {
-            in asciiAlphanumeric + ' ' + TAB -> {
+            in asciiAlphanumericAndEmpty -> {
                 tokenizer.emit(TokenCharacterType.Italic, reader.position)
             }
 
@@ -780,7 +781,7 @@ internal data object AtState : State {
 //            reader.pushback(2) // push back 1 for char before @, 1 for @
 //            val before = reader.consume() // char before @
 //            reader.consume() // @
-//            if (before !in asciiAlphanumeric + ' ' + TAB) {
+//            if (before !in asciiAlphanumericAndEmpty) {
 //                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
 //                tokenizer.switch(DataState)
 //                return
@@ -869,19 +870,22 @@ internal data object UserHostState : State {
 
 internal data object HashState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
-        if (reader.position != 1) {
-            reader.pushback(2) // push back 1 for char before #, 1 for #
-            val before = reader.consume() // char before #
-            reader.consume() // #
-            if (before !in asciiAlphanumeric + ' ' + TAB) {
-                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
-                tokenizer.switch(DataState)
-                return
-            }
-        }
+//        if (reader.position != 1) {
+//            reader.pushback(2) // push back 1 for char before #, 1 for #
+//            val before = reader.consume() // char before #
+//            reader.consume() // #
+//            if (before !in asciiAlphanumericAndEmpty) {
+//                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
+//                tokenizer.switch(DataState)
+//                return
+//            }
+//        }
 
         when (val current = reader.consume()) {
             in hashTagExclude -> {
+                if (prevIsNotAsciiAlphanumeric(tokenizer, reader)) {
+                    return
+                }
                 // TODO: 括弧は対になっている時のみ内容に含めることができる。対象: () [] 「」 （）
                 tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.emit(TokenCharacterType.Character, reader.position)
@@ -889,6 +893,9 @@ internal data object HashState : State {
             }
 
             else -> {
+                if (prevIsNotAsciiAlphanumeric(tokenizer, reader)) {
+                    return
+                }
                 tokenizer.emit(TokenCharacterType.HashTagStart, reader.position - 1)
                 tokenizer.switch(HashNameState)
                 reader.pushback()
