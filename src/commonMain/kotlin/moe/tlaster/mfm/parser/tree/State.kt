@@ -113,7 +113,7 @@ internal data object TextState : State {
         val text = StringBuilder()
         while (reader.hasNext()) {
             val token = tokenCharacterTypes[reader.position]
-            if (token == Character || token == Bold || token == Italic) {
+            if (token == Character || token == Bold || token == Italic || token == TokenCharacterType.UnKnown) {
                 text.append(reader.consume())
             } else {
                 break

@@ -3,6 +3,7 @@ package moe.tlaster.mfm.parser.tokenizer
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 class TokenizerTest {
     @Test
@@ -979,5 +980,15 @@ class TokenizerTest {
         val content = ":petthex_syuilo_9597: haha! #blender @Tlaster@mstdn.jp wow! @Tlaster@pawoo.net o!"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
+    }
+
+    @Test
+    fun testMixed4() {
+        val tokenizer = Tokenizer()
+        val content = ":ablobcatwhackyfast:【にゃんぷっぷー10連ガチャ】:blobcatrainbow:\n[N] :blobcatdroolreach:\n[SR] :nekobounce:\n[SR] :ablobcatreachflip:\n[R] :blobcat_frustration:\n[SSR] :blabcatpeek:\n[SSR] :blabcatpeek:\n[SR] :meow_ghostreach:\n[R] :blobcat_frustration:\n[N] :blobcatdroolreach:\n[N] :blobcatdroolreach:\n#にゃんぷっぷー10連ガチャ\n\nhttps://misskey.io/play/9gyoya6mlu"
+        val result = tokenizer.parse(StringReader(content))
+        assertFalse {
+            result.contains(TokenCharacterType.UnKnown)
+        }
     }
 }
