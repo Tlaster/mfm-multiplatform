@@ -7,8 +7,12 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
 }
 
-group = "moe.tlaster"
-version = "0.1.1"
+val libName = "mfm-multiplatform"
+val libGroup = "moe.tlaster"
+val libVersion = "0.1.2-SNAPSHOT"
+
+group = libGroup
+version = libVersion
 
 repositories {
     mavenCentral()
@@ -16,7 +20,9 @@ repositories {
 
 kotlin {
     jvm {
-        jvmToolchain(11)
+        compilations.all {
+            kotlinOptions.jvmTarget = "1.8"
+        }
         testRuns.named("test") {
             executionTask.configure {
                 useJUnitPlatform()
@@ -59,12 +65,12 @@ mavenPublishing {
     publishToMavenCentral(SonatypeHost.S01)
     signAllPublications()
     coordinates(
-        groupId = "moe.tlaster",
-        artifactId = "mfm-multiplatform",
-        version = "0.1.1-SNAPSHOT",
+        groupId = libGroup,
+        artifactId = libName,
+        version = libVersion,
     )
     pom {
-        name.set("mfm-multiplatform")
+        name.set(libName)
         description.set("MFM parser")
         url.set("https://github.com/Tlaster/mfm-multiplatform")
 
