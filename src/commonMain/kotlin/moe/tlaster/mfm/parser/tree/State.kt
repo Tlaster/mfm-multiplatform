@@ -1,6 +1,7 @@
 package moe.tlaster.mfm.parser.tree
 
 import moe.tlaster.mfm.parser.tokenizer.Reader
+import moe.tlaster.mfm.parser.tokenizer.StringReader
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.AsteriskBold
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.AsteriskItalicStart
@@ -47,6 +48,7 @@ import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.Url
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.UserAt
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.UserHost
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.UserName
+import moe.tlaster.mfm.parser.tokenizer.Tokenizer
 
 internal data class TreeBuilderContext(
     var currentContainer: ContainerNode,
@@ -571,7 +573,12 @@ internal data object LinkState : State {
                 break
             }
         }
-        currentContainer.content.add(LinkNode(content.toString(), href.toString(), silent))
+        val tokenizer = Tokenizer()
+        val reader = StringReader(content.toString())
+        val tokens = tokenizer.parse(reader)
+        reader.reset()
+        val node = TreeBuilder().build(reader, tokens)
+        currentContainer.content.add(LinkNode(node.content, href.toString(), silent))
     }
 }
 
@@ -605,7 +612,6 @@ internal data object FnState : State {
                 break
             }
         }
-        // todo: parse fn content
         val node = FnNode(start, body.toString())
         currentContainer.content.add(node)
         stack.add(node)

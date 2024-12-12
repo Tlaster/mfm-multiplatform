@@ -991,4 +991,14 @@ class TokenizerTest {
             result.contains(TokenCharacterType.UnKnown)
         }
     }
+
+    @Test
+    fun testMixed5() {
+        val tokenizer = Tokenizer()
+        val content = "?[:mikan_muite_agemasyoune:りしちか](https://misskey.io/@Lysitka)さんに勝ちました♪"
+        val result = tokenizer.parse(StringReader(content))
+        assertFalse {
+            result.contains(TokenCharacterType.UnKnown)
+        }
+    }
 }

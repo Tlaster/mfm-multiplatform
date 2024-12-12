@@ -84,7 +84,7 @@ data class UrlNode(
 ) : InlineNode
 
 data class LinkNode(
-    val content: String,
+    val content: ArrayList<Node>,
     val url: String,
     val silent: Boolean,
 ) : InlineNode

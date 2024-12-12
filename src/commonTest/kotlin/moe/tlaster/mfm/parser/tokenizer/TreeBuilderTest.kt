@@ -343,7 +343,7 @@ class TreeBuilderTest {
             RootNode(
                 content = arrayListOf(
                     LinkNode(
-                        content = "test",
+                        content = arrayListOf(TextNode("test")),
                         url = "https://test.com",
                         silent = false,
                     ),
@@ -365,7 +365,7 @@ class TreeBuilderTest {
             RootNode(
                 content = arrayListOf(
                     LinkNode(
-                        content = "test",
+                        content = arrayListOf(TextNode("test")),
                         url = "https://test.com",
                         silent = true,
                     ),
@@ -680,7 +680,7 @@ class TreeBuilderTest {
                 InlineCodeNode(code = "test"),
                 TextNode(content = " "),
                 LinkNode(
-                    content = "test",
+                    content = arrayListOf(TextNode("test")),
                     url = "https://test.com",
                     silent = false,
                 ),
@@ -804,6 +804,30 @@ class TreeBuilderTest {
                 ),
                 TextNode("\n"),
                 TextNode(content = "wo!"),
+            ),
+        )
+        assertEquals(expected, builderResult)
+    }
+
+    @Test
+    fun testMixed5() {
+        val tokenizer = Tokenizer()
+        val content = "?[:mikan_muite_agemasyoune:りしちか](https://misskey.io/@Lysitka)さんに勝ちました♪"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        val expected = RootNode(
+            0,
+            arrayListOf(
+                LinkNode(
+                    content = arrayListOf(
+                        EmojiCodeNode("mikan_muite_agemasyoune"),
+                        TextNode("りしちか"),
+                    ),
+                    url = "https://misskey.io/@Lysitka",
+                    silent = true,
+                ),
+                TextNode(content = "さんに勝ちました♪"),
             ),
         )
         assertEquals(expected, builderResult)
