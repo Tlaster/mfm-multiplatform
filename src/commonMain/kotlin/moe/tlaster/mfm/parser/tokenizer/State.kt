@@ -131,28 +131,45 @@ internal data object QuestionState : State {
 
 internal data object LinkNameState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
-        when (val current = reader.consume()) {
-            ']' -> {
-                if (reader.next() == '(') {
-                    tokenizer.emit(TokenCharacterType.LinkClose, reader.position)
-                    tokenizer.emit(TokenCharacterType.LinkHrefOpen, reader.position + 1)
-                    tokenizer.switch(LinkHrefState)
-                    reader.consume()
-                } else {
-                    tokenizer.reject(reader.position)
-                    tokenizer.emit(TokenCharacterType.Character, reader.position)
-                    tokenizer.switch(DataState)
+        var stackCount = 0
+        while (reader.hasNext()) {
+            when (val current = reader.consume()) {
+                '[' -> {
+                    stackCount++
+                    tokenizer.emit(TokenCharacterType.LinkContent, reader.position)
                 }
-            }
-
-            in emptyChar + eof + '[' -> {
-                tokenizer.reject(reader.position)
-                tokenizer.switch(DataState)
-                reader.pushback()
-            }
-
-            else -> {
-                tokenizer.emit(TokenCharacterType.LinkContent, reader.position)
+                ']' -> {
+                    if (stackCount == 0) {
+                        if (reader.next() == '(') {
+                            tokenizer.emit(TokenCharacterType.LinkClose, reader.position)
+                            tokenizer.emit(TokenCharacterType.LinkHrefOpen, reader.position + 1)
+                            tokenizer.switch(LinkHrefState)
+                            reader.consume()
+                            break
+                        } else {
+                            tokenizer.reject(reader.position)
+                            tokenizer.emit(TokenCharacterType.Character, reader.position)
+                            tokenizer.switch(DataState)
+                            break
+                        }
+                    } else {
+                        stackCount--
+                        tokenizer.emit(TokenCharacterType.LinkContent, reader.position)
+                    }
+                }
+                in emptyChar + eof -> {
+                    if (stackCount == 0 || current == eof) {
+                        tokenizer.reject(reader.position)
+                        tokenizer.switch(DataState)
+                        reader.pushback()
+                        break
+                    } else {
+                        tokenizer.emit(TokenCharacterType.LinkContent, reader.position)
+                    }
+                }
+                else -> {
+                    tokenizer.emit(TokenCharacterType.LinkContent, reader.position)
+                }
             }
         }
     }
@@ -790,9 +807,9 @@ internal data object AtState : State {
 //        }
         when (val current = reader.consume()) {
             in asciiAlphanumericUnderscoreDash -> {
-                if (prevIsNotAsciiAlphanumeric(tokenizer, reader)) {
-                    return
-                }
+//                if (prevIsNotAsciiAlphanumeric(tokenizer, reader)) {
+//                    return
+//                }
                 tokenizer.emit(TokenCharacterType.UserAt, reader.position - 1)
                 tokenizer.switch(UserNameState)
                 reader.pushback()

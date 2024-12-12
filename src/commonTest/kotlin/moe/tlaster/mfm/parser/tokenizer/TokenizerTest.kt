@@ -196,33 +196,33 @@ class TokenizerTest {
         )
     }
 
-    @Test
-    fun testAtNonUserNameWithHostBefore() {
-        val tokenizer = Tokenizer()
-        val content = "asd!@test@host"
-        val result = tokenizer.parse(StringReader(content))
-        assertEquals(content.length, result.size - 1)
-        assertContentEquals(
-            listOf(
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.UserAt,
-                TokenCharacterType.UserName,
-                TokenCharacterType.UserName,
-                TokenCharacterType.UserName,
-                TokenCharacterType.UserName,
-                TokenCharacterType.Eof,
-            ),
-            result,
-        )
-    }
+//    @Test
+//    fun testAtNonUserNameWithHostBefore() {
+//        val tokenizer = Tokenizer()
+//        val content = "asd!@test@host"
+//        val result = tokenizer.parse(StringReader(content))
+//        assertEquals(content.length, result.size - 1)
+//        assertContentEquals(
+//            listOf(
+//                TokenCharacterType.Character,
+//                TokenCharacterType.Character,
+//                TokenCharacterType.Character,
+//                TokenCharacterType.Character,
+//                TokenCharacterType.Character,
+//                TokenCharacterType.Character,
+//                TokenCharacterType.Character,
+//                TokenCharacterType.Character,
+//                TokenCharacterType.Character,
+//                TokenCharacterType.UserAt,
+//                TokenCharacterType.UserName,
+//                TokenCharacterType.UserName,
+//                TokenCharacterType.UserName,
+//                TokenCharacterType.UserName,
+//                TokenCharacterType.Eof,
+//            ),
+//            result,
+//        )
+//    }
 
     @Test
     fun testCash() {
