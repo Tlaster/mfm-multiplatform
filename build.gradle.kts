@@ -1,7 +1,7 @@
 import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
-    kotlin("multiplatform") version "1.9.0"
+    kotlin("multiplatform") version "2.1.0"
     id("org.jetbrains.kotlinx.kover") version "0.7.3"
     id("com.vanniktech.maven.publish") version "0.25.3"
     id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
@@ -19,6 +19,7 @@ repositories {
 }
 
 kotlin {
+    applyDefaultHierarchyTemplate()
     jvm {
         compilations.all {
             kotlinOptions.jvmTarget = "1.8"
@@ -39,13 +40,17 @@ kotlin {
     //        nodejs()
     //        d8()
     //    }
-    ios()
+    iosX64()
+    iosArm64()
     iosSimulatorArm64()
     macosX64()
     macosArm64()
-    watchos()
+    watchosArm32()
+    watchosArm64()
+    watchosX64()
     watchosSimulatorArm64()
-    tvos()
+    tvosArm64()
+    tvosX64()
     tvosSimulatorArm64()
     mingwX64()
     linuxX64()

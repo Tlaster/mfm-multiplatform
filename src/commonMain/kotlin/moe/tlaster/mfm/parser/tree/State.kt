@@ -134,7 +134,12 @@ internal data object EmojiNameState : State {
                 text.append(reader.consume())
             } else if (token == EmojiNameStart) {
                 // skip
-                reader.consume()
+                if (text.isEmpty()) {
+                    reader.consume()
+                } else {
+                    reader.consume()
+                    break
+                }
             } else {
                 break
             }
@@ -604,8 +609,14 @@ internal data object FnState : State {
         while (reader.hasNext()) {
             val token = tokenCharacterTypes[reader.position]
             if (token == Fn) {
-                // skip
-                reader.consume()
+                if (body.isEmpty()) {
+                    // skip
+                    reader.consume()
+                } else {
+                    // nested fn
+                    reader.consume()
+                    break
+                }
             } else if (token == FnContent) {
                 body.append(reader.consume())
             } else {

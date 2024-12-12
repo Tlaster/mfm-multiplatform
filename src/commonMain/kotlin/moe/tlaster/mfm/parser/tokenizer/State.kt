@@ -724,6 +724,7 @@ internal data object FnOpenState : State {
 
 internal data object FnNameState : State {
     override fun read(tokenizer: Tokenizer, reader: Reader) {
+        val vaildFnContent = asciiAlphanumericUnderscoreDash + '.'
         when (val current = reader.consume()) {
             in emptyChar -> {
                 tokenizer.emit(TokenCharacterType.Fn, reader.position)
@@ -731,12 +732,12 @@ internal data object FnNameState : State {
                 tokenizer.switch(DataState)
             }
 
-            in asciiAlphanumericUnderscore -> {
+            in vaildFnContent -> {
                 tokenizer.emit(TokenCharacterType.FnContent, reader.position)
             }
 
             in listOf('.', ',', '=') -> {
-                if (reader.next() in asciiAlphanumericUnderscore) {
+                if (reader.next() in vaildFnContent) {
                     tokenizer.emit(TokenCharacterType.FnContent, reader.position)
                 } else {
                     tokenizer.reject(reader.position)
