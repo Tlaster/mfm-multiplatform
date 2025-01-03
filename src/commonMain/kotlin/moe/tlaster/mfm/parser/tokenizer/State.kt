@@ -157,7 +157,7 @@ internal data object LinkNameState : State {
                         tokenizer.emit(TokenCharacterType.LinkContent, reader.position)
                     }
                 }
-                in emptyChar + eof -> {
+                in listOf(LF, eof) -> {
                     if (stackCount == 0 || current == eof) {
                         tokenizer.reject(reader.position)
                         tokenizer.switch(DataState)

@@ -862,4 +862,25 @@ class TreeBuilderTest {
         val builder = TreeBuilder()
         val builderResult = builder.build(StringReader(content), result)
     }
+
+    @Test
+    fun testSpaceInLink() {
+        val tokenizer = Tokenizer()
+        val content = "[test link](https://test.com)"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content = arrayListOf(
+                    LinkNode(
+                        content = arrayListOf(TextNode("test link")),
+                        url = "https://test.com",
+                        silent = false,
+                    ),
+                ),
+            ),
+            builderResult,
+        )
+    }
 }
