@@ -56,11 +56,16 @@ internal data class TreeBuilderContext(
     val reader: Reader,
 ) {
     val stack: ArrayList<ContainerNode> = arrayListOf()
-    fun isInNewLine(start: Int, end: Int): Boolean {
+
+    fun isInNewLine(
+        start: Int,
+        end: Int,
+    ): Boolean {
         val previous = tokenCharacterTypes.getOrNull(start - 1)
         val next = tokenCharacterTypes.getOrNull(end + 1)
         return (previous == LineBreak || previous == null) && (next == LineBreak || next == null || next == Eof)
     }
+
     inline fun <reified T : Node> endNode(start: Int) {
         val node = stack.findLast { it is T } as? Node
         if (node != null) {
@@ -222,6 +227,7 @@ internal data object InlineCodeState : State {
         currentContainer.content.add(InlineCodeNode(text.toString()))
     }
 }
+
 internal data object CodeBlockState : State {
     override fun TreeBuilderContext.build() {
         val text = StringBuilder()
@@ -578,7 +584,7 @@ internal data object LinkState : State {
                 break
             }
         }
-        val tokenizer = Tokenizer()
+        val tokenizer = Tokenizer(emojiOnly = false)
         val reader = StringReader(content.toString())
         val tokens = tokenizer.parse(reader)
         reader.reset()

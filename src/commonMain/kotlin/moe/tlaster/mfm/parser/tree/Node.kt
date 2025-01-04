@@ -3,7 +3,9 @@ package moe.tlaster.mfm.parser.tree
 sealed interface Node
 
 sealed interface BlockNode : Node
+
 sealed interface InlineNode : Node
+
 internal sealed interface ContainerNode : Node {
     val content: ArrayList<Node>
     val start: Int
@@ -12,12 +14,14 @@ internal sealed interface ContainerNode : Node {
 data class RootNode(
     override val start: Int = 0,
     override val content: ArrayList<Node> = arrayListOf(),
-) : Node, ContainerNode
+) : Node,
+    ContainerNode
 
 data class QuoteNode(
     override val start: Int,
     override val content: ArrayList<Node> = arrayListOf(),
-) : BlockNode, ContainerNode
+) : BlockNode,
+    ContainerNode
 
 data class SearchNode(
     val query: String,
@@ -36,7 +40,8 @@ data class MathBlockNode(
 data class CenterNode(
     override val start: Int,
     override val content: ArrayList<Node> = arrayListOf(),
-) : BlockNode, ContainerNode
+) : BlockNode,
+    ContainerNode
 
 data class EmojiCodeNode(
     val emoji: String,
@@ -45,22 +50,26 @@ data class EmojiCodeNode(
 data class BoldNode(
     override val start: Int,
     override val content: ArrayList<Node> = arrayListOf(),
-) : InlineNode, ContainerNode
+) : InlineNode,
+    ContainerNode
 
 data class SmallNode(
     override val start: Int,
     override val content: ArrayList<Node> = arrayListOf(),
-) : InlineNode, ContainerNode
+) : InlineNode,
+    ContainerNode
 
 data class ItalicNode(
     override val start: Int,
     override val content: ArrayList<Node> = arrayListOf(),
-) : InlineNode, ContainerNode
+) : InlineNode,
+    ContainerNode
 
 data class StrikeNode(
     override val start: Int,
     override val content: ArrayList<Node> = arrayListOf(),
-) : InlineNode, ContainerNode
+) : InlineNode,
+    ContainerNode
 
 data class InlineCodeNode(
     val code: String,
@@ -95,7 +104,8 @@ data class FnNode(
     override val content: ArrayList<Node> = arrayListOf(),
     // Record<string, string | true>
     val args: HashMap<String, String> = hashMapOf(),
-) : InlineNode, ContainerNode
+) : InlineNode,
+    ContainerNode
 
 data class TextNode(
     val content: String,

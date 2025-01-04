@@ -413,11 +413,12 @@ class TokenizerTest {
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
         assertContentEquals(
-            content.map {
-                TokenCharacterType.Character
-            }.plus(
-                TokenCharacterType.Eof,
-            ),
+            content
+                .map {
+                    TokenCharacterType.Character
+                }.plus(
+                    TokenCharacterType.Eof,
+                ),
             result,
         )
     }
@@ -919,7 +920,9 @@ class TokenizerTest {
     @Test
     fun testMixed() {
         val tokenizer = Tokenizer()
-        val content = "test **test** *test* ~~test~~ `test` [test](https://test.com) \$[test] \$[test](https://test.com) #test @test@host \$test"
+        val content =
+            "test **test** *test* ~~test~~ `test` [test](https://test.com) " +
+                "\$[test] \$[test](https://test.com) #test @test@host \$test"
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
         assertContentEquals(
@@ -985,7 +988,12 @@ class TokenizerTest {
     @Test
     fun testMixed4() {
         val tokenizer = Tokenizer()
-        val content = ":ablobcatwhackyfast:【にゃんぷっぷー10連ガチャ】:blobcatrainbow:\n[N] :blobcatdroolreach:\n[SR] :nekobounce:\n[SR] :ablobcatreachflip:\n[R] :blobcat_frustration:\n[SSR] :blabcatpeek:\n[SSR] :blabcatpeek:\n[SR] :meow_ghostreach:\n[R] :blobcat_frustration:\n[N] :blobcatdroolreach:\n[N] :blobcatdroolreach:\n#にゃんぷっぷー10連ガチャ\n\nhttps://misskey.io/play/9gyoya6mlu"
+        val content =
+            ":ablobcatwhackyfast:【にゃんぷっぷー10連ガチャ】:blobcatrainbow:\n[N] " +
+                ":blobcatdroolreach:\n[SR] :nekobounce:\n[SR] :ablobcatreachflip:\n[R] " +
+                ":blobcat_frustration:\n[SSR] :blabcatpeek:\n[SSR] :blabcatpeek:\n[SR] " +
+                ":meow_ghostreach:\n[R] :blobcat_frustration:\n[N] :blobcatdroolreach:\n[N] " +
+                ":blobcatdroolreach:\n#にゃんぷっぷー10連ガチャ\n\nhttps://misskey.io/play/9gyoya6mlu"
         val result = tokenizer.parse(StringReader(content))
         assertFalse {
             result.contains(TokenCharacterType.UnKnown)

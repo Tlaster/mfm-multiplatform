@@ -1,8 +1,11 @@
 package moe.tlaster.mfm.parser.tokenizer
 
-internal class Tokenizer {
+internal class Tokenizer(
+    val emojiOnly: Boolean = false,
+) {
     private var currentState: State = DataState
     private lateinit var tokens: ArrayList<TokenCharacterType>
+
     fun parse(reader: Reader): List<TokenCharacterType> {
         tokens = (0..<reader.length).map { TokenCharacterType.UnKnown }.toCollection(ArrayList())
         while (reader.hasNext()) {
@@ -11,12 +14,19 @@ internal class Tokenizer {
         return tokens.toList()
     }
 
-    fun emit(tokenCharacterType: TokenCharacterType, index: Int) {
+    fun emit(
+        tokenCharacterType: TokenCharacterType,
+        index: Int,
+    ) {
         tokens[index - 1] = tokenCharacterType
     }
 
     // start is not included, end is included
-    fun emitRange(tokenCharacterType: TokenCharacterType, start: Int, end: Int) {
+    fun emitRange(
+        tokenCharacterType: TokenCharacterType,
+        start: Int,
+        end: Int,
+    ) {
         repeat(end - start) {
             tokens[start + it] = tokenCharacterType
         }

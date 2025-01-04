@@ -2,9 +2,9 @@ import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
     kotlin("multiplatform") version "2.1.0"
-    id("org.jetbrains.kotlinx.kover") version "0.7.3"
+    id("org.jetbrains.kotlinx.kover") version "0.9.0"
     id("com.vanniktech.maven.publish") version "0.25.3"
-    id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
 }
 
 val libName = "mfm-multiplatform"
@@ -20,6 +20,9 @@ repositories {
 
 kotlin {
     applyDefaultHierarchyTemplate()
+    compilerOptions {
+        freeCompilerArgs.add("-Xwhen-guards")
+    }
     jvm {
         compilations.all {
             kotlinOptions.jvmTarget = "1.8"
@@ -101,5 +104,5 @@ mavenPublishing {
 }
 
 ktlint {
-    version.set("0.50.0")
+    version.set("1.5.0")
 }

@@ -4,13 +4,17 @@ import moe.tlaster.mfm.parser.tokenizer.Reader
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType
 
 internal class TreeBuilder {
-    fun build(reader: Reader, tokenCharacterTypes: List<TokenCharacterType>): RootNode {
+    fun build(
+        reader: Reader,
+        tokenCharacterTypes: List<TokenCharacterType>,
+    ): RootNode {
         val root = RootNode()
-        val context = TreeBuilderContext(
-            currentContainer = root,
-            tokenCharacterTypes = tokenCharacterTypes,
-            reader = reader,
-        )
+        val context =
+            TreeBuilderContext(
+                currentContainer = root,
+                tokenCharacterTypes = tokenCharacterTypes,
+                reader = reader,
+            )
         context.stack.add(root)
         while (context.reader.hasNext()) {
             with(context) {

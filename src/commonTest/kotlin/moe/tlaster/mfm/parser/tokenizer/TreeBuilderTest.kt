@@ -34,11 +34,12 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    EmojiCodeNode(
-                        emoji = "test",
+                content =
+                    arrayListOf(
+                        EmojiCodeNode(
+                            emoji = "test",
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -53,12 +54,13 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    MentionNode(
-                        userName = "test",
-                        host = null,
+                content =
+                    arrayListOf(
+                        MentionNode(
+                            userName = "test",
+                            host = null,
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -73,12 +75,13 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    MentionNode(
-                        userName = "test",
-                        host = "host",
+                content =
+                    arrayListOf(
+                        MentionNode(
+                            userName = "test",
+                            host = "host",
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -93,11 +96,12 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    HashtagNode(
-                        tag = "test",
+                content =
+                    arrayListOf(
+                        HashtagNode(
+                            tag = "test",
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -112,11 +116,12 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    CashNode(
-                        content = "test",
+                content =
+                    arrayListOf(
+                        CashNode(
+                            content = "test",
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -131,11 +136,12 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    InlineCodeNode(
-                        code = "test",
+                content =
+                    arrayListOf(
+                        InlineCodeNode(
+                            code = "test",
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -150,12 +156,13 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    CodeBlockNode(
-                        code = "test",
-                        language = null,
+                content =
+                    arrayListOf(
+                        CodeBlockNode(
+                            code = "test",
+                            language = null,
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -170,12 +177,13 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    CodeBlockNode(
-                        code = "test",
-                        language = "kotlin",
+                content =
+                    arrayListOf(
+                        CodeBlockNode(
+                            code = "test",
+                            language = "kotlin",
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -190,16 +198,18 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    BoldNode(
-                        start = 0,
-                        content = arrayListOf(
-                            TextNode(
-                                content = "test",
-                            ),
+                content =
+                    arrayListOf(
+                        BoldNode(
+                            start = 0,
+                            content =
+                                arrayListOf(
+                                    TextNode(
+                                        content = "test",
+                                    ),
+                                ),
                         ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -214,16 +224,18 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    ItalicNode(
-                        start = 0,
-                        content = arrayListOf(
-                            TextNode(
-                                content = "test",
-                            ),
+                content =
+                    arrayListOf(
+                        ItalicNode(
+                            start = 0,
+                            content =
+                                arrayListOf(
+                                    TextNode(
+                                        content = "test",
+                                    ),
+                                ),
                         ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -238,16 +250,18 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    BoldNode(
-                        start = 0,
-                        content = arrayListOf(
-                            TextNode(
-                                content = "test",
-                            ),
+                content =
+                    arrayListOf(
+                        BoldNode(
+                            start = 0,
+                            content =
+                                arrayListOf(
+                                    TextNode(
+                                        content = "test",
+                                    ),
+                                ),
                         ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -262,16 +276,18 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    ItalicNode(
-                        start = 0,
-                        content = arrayListOf(
-                            TextNode(
-                                content = "test",
-                            ),
+                content =
+                    arrayListOf(
+                        ItalicNode(
+                            start = 0,
+                            content =
+                                arrayListOf(
+                                    TextNode(
+                                        content = "test",
+                                    ),
+                                ),
                         ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -286,11 +302,12 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    MathInlineNode(
-                        formula = "test",
+                content =
+                    arrayListOf(
+                        MathInlineNode(
+                            formula = "test",
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -316,16 +333,18 @@ class TreeBuilderTest {
 
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    QuoteNode(
-                        start = 0,
-                        content = arrayListOf(
-                            TextNode(
-                                content = "test",
-                            ),
+                content =
+                    arrayListOf(
+                        QuoteNode(
+                            start = 0,
+                            content =
+                                arrayListOf(
+                                    TextNode(
+                                        content = "test",
+                                    ),
+                                ),
                         ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -341,13 +360,14 @@ class TreeBuilderTest {
 
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    LinkNode(
-                        content = arrayListOf(TextNode("test")),
-                        url = "https://test.com",
-                        silent = false,
+                content =
+                    arrayListOf(
+                        LinkNode(
+                            content = arrayListOf(TextNode("test")),
+                            url = "https://test.com",
+                            silent = false,
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -363,13 +383,14 @@ class TreeBuilderTest {
 
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    LinkNode(
-                        content = arrayListOf(TextNode("test")),
-                        url = "https://test.com",
-                        silent = true,
+                content =
+                    arrayListOf(
+                        LinkNode(
+                            content = arrayListOf(TextNode("test")),
+                            url = "https://test.com",
+                            silent = true,
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -385,11 +406,12 @@ class TreeBuilderTest {
 
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    UrlNode(
-                        url = "https://test.com",
+                content =
+                    arrayListOf(
+                        UrlNode(
+                            url = "https://test.com",
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -404,13 +426,14 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    FnNode(
-                        start = 0,
-                        name = "flip.h,v",
-                        content = arrayListOf(TextNode(content = "MisskeyでFediverseの世界が広がります")),
+                content =
+                    arrayListOf(
+                        FnNode(
+                            start = 0,
+                            name = "flip.h,v",
+                            content = arrayListOf(TextNode(content = "MisskeyでFediverseの世界が広がります")),
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -425,11 +448,12 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    TextNode(
-                        content = "\$[flip.h,v Miss~~keyでFedivers*eの世**界が広_が__ります",
+                content =
+                    arrayListOf(
+                        TextNode(
+                            content = "\$[flip.h,v Miss~~keyでFedivers*eの世**界が広_が__ります",
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -445,16 +469,18 @@ class TreeBuilderTest {
 
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    StrikeNode(
-                        start = 0,
-                        content = arrayListOf(
-                            TextNode(
-                                content = "test",
-                            ),
+                content =
+                    arrayListOf(
+                        StrikeNode(
+                            start = 0,
+                            content =
+                                arrayListOf(
+                                    TextNode(
+                                        content = "test",
+                                    ),
+                                ),
                         ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -470,12 +496,13 @@ class TreeBuilderTest {
 
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    SearchNode(
-                        query = "misskey",
-                        search = "[Search]",
+                content =
+                    arrayListOf(
+                        SearchNode(
+                            query = "misskey",
+                            search = "[Search]",
+                        ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -491,16 +518,18 @@ class TreeBuilderTest {
 
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    BoldNode(
-                        start = 0,
-                        content = arrayListOf(
-                            TextNode(
-                                content = "test",
-                            ),
+                content =
+                    arrayListOf(
+                        BoldNode(
+                            start = 0,
+                            content =
+                                arrayListOf(
+                                    TextNode(
+                                        content = "test",
+                                    ),
+                                ),
                         ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -516,16 +545,18 @@ class TreeBuilderTest {
 
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    ItalicNode(
-                        start = 0,
-                        content = arrayListOf(
-                            TextNode(
-                                content = "test",
-                            ),
+                content =
+                    arrayListOf(
+                        ItalicNode(
+                            start = 0,
+                            content =
+                                arrayListOf(
+                                    TextNode(
+                                        content = "test",
+                                    ),
+                                ),
                         ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -541,16 +572,18 @@ class TreeBuilderTest {
 
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    StrikeNode(
-                        start = 0,
-                        content = arrayListOf(
-                            TextNode(
-                                content = "test",
-                            ),
+                content =
+                    arrayListOf(
+                        StrikeNode(
+                            start = 0,
+                            content =
+                                arrayListOf(
+                                    TextNode(
+                                        content = "test",
+                                    ),
+                                ),
                         ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -566,16 +599,18 @@ class TreeBuilderTest {
 
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    SmallNode(
-                        start = 0,
-                        content = arrayListOf(
-                            TextNode(
-                                content = "test",
-                            ),
+                content =
+                    arrayListOf(
+                        SmallNode(
+                            start = 0,
+                            content =
+                                arrayListOf(
+                                    TextNode(
+                                        content = "test",
+                                    ),
+                                ),
                         ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -591,16 +626,18 @@ class TreeBuilderTest {
 
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    CenterNode(
-                        start = 0,
-                        content = arrayListOf(
-                            TextNode(
-                                content = "test",
-                            ),
+                content =
+                    arrayListOf(
+                        CenterNode(
+                            start = 0,
+                            content =
+                                arrayListOf(
+                                    TextNode(
+                                        content = "test",
+                                    ),
+                                ),
                         ),
                     ),
-                ),
             ),
             builderResult,
         )
@@ -616,11 +653,12 @@ class TreeBuilderTest {
 
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    TextNode(content = "<test>"),
-                    TextNode(content = "test"),
-                    TextNode(content = "</test>"),
-                ),
+                content =
+                    arrayListOf(
+                        TextNode(content = "<test>"),
+                        TextNode(content = "test"),
+                        TextNode(content = "</test>"),
+                    ),
             ),
             builderResult,
         )
@@ -636,9 +674,10 @@ class TreeBuilderTest {
 
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    TextNode(content = "<b>test<small</center>"),
-                ),
+                content =
+                    arrayListOf(
+                        TextNode(content = "<b>test<small</center>"),
+                    ),
             ),
             builderResult,
         )
@@ -653,54 +692,59 @@ class TreeBuilderTest {
         val builder = TreeBuilder()
         val builderResult = builder.build(StringReader(content), result)
 
-        val expected = RootNode(
-            content = arrayListOf(
-                TextNode(content = "test "),
-                BoldNode(
-                    start = 5,
-                    content = arrayListOf(
-                        TextNode(content = "test"),
+        val expected =
+            RootNode(
+                content =
+                    arrayListOf(
+                        TextNode(content = "test "),
+                        BoldNode(
+                            start = 5,
+                            content =
+                                arrayListOf(
+                                    TextNode(content = "test"),
+                                ),
+                        ),
+                        TextNode(content = " "),
+                        ItalicNode(
+                            start = 14,
+                            content =
+                                arrayListOf(
+                                    TextNode(content = "test"),
+                                ),
+                        ),
+                        TextNode(content = " "),
+                        StrikeNode(
+                            start = 21,
+                            content =
+                                arrayListOf(
+                                    TextNode(content = "test"),
+                                ),
+                        ),
+                        TextNode(content = " "),
+                        InlineCodeNode(code = "test"),
+                        TextNode(content = " "),
+                        LinkNode(
+                            content = arrayListOf(TextNode("test")),
+                            url = "https://test.com",
+                            silent = false,
+                        ),
+                        TextNode(content = " \$[test"),
+                        TextNode(content = "]"),
+                        TextNode(content = " \$[test"),
+                        TextNode(content = "]"),
+                        TextNode(content = "("),
+                        UrlNode(url = "https://test.com)"),
+                        TextNode(content = " "),
+                        HashtagNode(tag = "test"),
+                        TextNode(content = " "),
+                        MentionNode(
+                            userName = "test",
+                            host = "host",
+                        ),
+                        TextNode(content = " "),
+                        CashNode(content = "test"),
                     ),
-                ),
-                TextNode(content = " "),
-                ItalicNode(
-                    start = 14,
-                    content = arrayListOf(
-                        TextNode(content = "test"),
-                    ),
-                ),
-                TextNode(content = " "),
-                StrikeNode(
-                    start = 21,
-                    content = arrayListOf(
-                        TextNode(content = "test"),
-                    ),
-                ),
-                TextNode(content = " "),
-                InlineCodeNode(code = "test"),
-                TextNode(content = " "),
-                LinkNode(
-                    content = arrayListOf(TextNode("test")),
-                    url = "https://test.com",
-                    silent = false,
-                ),
-                TextNode(content = " \$[test"),
-                TextNode(content = "]"),
-                TextNode(content = " \$[test"),
-                TextNode(content = "]"),
-                TextNode(content = "("),
-                UrlNode(url = "https://test.com)"),
-                TextNode(content = " "),
-                HashtagNode(tag = "test"),
-                TextNode(content = " "),
-                MentionNode(
-                    userName = "test",
-                    host = "host",
-                ),
-                TextNode(content = " "),
-                CashNode(content = "test"),
-            ),
-        )
+            )
 
         assertEquals(expected, builderResult)
     }
@@ -719,10 +763,11 @@ class TreeBuilderTest {
                     FnNode(
                         start = 0,
                         name = "flip",
-                        content = arrayListOf(
-                            TextNode(content = "eefewfe"),
-                            TextNode(content = "~~fds<b>afd</b>f"),
-                        ),
+                        content =
+                            arrayListOf(
+                                TextNode(content = "eefewfe"),
+                                TextNode(content = "~~fds<b>afd</b>f"),
+                            ),
                     ),
                     TextNode(content = "~~"),
                 ),
@@ -738,30 +783,34 @@ class TreeBuilderTest {
         val result = tokenizer.parse(StringReader(content))
         val builder = TreeBuilder()
         val builderResult = builder.build(StringReader(content), result)
-        val expected = RootNode(
-            0,
-            arrayListOf(
-                StrikeNode(
-                    start = 0,
-                    content = arrayListOf(
-                        FnNode(
-                            start = 2,
-                            name = "flip.h,v",
-                            content = arrayListOf(
-                                TextNode(content = "Misskeyで"),
+        val expected =
+            RootNode(
+                0,
+                arrayListOf(
+                    StrikeNode(
+                        start = 0,
+                        content =
+                            arrayListOf(
                                 FnNode(
-                                    start = 21,
+                                    start = 2,
                                     name = "flip.h,v",
-                                    content = arrayListOf(
-                                        TextNode(content = "MisskeyでFediverseの世界が広がります"),
-                                    ),
+                                    content =
+                                        arrayListOf(
+                                            TextNode(content = "Misskeyで"),
+                                            FnNode(
+                                                start = 21,
+                                                name = "flip.h,v",
+                                                content =
+                                                    arrayListOf(
+                                                        TextNode(content = "MisskeyでFediverseの世界が広がります"),
+                                                    ),
+                                            ),
+                                        ),
                                 ),
                             ),
-                        ),
                     ),
                 ),
-            ),
-        )
+            )
         assertEquals(expected, builderResult)
     }
 
@@ -772,17 +821,18 @@ class TreeBuilderTest {
         val result = tokenizer.parse(StringReader(content))
         val builder = TreeBuilder()
         val builderResult = builder.build(StringReader(content), result)
-        val expected = RootNode(
-            0,
-            arrayListOf(
-                TextNode(content = "111111111111"),
-                TextNode("\n"),
-                SearchNode(
-                    query = "fewfew few few",
-                    search = "[Search]",
+        val expected =
+            RootNode(
+                0,
+                arrayListOf(
+                    TextNode(content = "111111111111"),
+                    TextNode("\n"),
+                    SearchNode(
+                        query = "fewfew few few",
+                        search = "[Search]",
+                    ),
                 ),
-            ),
-        )
+            )
         assertEquals(expected, builderResult)
     }
 
@@ -793,19 +843,21 @@ class TreeBuilderTest {
         val result = tokenizer.parse(StringReader(content))
         val builder = TreeBuilder()
         val builderResult = builder.build(StringReader(content), result)
-        val expected = RootNode(
-            0,
-            arrayListOf(
-                QuoteNode(
-                    start = 0,
-                    content = arrayListOf(
-                        TextNode(content = "haha!"),
+        val expected =
+            RootNode(
+                0,
+                arrayListOf(
+                    QuoteNode(
+                        start = 0,
+                        content =
+                            arrayListOf(
+                                TextNode(content = "haha!"),
+                            ),
                     ),
+                    TextNode("\n"),
+                    TextNode(content = "wo!"),
                 ),
-                TextNode("\n"),
-                TextNode(content = "wo!"),
-            ),
-        )
+            )
         assertEquals(expected, builderResult)
     }
 
@@ -816,20 +868,22 @@ class TreeBuilderTest {
         val result = tokenizer.parse(StringReader(content))
         val builder = TreeBuilder()
         val builderResult = builder.build(StringReader(content), result)
-        val expected = RootNode(
-            0,
-            arrayListOf(
-                LinkNode(
-                    content = arrayListOf(
-                        EmojiCodeNode("mikan_muite_agemasyoune"),
-                        TextNode("りしちか"),
+        val expected =
+            RootNode(
+                0,
+                arrayListOf(
+                    LinkNode(
+                        content =
+                            arrayListOf(
+                                EmojiCodeNode("mikan_muite_agemasyoune"),
+                                TextNode("りしちか"),
+                            ),
+                        url = "https://misskey.io/@Lysitka",
+                        silent = true,
                     ),
-                    url = "https://misskey.io/@Lysitka",
-                    silent = true,
+                    TextNode(content = "さんに勝ちました♪"),
                 ),
-                TextNode(content = "さんに勝ちました♪"),
-            ),
-        )
+            )
         assertEquals(expected, builderResult)
     }
 
@@ -846,18 +900,19 @@ class TreeBuilderTest {
     @Test
     fun testMixed7() {
         val tokenizer = Tokenizer()
-        val content = """
-        バリくそ極小絵描き
+        val content =
+            """
+            バリくそ極小絵描き
 
-        もうひとつの俺@setsna
+            もうひとつの俺@setsna
 
 
 
 
-        きりたん→@setsna@kiritan.work
-        https://knoow.jp/@/setsna
-        $[border.width=2,radius=40,color=83a5b9 $[fg.color=f5b2b2 $[bg.color=dcdcdc $[scale.x=0.8,y=0.8 ?[$[fg.color=f5b2b2 ガキ貿易大臣]](https://msk.kitazawa.me/@setuna)]]]] $[border.width=2,radius=40,color=10b5x9 $[fg.color=f5b2b2 $[bg.color=dcdcdc $[scale.x=0.8,y=0.8 ?[$[fg.color=f5 千葉のガキ使い見習い]](https://msk.kitazawa.me/@setuna)]]]] $[border.width=2,radius=40,color=93a0b0 $[fg.color=f5b2b2 $[bg.color=ddcdc $[scale.x=0.8,y=0.8 ?[$[fg.color=c2b2f2 マスカットキャラクター:character_muscat:]](https://msk.kitazawa.me/@setuna)]]]]
-        """.trimIndent()
+            きりたん→@setsna@kiritan.work
+            https://knoow.jp/@/setsna
+            $[border.width=2,radius=40,color=83a5b9 $[fg.color=f5b2b2 $[bg.color=dcdcdc $[scale.x=0.8,y=0.8 ?[$[fg.color=f5b2b2 ガキ貿易大臣]](https://msk.kitazawa.me/@setuna)]]]] $[border.width=2,radius=40,color=10b5x9 $[fg.color=f5b2b2 $[bg.color=dcdcdc $[scale.x=0.8,y=0.8 ?[$[fg.color=f5 千葉のガキ使い見習い]](https://msk.kitazawa.me/@setuna)]]]] $[border.width=2,radius=40,color=93a0b0 $[fg.color=f5b2b2 $[bg.color=ddcdc $[scale.x=0.8,y=0.8 ?[$[fg.color=c2b2f2 マスカットキャラクター:character_muscat:]](https://msk.kitazawa.me/@setuna)]]]]
+            """.trimIndent()
         val result = tokenizer.parse(StringReader(content))
         val builder = TreeBuilder()
         val builderResult = builder.build(StringReader(content), result)
@@ -872,13 +927,36 @@ class TreeBuilderTest {
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content = arrayListOf(
-                    LinkNode(
-                        content = arrayListOf(TextNode("test link")),
-                        url = "https://test.com",
-                        silent = false,
+                content =
+                    arrayListOf(
+                        LinkNode(
+                            content = arrayListOf(TextNode("test link")),
+                            url = "https://test.com",
+                            silent = false,
+                        ),
                     ),
-                ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testEmojiOnlyMode() {
+        val tokenizer = Tokenizer(emojiOnly = true)
+        val content = "test :emoji: with [link in :emoji:](https://test.com)"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        TextNode("test "),
+                        EmojiCodeNode("emoji"),
+                        TextNode(" with [link in "),
+                        EmojiCodeNode("emoji"),
+                        TextNode("](https://test.com)"),
+                    ),
             ),
             builderResult,
         )
