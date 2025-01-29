@@ -41,8 +41,9 @@ private const val NULL = '\u0000'
 private const val TAB = '\u0009'
 private const val LF = '\u000A'
 private val emptyChar = listOf(TAB, LF, '\u000C', '\u0020')
-private val hashTagExclude = "[ \u3000\t.,!?'\"#:/[]【】()「」（）<>]".toList() + EOF
-private val asciiAlphanumericAndEmpty = asciiAlphanumeric + ' ' + TAB + LF
+private const val FULLWIDTHSPACE = '\u3000'
+private val hashTagExclude = "[ \t.,!?'\"#:/[]【】()「」（）<>]".toList() + EOF + emptyChar + FULLWIDTHSPACE
+private val asciiAlphanumericAndEmpty = asciiAlphanumeric + ' ' + TAB + LF + FULLWIDTHSPACE
 
 internal data object DataState : State {
     override fun read(

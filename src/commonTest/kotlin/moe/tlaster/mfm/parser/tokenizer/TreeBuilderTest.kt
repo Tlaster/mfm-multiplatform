@@ -961,4 +961,28 @@ class TreeBuilderTest {
             builderResult,
         )
     }
+
+    @Test
+    fun testHashtagMultiline() {
+        val tokenizer = Tokenizer()
+        val content = "#test　#test\n#test #test"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        HashtagNode(tag = "test"),
+                        TextNode("　"),
+                        HashtagNode(tag = "test"),
+                        TextNode("\n"),
+                        HashtagNode(tag = "test"),
+                        TextNode(" "),
+                        HashtagNode(tag = "test"),
+                    ),
+            ),
+            builderResult,
+        )
+    }
 }

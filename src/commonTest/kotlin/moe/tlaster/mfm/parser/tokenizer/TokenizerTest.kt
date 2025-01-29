@@ -1009,4 +1009,40 @@ class TokenizerTest {
             result.contains(TokenCharacterType.UnKnown)
         }
     }
+
+    @Test
+    fun testHashtagMultiline() {
+        val tokenizer = Tokenizer()
+        val content = "#test　#test\n#test #test"
+        val result = tokenizer.parse(StringReader(content))
+        assertContentEquals(
+            listOf(
+                TokenCharacterType.HashTagStart,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.Character,
+                TokenCharacterType.HashTagStart,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.LineBreak,
+                TokenCharacterType.HashTagStart,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.Character,
+                TokenCharacterType.HashTagStart,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.Eof,
+            ),
+            result,
+        )
+    }
 }
