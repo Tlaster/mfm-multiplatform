@@ -1,9 +1,7 @@
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     kotlin("multiplatform") version "2.1.0"
     id("org.jetbrains.kotlinx.kover") version "0.9.0"
-    id("com.vanniktech.maven.publish") version "0.25.3"
+    id("com.vanniktech.maven.publish") version "0.34.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
 }
 
@@ -70,7 +68,7 @@ kotlin {
 }
 
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.S01)
+    publishToMavenCentral(automaticRelease = true)
     signAllPublications()
     coordinates(
         groupId = libGroup,
