@@ -960,7 +960,7 @@ class TokenizerTest {
                 "]".map { TokenCharacterType.FnEndBracket } +
                 "(".map { TokenCharacterType.Character } +
                 "https://test.com".map { TokenCharacterType.Url } +
-                ")".map { TokenCharacterType.Url } +
+                ")".map { TokenCharacterType.Character } +
                 " ".map { TokenCharacterType.Character } +
                 "#".map { TokenCharacterType.HashTagStart } +
                 "test".map { TokenCharacterType.HashTag } +

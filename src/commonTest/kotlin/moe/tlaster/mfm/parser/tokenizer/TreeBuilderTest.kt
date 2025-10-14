@@ -733,8 +733,8 @@ class TreeBuilderTest {
                         TextNode(content = " \$[test"),
                         TextNode(content = "]"),
                         TextNode(content = "("),
-                        UrlNode(url = "https://test.com)"),
-                        TextNode(content = " "),
+                        UrlNode(url = "https://test.com"),
+                        TextNode(content = ") "),
                         HashtagNode(tag = "test"),
                         TextNode(content = " "),
                         MentionNode(
@@ -980,6 +980,54 @@ class TreeBuilderTest {
                         HashtagNode(tag = "test"),
                         TextNode(" "),
                         HashtagNode(tag = "test"),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testText1() {
+        val tokenizer = Tokenizer()
+        val content =
+            """
+            <center>#きょうのにゃんぷっぷー は
+            $[tada.speed=0s $[tada.speed=0s :blobcat:]]
+            タグ：ブロブキャット, catblob
+            にゃぷあつめ率：0.48% https://misskey.io/play/9pcmdcebfyat037j</center>
+            """.trimIndent()
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        CenterNode(
+                            start = 0,
+                            content =
+                                arrayListOf(
+                                    TextNode("#きょうのにゃんぷっぷー は"),
+                                    TextNode("\n"),
+                                    FnNode(
+                                        start = 23,
+                                        name = "tada.speed=0s",
+                                        content =
+                                            arrayListOf(
+                                                FnNode(
+                                                    start = 39,
+                                                    name = "tada.speed=0s",
+                                                    content = arrayListOf(EmojiCodeNode("blobcat")),
+                                                ),
+                                            ),
+                                    ),
+                                    TextNode("\n"),
+                                    TextNode("タグ：ブロブキャット, catblob"),
+                                    TextNode("\n"),
+                                    TextNode("にゃぷあつめ率：0.48% "),
+                                    UrlNode("https://misskey.io/play/9pcmdcebfyat037j"),
+                                ),
+                        ),
                     ),
             ),
             builderResult,

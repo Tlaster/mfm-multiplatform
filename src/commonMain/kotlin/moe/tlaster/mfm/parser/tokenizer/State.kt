@@ -44,6 +44,9 @@ private val emptyChar = listOf(TAB, LF, '\u000C', '\u0020')
 private const val FULLWIDTHSPACE = '\u3000'
 private val hashTagExclude = "[ \t.,!?'\"#:/[]【】()「」（）<>]".toList() + EOF + emptyChar + FULLWIDTHSPACE
 private val asciiAlphanumericAndEmpty = asciiAlphanumeric + ' ' + TAB + LF + FULLWIDTHSPACE
+private val marks = "-._~:/?#[]@!\$&'()*+,;=".toList()
+private val urlDisallowedEndMarks = ".".toList()
+private val urlChar = asciiAlphanumeric + marks
 
 internal data object DataState : State {
     override fun read(
@@ -94,11 +97,117 @@ internal data object HState : State {
 }
 
 internal data object UrlState : State {
+    private val urlEscapeChars =
+        listOf(
+            '!',
+            '~',
+            '*',
+            '\'',
+            '(',
+            ')',
+            ';',
+            ':',
+            '+',
+            ',',
+            '%',
+            '[',
+            ']',
+        )
+
+    private fun urlCheck(
+        tokenizer: Tokenizer,
+        reader: Reader,
+    ) {
+        var index = reader.position - 1
+        while (index > 0) {
+            val token = tokenizer.readAt(index)
+            if (token != TokenCharacterType.Url && token != TokenCharacterType.UnKnown) {
+                break
+            }
+            index--
+        }
+        val url = reader.readAt(index, reader.position - index)
+        if (!url.contains(".")) {
+            tokenizer.emitRange(TokenCharacterType.Character, index, reader.position)
+            tokenizer.switch(DataState)
+            reader.pushback()
+        } else {
+            tokenizer.accept()
+            tokenizer.switch(DataState)
+            reader.pushback()
+        }
+    }
+
     override fun read(
         tokenizer: Tokenizer,
         reader: Reader,
     ) {
         when (val current = reader.consume()) {
+            in emptyChar + EOF -> {
+                urlCheck(tokenizer, reader)
+            }
+
+            ':' -> {
+                val next = reader.next()
+                if (next in asciiDigit) {
+                    tokenizer.emit(TokenCharacterType.Url, reader.position)
+                    tokenizer.switch(UrlPortState)
+                } else {
+                    urlCheck(tokenizer, reader)
+                }
+            }
+
+            else -> {
+                if (current in urlEscapeChars) {
+                    urlCheck(tokenizer, reader)
+                } else {
+                    if (!current.isLetterOrDigit()) {
+                        val next = reader.next()
+                        if (current in marks) {
+                            if (next in emptyChar + EOF) {
+                                if (current in urlDisallowedEndMarks) {
+                                    urlCheck(tokenizer, reader)
+                                } else {
+                                    tokenizer.emit(TokenCharacterType.Url, reader.position)
+                                }
+                            } else {
+                                tokenizer.emit(TokenCharacterType.Url, reader.position)
+                            }
+                        } else {
+                            if (next in emptyChar + EOF) {
+                                urlCheck(tokenizer, reader)
+                            } else {
+                                urlCheck(tokenizer, reader)
+                            }
+                        }
+                    } else {
+                        if (current in urlChar) {
+                            tokenizer.emit(TokenCharacterType.Url, reader.position)
+                        } else {
+                            urlCheck(tokenizer, reader)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+internal data object UrlPortState : State {
+    override fun read(
+        tokenizer: Tokenizer,
+        reader: Reader,
+    ) {
+        when (val current = reader.consume()) {
+            in asciiDigit -> {
+                tokenizer.emit(TokenCharacterType.Url, reader.position)
+            }
+
+            in listOf('/', '?') -> {
+                tokenizer.emit(TokenCharacterType.Url, reader.position)
+                tokenizer.switch(UrlState)
+            }
+
             in emptyChar + EOF -> {
                 tokenizer.accept()
                 tokenizer.switch(DataState)
@@ -106,7 +215,9 @@ internal data object UrlState : State {
             }
 
             else -> {
-                tokenizer.emit(TokenCharacterType.Url, reader.position)
+                tokenizer.accept()
+                tokenizer.switch(DataState)
+                reader.pushback()
             }
         }
     }
