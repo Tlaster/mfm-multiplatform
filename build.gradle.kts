@@ -41,7 +41,7 @@ kotlin {
     //        nodejs()
     //        d8()
     //    }
-//    iosX64()
+    iosX64()
     iosArm64()
     iosSimulatorArm64()
     macosX64()
