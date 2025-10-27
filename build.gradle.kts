@@ -7,7 +7,7 @@ plugins {
 
 val libName = "mfm-multiplatform"
 val libGroup = "moe.tlaster"
-val libVersion = "0.1.2-SNAPSHOT"
+val libVersion = "0.2.1-SNAPSHOT"
 
 group = libGroup
 version = libVersion
@@ -41,7 +41,7 @@ kotlin {
     //        nodejs()
     //        d8()
     //    }
-//    iosX64()
+    iosX64()
     iosArm64()
     iosSimulatorArm64()
     macosX64()
