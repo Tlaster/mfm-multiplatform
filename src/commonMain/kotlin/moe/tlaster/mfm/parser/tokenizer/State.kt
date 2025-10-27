@@ -272,19 +272,17 @@ internal data object LinkNameState : State {
                     tokenizer.emit(TokenCharacterType.LinkContent, reader.position)
                 }
                 ']' -> {
-                    if (stackCount == 0) {
-                        if (reader.next() == '(') {
-                            tokenizer.emit(TokenCharacterType.LinkClose, reader.position)
-                            tokenizer.emit(TokenCharacterType.LinkHrefOpen, reader.position + 1)
-                            tokenizer.switch(LinkHrefState)
-                            reader.consume()
-                            break
-                        } else {
-                            tokenizer.reject(reader.position)
-                            tokenizer.emit(TokenCharacterType.Character, reader.position)
-                            tokenizer.switch(DataState)
-                            break
-                        }
+                    if (reader.next() == '(') {
+                        tokenizer.emit(TokenCharacterType.LinkClose, reader.position)
+                        tokenizer.emit(TokenCharacterType.LinkHrefOpen, reader.position + 1)
+                        tokenizer.switch(LinkHrefState)
+                        reader.consume()
+                        break
+                    } else if (stackCount == 0) {
+                        tokenizer.reject(reader.position)
+                        tokenizer.emit(TokenCharacterType.Character, reader.position)
+                        tokenizer.switch(DataState)
+                        break
                     } else {
                         stackCount--
                         tokenizer.emit(TokenCharacterType.LinkContent, reader.position)
@@ -350,7 +348,7 @@ internal data object BracketOpenState : State {
             reader.consume("検索]".length)
         } else {
             when (val current = reader.consume()) {
-                in listOf('[', ']', '<', '>') -> {
+                in listOf(']', '<', '>') -> {
                     tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                     tokenizer.switch(DataState)
                     reader.pushback()

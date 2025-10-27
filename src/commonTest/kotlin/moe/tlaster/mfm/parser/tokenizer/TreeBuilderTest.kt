@@ -1033,4 +1033,48 @@ class TreeBuilderTest {
             builderResult,
         )
     }
+
+    @Test
+    fun testLink2() {
+        val tokenizer = Tokenizer()
+        val content = "[[test link]](https://test.com)"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        LinkNode(
+                            content = arrayListOf(TextNode("[test link]")),
+                            url = "https://test.com",
+                            silent = false,
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testLink3() {
+        val tokenizer = Tokenizer()
+        val content = "[[test link](https://test.com)"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        LinkNode(
+                            content = arrayListOf(TextNode("[test link")),
+                            url = "https://test.com",
+                            silent = false,
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
 }

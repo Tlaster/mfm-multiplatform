@@ -1045,4 +1045,38 @@ class TokenizerTest {
             result,
         )
     }
+
+    @Test
+    fun testLink2() {
+        val tokenizer = Tokenizer()
+        val content = "[[test link]](https://test.com)"
+        val result = tokenizer.parse(StringReader(content))
+        assertContentEquals(
+            "[".map { TokenCharacterType.LinkOpen } +
+                "[test link]".map { TokenCharacterType.LinkContent } +
+                "]".map { TokenCharacterType.LinkClose } +
+                "(".map { TokenCharacterType.LinkHrefOpen } +
+                "https://test.com".map { TokenCharacterType.LinkHref } +
+                ")".map { TokenCharacterType.LinkHrefClose } +
+                listOf(TokenCharacterType.Eof),
+            result,
+        )
+    }
+
+    @Test
+    fun testLink3() {
+        val tokenizer = Tokenizer()
+        val content = "[[test link](https://test.com)"
+        val result = tokenizer.parse(StringReader(content))
+        assertContentEquals(
+            "[".map { TokenCharacterType.LinkOpen } +
+                "[test link".map { TokenCharacterType.LinkContent } +
+                "]".map { TokenCharacterType.LinkClose } +
+                "(".map { TokenCharacterType.LinkHrefOpen } +
+                "https://test.com".map { TokenCharacterType.LinkHref } +
+                ")".map { TokenCharacterType.LinkHrefClose } +
+                listOf(TokenCharacterType.Eof),
+            result,
+        )
+    }
 }
