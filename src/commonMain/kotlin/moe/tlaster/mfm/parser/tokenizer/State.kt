@@ -44,7 +44,7 @@ private val emptyChar = listOf(TAB, LF, '\u000C', '\u0020')
 private const val FULLWIDTHSPACE = '\u3000'
 private val hashTagExclude = "[ \t.,!?'\"#:/[]【】()「」（）<>]".toList() + EOF + emptyChar + FULLWIDTHSPACE
 private val asciiAlphanumericAndEmpty = asciiAlphanumeric + ' ' + TAB + LF + FULLWIDTHSPACE
-private val marks = "-._~:/?#[]@!\$&'()*+,;=".toList()
+private val marks = "-._~:/?#[]@!\$&'()*+,;=%".toList()
 private val urlDisallowedEndMarks = ".".toList()
 private val urlChar = asciiAlphanumeric + marks
 
@@ -109,7 +109,6 @@ internal data object UrlState : State {
             ':',
             '+',
             ',',
-            '%',
             '[',
             ']',
         )

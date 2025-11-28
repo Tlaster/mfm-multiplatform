@@ -418,6 +418,28 @@ class TreeBuilderTest {
     }
 
     @Test
+    fun testCJKUrl() {
+        val tokenizer = Tokenizer()
+        val encoded = "https://example.com/%E6%B5%8B%E8%AF%95"
+        val decoded = "https://example.com/测试"
+        val result = tokenizer.parse(StringReader(encoded))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(encoded), result)
+
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        UrlNode(
+                            url = decoded,
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
     fun testFn() {
         val tokenizer = Tokenizer()
         val content = "\$[flip.h,v MisskeyでFediverseの世界が広がります]"

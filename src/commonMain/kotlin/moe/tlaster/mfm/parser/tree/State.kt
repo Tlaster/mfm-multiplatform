@@ -604,7 +604,7 @@ internal data object UrlState : State {
                 break
             }
         }
-        currentContainer.content.add(UrlNode(url.toString()))
+        currentContainer.content.add(UrlNode(decodePercentEncodedUrl(url.toString())))
     }
 }
 
@@ -668,3 +668,50 @@ internal data object EofState : State {
         reader.consume()
     }
 }
+
+private fun decodePercentEncodedUrl(value: String): String {
+    if (!value.contains('%')) {
+        return value
+    }
+    val decoded = StringBuilder()
+    val buffer = mutableListOf<Byte>()
+    var index = 0
+    while (index < value.length) {
+        val current = value[index]
+        if (current == '%' && index + 2 < value.length) {
+            val highDigit = hexDigitOf(value[index + 1])
+            val lowDigit = hexDigitOf(value[index + 2])
+            if (highDigit >= 0 && lowDigit >= 0) {
+                buffer.add(((highDigit shl 4) + lowDigit).toByte())
+                index += 3
+                continue
+            }
+        }
+        appendDecodedBuffer(buffer, decoded)
+        decoded.append(current)
+        index++
+    }
+    appendDecodedBuffer(buffer, decoded)
+    return decoded.toString()
+}
+
+private fun appendDecodedBuffer(
+    buffer: MutableList<Byte>,
+    destination: StringBuilder,
+) {
+    if (buffer.isEmpty()) {
+        return
+    }
+    val bytes = ByteArray(buffer.size)
+    buffer.forEachIndexed { index, byte -> bytes[index] = byte }
+    destination.append(bytes.decodeToString())
+    buffer.clear()
+}
+
+private fun hexDigitOf(value: Char): Int =
+    when (value) {
+        in '0'..'9' -> value - '0'
+        in 'a'..'f' -> value - 'a' + 10
+        in 'A'..'F' -> value - 'A' + 10
+        else -> -1
+    }
