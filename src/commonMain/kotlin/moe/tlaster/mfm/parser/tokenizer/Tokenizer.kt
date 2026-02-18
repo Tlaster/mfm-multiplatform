@@ -37,7 +37,19 @@ internal class Tokenizer(
     }
 
     fun reject(position: Int) {
-        val index = tokens.subList(0, position).indexOfLast { it == TokenCharacterType.Character } + 1
+        val subList = tokens.subList(0, position)
+        var index = subList.indexOfLast { it == TokenCharacterType.Character } + 1
+        if (index == 0) {
+            // No Character token found. Look for a LinkOpen that started this construct
+            // so we don't wipe previously accepted emoji/tag tokens before it.
+            val linkStart =
+                subList.indexOfLast {
+                    it == TokenCharacterType.LinkOpen || it == TokenCharacterType.SilentLink
+                }
+            if (linkStart >= 0) {
+                index = linkStart
+            }
+        }
         repeat(position - index - 1) {
             tokens[index + it] = TokenCharacterType.Character
         }

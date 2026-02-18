@@ -1179,8 +1179,8 @@ internal data object ColonState : State {
 
             else -> {
                 tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
-                tokenizer.emit(TokenCharacterType.Character, reader.position)
                 tokenizer.switch(DataState)
+                reader.pushback()
             }
         }
     }
