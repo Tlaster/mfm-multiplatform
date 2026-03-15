@@ -896,6 +896,23 @@ class TreeBuilderTest {
                 arrayListOf(
                     TextNode(content = "a->b"),
                 ),
+        )
+        assertEquals(expected, builderResult)
+    }
+
+    @Test
+    fun testPlain() {
+        val tokenizer = Tokenizer()
+        val content = "<plain>**bold** @user $[x2 test]</plain>"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        val expected =
+            RootNode(
+                0,
+                arrayListOf(
+                    TextNode(content = "**bold** @user $[x2 test]"),
+                ),
             )
         assertEquals(expected, builderResult)
     }

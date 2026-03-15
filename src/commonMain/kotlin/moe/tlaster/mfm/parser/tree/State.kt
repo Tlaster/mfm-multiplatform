@@ -66,6 +66,11 @@ internal data class TreeBuilderContext(
         return (previous == LineBreak || previous == null) && (next == LineBreak || next == null || next == Eof)
     }
 
+    fun isCurrentClosingTag(tagName: String): Boolean {
+        val closingTag = "</$tagName>"
+        return reader.position + closingTag.length <= reader.length && reader.readAt(reader.position, closingTag.length) == closingTag
+    }
+
     inline fun <reified T : Node> endNode(start: Int) {
         val node = stack.findLast { it is T } as? Node
         if (node != null) {
@@ -462,6 +467,16 @@ internal data object TagState : State {
                     currentContainer.content.add(node)
                     stack.add(node)
                     currentContainer = node
+                }
+                "plain" -> {
+                    val text = StringBuilder()
+                    while (reader.hasNext() && tokenCharacterTypes[reader.position] != Eof && !isCurrentClosingTag("plain")) {
+                        text.append(reader.consume())
+                    }
+                    currentContainer.content.add(TextNode(text.toString()))
+                    if (isCurrentClosingTag("plain")) {
+                        reader.consume("</plain>".length)
+                    }
                 }
                 "i" -> {
                     val node = ItalicNode(start)
