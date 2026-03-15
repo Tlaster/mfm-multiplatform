@@ -48,6 +48,8 @@ private val marks = "-._~:/?#[]@!\$&'()*+,;=%".toList()
 private val urlDisallowedEndMarks = ".".toList()
 private val urlChar = asciiAlphanumeric + marks
 
+private fun isAtStartOfLine(reader: Reader): Boolean = reader.position == 1 || reader.readAt(reader.position - 2) == LF
+
 internal data object DataState : State {
     override fun read(
         tokenizer: Tokenizer,
@@ -59,7 +61,7 @@ internal data object DataState : State {
             '?' if !tokenizer.emojiOnly -> tokenizer.switch(QuestionState)
             '[' if !tokenizer.emojiOnly -> tokenizer.switch(BracketOpenState)
             '<' if !tokenizer.emojiOnly -> tokenizer.switch(TagOpenState)
-            '>' if !tokenizer.emojiOnly -> tokenizer.switch(BlockquoteState)
+            '>' if !tokenizer.emojiOnly && isAtStartOfLine(reader) -> tokenizer.switch(BlockquoteState)
             '\\' if !tokenizer.emojiOnly -> tokenizer.switch(EscapeState)
             '~' if !tokenizer.emojiOnly -> tokenizer.switch(TildeState)
             '_' if !tokenizer.emojiOnly -> tokenizer.switch(UnderscoreState)

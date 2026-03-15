@@ -879,6 +879,23 @@ class TreeBuilderTest {
                     TextNode("\n"),
                     TextNode(content = "wo!"),
                 ),
+        )
+        assertEquals(expected, builderResult)
+    }
+
+    @Test
+    fun testQuoteOnlyAtLineStart() {
+        val tokenizer = Tokenizer()
+        val content = "a->b"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        val expected =
+            RootNode(
+                0,
+                arrayListOf(
+                    TextNode(content = "a->b"),
+                ),
             )
         assertEquals(expected, builderResult)
     }

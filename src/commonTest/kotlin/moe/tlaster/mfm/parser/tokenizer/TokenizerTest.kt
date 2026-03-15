@@ -589,6 +589,42 @@ class TokenizerTest {
     }
 
     @Test
+    fun testQuoteOnlyAtLineStart() {
+        val tokenizer = Tokenizer()
+        val content = "a->b"
+        val result = tokenizer.parse(StringReader(content))
+        assertEquals(content.length, result.size - 1)
+        assertContentEquals(
+            listOf(
+                TokenCharacterType.Character,
+                TokenCharacterType.Character,
+                TokenCharacterType.Character,
+                TokenCharacterType.Character,
+                TokenCharacterType.Eof,
+            ),
+            result,
+        )
+    }
+
+    @Test
+    fun testQuoteAtStartOfNextLine() {
+        val tokenizer = Tokenizer()
+        val content = "a\n>b"
+        val result = tokenizer.parse(StringReader(content))
+        assertEquals(content.length, result.size - 1)
+        assertContentEquals(
+            listOf(
+                TokenCharacterType.Character,
+                TokenCharacterType.LineBreak,
+                TokenCharacterType.Blockquote,
+                TokenCharacterType.Character,
+                TokenCharacterType.Eof,
+            ),
+            result,
+        )
+    }
+
+    @Test
     fun testTag() {
         val tokenizer = Tokenizer()
         val content = "<test>"
