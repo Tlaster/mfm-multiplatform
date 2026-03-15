@@ -879,7 +879,7 @@ class TreeBuilderTest {
                     TextNode("\n"),
                     TextNode(content = "wo!"),
                 ),
-        )
+            )
         assertEquals(expected, builderResult)
     }
 
@@ -896,7 +896,7 @@ class TreeBuilderTest {
                 arrayListOf(
                     TextNode(content = "a->b"),
                 ),
-        )
+            )
         assertEquals(expected, builderResult)
     }
 
