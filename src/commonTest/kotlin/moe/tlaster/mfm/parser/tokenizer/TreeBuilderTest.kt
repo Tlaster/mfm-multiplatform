@@ -613,8 +613,9 @@ class TreeBuilderTest {
                     arrayListOf(
                         FnNode(
                             start = 0,
-                            name = "flip.h,v",
+                            name = "flip",
                             content = arrayListOf(TextNode(content = "MisskeyでFediverseの世界が広がります")),
+                            args = hashMapOf("h" to "true", "v" to "true"),
                         ),
                     ),
             ),
@@ -1042,19 +1043,21 @@ class TreeBuilderTest {
                             arrayListOf(
                                 FnNode(
                                     start = 2,
-                                    name = "flip.h,v",
+                                    name = "flip",
                                     content =
                                         arrayListOf(
                                             TextNode(content = "Misskeyで"),
                                             FnNode(
                                                 start = 21,
-                                                name = "flip.h,v",
+                                                name = "flip",
                                                 content =
                                                     arrayListOf(
                                                         TextNode(content = "MisskeyでFediverseの世界が広がります"),
                                                     ),
+                                                args = hashMapOf("h" to "true", "v" to "true"),
                                             ),
                                         ),
+                                    args = hashMapOf("h" to "true", "v" to "true"),
                                 ),
                             ),
                     ),
@@ -1290,19 +1293,22 @@ class TreeBuilderTest {
                             start = 0,
                             content =
                                 arrayListOf(
-                                    TextNode("#きょうのにゃんぷっぷー は"),
+                                    HashtagNode(tag = "きょうのにゃんぷっぷー"),
+                                    TextNode(" は"),
                                     TextNode("\n"),
                                     FnNode(
                                         start = 23,
-                                        name = "tada.speed=0s",
+                                        name = "tada",
                                         content =
                                             arrayListOf(
                                                 FnNode(
                                                     start = 39,
-                                                    name = "tada.speed=0s",
+                                                    name = "tada",
                                                     content = arrayListOf(EmojiCodeNode("blobcat")),
+                                                    args = hashMapOf("speed" to "0s"),
                                                 ),
                                             ),
+                                        args = hashMapOf("speed" to "0s"),
                                     ),
                                     TextNode("\n"),
                                     TextNode("タグ：ブロブキャット, catblob"),
@@ -1445,15 +1451,17 @@ class TreeBuilderTest {
                                             arrayListOf(
                                                 FnNode(
                                                     start = 96,
-                                                    name = "scale.x=5",
+                                                    name = "scale",
                                                     content =
                                                         arrayListOf(
                                                             FnNode(
                                                                 start = 108,
-                                                                name = "scale.x=5",
+                                                                name = "scale",
                                                                 content = arrayListOf(TextNode("―")),
+                                                                args = hashMapOf("x" to "5"),
                                                             ),
                                                         ),
+                                                    args = hashMapOf("x" to "5"),
                                                 ),
                                             ),
                                     ),
@@ -1507,15 +1515,17 @@ class TreeBuilderTest {
                                             arrayListOf(
                                                 FnNode(
                                                     start = 369,
-                                                    name = "scale.x=5",
+                                                    name = "scale",
                                                     content =
                                                         arrayListOf(
                                                             FnNode(
                                                                 start = 381,
-                                                                name = "scale.x=5",
+                                                                name = "scale",
                                                                 content = arrayListOf(TextNode("―")),
+                                                                args = hashMapOf("x" to "5"),
                                                             ),
                                                         ),
+                                                    args = hashMapOf("x" to "5"),
                                                 ),
                                             ),
                                     ),
@@ -1589,15 +1599,17 @@ class TreeBuilderTest {
                                             arrayListOf(
                                                 FnNode(
                                                     start = 640,
-                                                    name = "scale.x=5",
+                                                    name = "scale",
                                                     content =
                                                         arrayListOf(
                                                             FnNode(
                                                                 start = 652,
-                                                                name = "scale.x=5",
+                                                                name = "scale",
                                                                 content = arrayListOf(TextNode("―")),
+                                                                args = hashMapOf("x" to "5"),
                                                             ),
                                                         ),
+                                                    args = hashMapOf("x" to "5"),
                                                 ),
                                             ),
                                     ),

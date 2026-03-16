@@ -94,7 +94,7 @@ data class HashtagNode(
 
 data class UrlNode(
     val url: String,
-    val brackets: Boolean = false,
+    internal val brackets: Boolean = false,
 ) : InlineNode
 
 data class LinkNode(
