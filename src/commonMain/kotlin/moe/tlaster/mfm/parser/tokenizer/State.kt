@@ -1323,11 +1323,6 @@ internal data object ColonState : State {
         tokenizer: Tokenizer,
         reader: Reader,
     ) {
-        if (hasAsciiAlphanumericBeforeMarker(reader)) {
-            tokenizer.emit(TokenCharacterType.Character, reader.position)
-            tokenizer.switch(DataState)
-            return
-        }
         when (val current = reader.consume()) {
             in asciiAlphanumericUnderscoreDashPlus -> {
                 tokenizer.switch(EmojiNameState)
@@ -1355,6 +1350,22 @@ internal data object EmojiNameState : State {
             }
 
             ':' -> {
+                val endPosition = reader.position
+                var startPosition = endPosition - 2
+                while (startPosition > 0 && tokenizer.readAt(startPosition - 1) != TokenCharacterType.EmojiNameStart) {
+                    startPosition--
+                }
+
+                if (startPosition > 0) {
+                    val charBeforeStart = if (startPosition > 1) reader.readAt(startPosition - 2) else EOF
+                    val charAfterEnd = if (reader.hasNext()) reader.next() else EOF
+                    if (charBeforeStart in asciiAlphanumeric && charAfterEnd in asciiAlphanumeric) {
+                        tokenizer.reject(endPosition)
+                        tokenizer.emit(TokenCharacterType.Character, endPosition)
+                        tokenizer.switch(DataState)
+                        return
+                    }
+                }
                 tokenizer.emit(TokenCharacterType.EmojiNameStart, reader.position)
                 tokenizer.accept()
                 tokenizer.switch(DataState)
