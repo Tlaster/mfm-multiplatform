@@ -231,7 +231,14 @@ internal data object UrlState : State {
             }
             index--
         }
-        val start = if (tokenizer.readAt(index) == TokenCharacterType.Url || tokenizer.readAt(index) == TokenCharacterType.UnKnown) index else index + 1
+        val start =
+            if (tokenizer.readAt(index) == TokenCharacterType.Url ||
+                tokenizer.readAt(index) == TokenCharacterType.UnKnown
+            ) {
+                index
+            } else {
+                index + 1
+            }
         val rawUrl = reader.readAt(start, reader.position - start)
         val trimmedUrl = rawUrl.trimEnd { it in urlDisallowedEndMarks }
         if (!trimmedUrl.contains(".") || !hasValidUrlAuthority(trimmedUrl)) {

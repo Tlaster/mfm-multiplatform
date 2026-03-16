@@ -42,9 +42,9 @@ import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.Strike
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.Tag
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.TagClose
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.TagOpen
-import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.UnicodeEmoji
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.UnderscoreBoldStart
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.UnderscoreItalicStart
+import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.UnicodeEmoji
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.Url
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.UserAt
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.UserHost
@@ -333,8 +333,8 @@ internal data object CodeBlockState : State {
             currentContainer.content.add(
                 CodeBlockNode(
                     text.toString().removeSuffix("\n"),
-                    language.toString().takeIf { it.isNotEmpty() }
-                )
+                    language.toString().takeIf { it.isNotEmpty() },
+                ),
             )
         }
     }
@@ -728,7 +728,7 @@ internal data object LinkState : State {
             )
         if (!isSupportedLinkHref(normalizedHref)) {
             val prefix = if (silent) "?[" else "["
-            currentContainer.content.add(TextNode("$prefix${content}]($rawHref)"))
+            currentContainer.content.add(TextNode("$prefix$content]($rawHref)"))
         } else {
             currentContainer.content.add(LinkNode(node.content, normalizedHref, silent))
         }

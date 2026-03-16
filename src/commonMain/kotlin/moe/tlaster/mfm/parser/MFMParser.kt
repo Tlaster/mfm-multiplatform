@@ -4,7 +4,6 @@ import moe.tlaster.mfm.parser.tokenizer.StringReader
 import moe.tlaster.mfm.parser.tokenizer.Tokenizer
 import moe.tlaster.mfm.parser.tree.BoldNode
 import moe.tlaster.mfm.parser.tree.CenterNode
-import moe.tlaster.mfm.parser.tree.ContainerNode
 import moe.tlaster.mfm.parser.tree.FnNode
 import moe.tlaster.mfm.parser.tree.HashtagNode
 import moe.tlaster.mfm.parser.tree.ItalicNode

@@ -22,7 +22,6 @@ import moe.tlaster.mfm.parser.tree.StrikeNode
 import moe.tlaster.mfm.parser.tree.TextNode
 import moe.tlaster.mfm.parser.tree.UnicodeEmojiNode
 import moe.tlaster.mfm.parser.tree.UrlNode
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -778,7 +777,10 @@ class UpstreamParserCompatibilityTest {
             ),
             parseFull("[@example**@example**](https://example.com)"),
         )
-        assertEquals(listOf(LINK(false, "https://example.com/foo(bar)", listOf(TEXT("foo")))), parseFull("[foo](https://example.com/foo(bar))"))
+        assertEquals(
+            listOf(LINK(false, "https://example.com/foo(bar)", listOf(TEXT("foo")))),
+            parseFull("[foo](https://example.com/foo(bar))"),
+        )
         assertEquals(
             listOf(
                 TEXT("("),
@@ -836,7 +838,6 @@ class UpstreamParserCompatibilityTest {
             parseFull("a\n<plain>**Hello** world</plain>\nb"),
         )
     }
-
 
     @Test
     fun fullParserComposite() {
