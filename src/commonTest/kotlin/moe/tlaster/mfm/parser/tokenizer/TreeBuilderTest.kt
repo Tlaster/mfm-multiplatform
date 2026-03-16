@@ -498,8 +498,7 @@ class TreeBuilderTest {
                             start = 0,
                             content = arrayListOf(TextNode("foo")),
                         ),
-                        TextNode("\n"),
-                        TextNode("outside"),
+                        TextNode("\noutside"),
                     ),
             ),
             builderResult,
@@ -1093,8 +1092,7 @@ class TreeBuilderTest {
                                 TextNode(content = "haha!"),
                             ),
                     ),
-                    TextNode("\n"),
-                    TextNode(content = "wo!"),
+                    TextNode(content = "\nwo!"),
                 ),
             )
         assertEquals(expected, builderResult)
@@ -1398,276 +1396,362 @@ class TreeBuilderTest {
     fun testComplexMfm() {
         val tokenizer = Tokenizer()
         val content =
-            "オープンワールドRPG『:genshin:』の総合チャンネルです。キャラクター、ストーリー、育成、" +
-                "アプデ等々、原神に関連するものであれば何でも投稿を歓迎しております！<center>\$[x2 \$[scale.x=5 \$[scale.x=5 ―]]]" +
-                "</center><center>**このチャンネルのルール**</center>・公式が許可していない話題は禁止とします<small>リーク、MOD、プラベ鯖を含め" +
-                "[原神利用規約](http://t.ly/Yrb7Q)に抵触する話題等</small>・一部の内容は「内容を隠す」機能の使用を推奨します<small>最新のネタバレやNSFW" +
-                "、センシティブなものを含む</small>・実装済みの範囲内でネタバレを含む可能性があります・**ほんわかレス推奨です！**<center>\$[x2 " +
-                "\$[scale.x=5 \$[scale.x=5 ―]]]</center><small>最終更新 :\$[unixtime 1771316689.8110971]</small><center>\$[x2 :blank:]" +
-                "**ゲームタイマー**\$[x2 :blank:]</center>[\$[unixtime 1771344000]HoYoLabログボ更新](https://is.gd/cB406l)\$[unixtime 1771358400]" +
-                "デイリー更新\$[unixtime 1771790400]ウィークリー更新" +
-                "<center>\$[x2 \$[scale.x=5 \$[scale.x=5 ―]]]</center>公式SNS：[:unicode_1d54f_bg_black:]" +
-                "(http://is.gd/rRlhOa)｜" +
-                "[:youtube:](http://is.gd/g3wqTi)｜" +
-                "[:twitch:<small>[EN]</small>]" +
-                "(http://is.gd/sQII2q)便利リンク┣[公式HP]" +
-                "(http://t.ly/GlOB5)┣[マップ](http://t.ly/E0AR-)┣[パイモン](http://t.ly/MS3NK)┗[Discord](http://t.ly/xld6t)外部ツール┣[祈願カウンター]" +
-                "(http://paimon.moe/wish)┣[ビルドランキング](http://akasha.cv)┗[聖遺物計算](http://is.gd/VAtEEU)管理者：@ms"
+            "オープンワールドRPG『:genshin:』の総合チャンネルです。\n" +
+                "キャラクター、ストーリー、育成、アプデ等々、原神に関連するものであれば何でも投稿を歓迎しております！\n" +
+                "<center>\$[x2 \$[scale.x=5 \$[scale.x=5 ―]]]</center>\n\n" +
+                "<center>**このチャンネルのルール**</center>\n\n" +
+                "・公式が許可していない話題は禁止とします\n" +
+                "<small>リーク、MOD、プラベ鯖を含め[原神利用規約](http://t.ly/Yrb7Q)に抵触する話題等</small>\n" +
+                "・一部の内容は「内容を隠す」機能の使用を推奨します\n" +
+                "<small>最新のネタバレやNSFW、センシティブなものを含む</small>\n" +
+                "・実装済みの範囲内でネタバレを含む可能性があります\n" +
+                "・**ほんわかレス推奨です！**\n" +
+                "<center>\$[x2 \$[scale.x=5 \$[scale.x=5 ―]]]</center>\n" +
+                "<small>最終更新 :\$[unixtime 1773656919.3219297]</small>\n" +
+                "<center>\$[x2 :blank:]**ゲームタイマー**\$[x2 :blank:]</center>\n" +
+                "[\$[unixtime 1773676800]HoYoLabログボ更新](https://is.gd/cB406l)\n" +
+                "\$[unixtime 1773691200]デイリー更新\n" +
+                "\$[unixtime 1774209600]ウィークリー更新\n" +
+                "<center>\$[x2 \$[scale.x=5 \$[scale.x=5 ―]]]</center>\n" +
+                "公式SNS：[:unicode_1d54f_bg_black:](http://is.gd/rRlhOa)｜[:youtube:](http://is.gd/g3wqTi)｜[:twitch:<small>[EN]</small>](http://is.gd/sQII2q)\n" +
+                "便利リンク\n" +
+                "┣[公式HP](http://t.ly/GlOB5)\n" +
+                "┣[マップ](http://t.ly/E0AR-)\n" +
+                "┣[パイモン](http://t.ly/MS3NK)\n" +
+                "┗[Discord](http://t.ly/xld6t)\n\n" +
+                "外部ツール\n" +
+                "┣[祈願カウンター](http://paimon.moe/wish)\n" +
+                "┣[ビルドランキング](http://akasha.cv)\n" +
+                "┗[聖遺物計算](http://is.gd/VAtEEU)\n\n" +
+                "管理者：@ms"
         val result = tokenizer.parse(StringReader(content))
         val builder = TreeBuilder()
         val builderResult = builder.build(StringReader(content), result)
         assertEquals(
             RootNode(
-                content =
-                    arrayListOf(
-                        TextNode("オープンワールドRPG『"),
-                        EmojiCodeNode("genshin"),
-                        TextNode("』の総合チャンネルです。キャラクター、ストーリー、育成、アプデ等々、原神に関連するものであれば何でも投稿を歓迎しております！"),
-                        CenterNode(
-                            start = 83,
-                            content =
-                                arrayListOf(
-                                    FnNode(
-                                        start = 91,
-                                        name = "x2",
-                                        content =
-                                            arrayListOf(
-                                                FnNode(
-                                                    start = 96,
-                                                    name = "scale",
-                                                    content =
-                                                        arrayListOf(
-                                                            FnNode(
-                                                                start = 108,
-                                                                name = "scale",
-                                                                content = arrayListOf(TextNode("―")),
-                                                                args = hashMapOf("x" to "5"),
-                                                            ),
-                                                        ),
-                                                    args = hashMapOf("x" to "5"),
-                                                ),
-                                            ),
-                                    ),
-                                ),
-                        ),
-                        CenterNode(
-                            start = 133,
-                            content =
-                                arrayListOf(
-                                    BoldNode(
-                                        start = 141,
-                                        content = arrayListOf(TextNode("このチャンネルのルール")),
-                                    ),
-                                ),
-                        ),
-                        TextNode("・公式が許可していない話題は禁止とします"),
-                        SmallNode(
-                            start = 185,
-                            content =
-                                arrayListOf(
-                                    TextNode("リーク、MOD、プラベ鯖を含め"),
-                                    LinkNode(
-                                        content = arrayListOf(TextNode("原神利用規約")),
-                                        url = "http://t.ly/Yrb7Q",
-                                        silent = false,
-                                    ),
-                                    TextNode("に抵触する話題等"),
-                                ),
-                        ),
-                        TextNode("・一部の内容は「内容を隠す」機能の使用を推奨します"),
-                        SmallNode(
-                            start = 275,
-                            content =
-                                arrayListOf(
-                                    TextNode("最新のネタバレやNSFW、センシティブなものを含む"),
-                                ),
-                        ),
-                        TextNode("・実装済みの範囲内でネタバレを含む可能性があります・"),
-                        BoldNode(
-                            start = 341,
-                            content = arrayListOf(TextNode("ほんわかレス推奨です！")),
-                        ),
-                        CenterNode(
-                            start = 356,
-                            content =
-                                arrayListOf(
-                                    FnNode(
-                                        start = 364,
-                                        name = "x2",
-                                        content =
-                                            arrayListOf(
-                                                FnNode(
-                                                    start = 369,
-                                                    name = "scale",
-                                                    content =
-                                                        arrayListOf(
-                                                            FnNode(
-                                                                start = 381,
-                                                                name = "scale",
-                                                                content = arrayListOf(TextNode("―")),
-                                                                args = hashMapOf("x" to "5"),
-                                                            ),
-                                                        ),
-                                                    args = hashMapOf("x" to "5"),
-                                                ),
-                                            ),
-                                    ),
-                                ),
-                        ),
-                        SmallNode(
-                            start = 406,
-                            content =
-                                arrayListOf(
-                                    TextNode("最終更新 :"),
-                                    FnNode(
-                                        start = 419,
-                                        name = "unixtime",
-                                        content = arrayListOf(TextNode("1771316689.8110971")),
-                                    ),
-                                ),
-                        ),
-                        CenterNode(
-                            start = 457,
-                            content =
-                                arrayListOf(
-                                    FnNode(
-                                        start = 465,
-                                        name = "x2",
-                                        content = arrayListOf(EmojiCodeNode("blank")),
-                                    ),
-                                    BoldNode(
-                                        start = 478,
-                                        content = arrayListOf(TextNode("ゲームタイマー")),
-                                    ),
-                                    FnNode(
-                                        start = 489,
-                                        name = "x2",
-                                        content = arrayListOf(EmojiCodeNode("blank")),
-                                    ),
-                                ),
-                        ),
-                        LinkNode(
-                            content =
-                                arrayListOf(
-                                    FnNode(
-                                        start = 0,
-                                        name = "unixtime",
-                                        content = arrayListOf(TextNode("1771344000")),
-                                    ),
-                                    TextNode("HoYoLabログボ更新"),
-                                ),
-                            url = "https://is.gd/cB406l",
-                            silent = false,
-                        ),
-                        FnNode(
-                            start = 569,
-                            name = "unixtime",
-                            content = arrayListOf(TextNode("1771358400")),
-                        ),
-                        TextNode("デイリー更新"),
-                        FnNode(
-                            start = 597,
-                            name = "unixtime",
-                            content = arrayListOf(TextNode("1771790400")),
-                        ),
-                        TextNode("ウィークリー更新"),
-                        CenterNode(
-                            start = 627,
-                            content =
-                                arrayListOf(
-                                    FnNode(
-                                        start = 635,
-                                        name = "x2",
-                                        content =
-                                            arrayListOf(
-                                                FnNode(
-                                                    start = 640,
-                                                    name = "scale",
-                                                    content =
-                                                        arrayListOf(
-                                                            FnNode(
-                                                                start = 652,
-                                                                name = "scale",
-                                                                content = arrayListOf(TextNode("―")),
-                                                                args = hashMapOf("x" to "5"),
-                                                            ),
-                                                        ),
-                                                    args = hashMapOf("x" to "5"),
-                                                ),
-                                            ),
-                                    ),
-                                ),
-                        ),
-                        TextNode("公式SNS："),
-                        LinkNode(
-                            content = arrayListOf(EmojiCodeNode("unicode_1d54f_bg_black")),
-                            url = "http://is.gd/rRlhOa",
-                            silent = false,
-                        ),
-                        TextNode("｜"),
-                        LinkNode(
-                            content = arrayListOf(EmojiCodeNode("youtube")),
-                            url = "http://is.gd/g3wqTi",
-                            silent = false,
-                        ),
-                        TextNode("｜"),
-                        LinkNode(
-                            content =
-                                arrayListOf(
-                                    EmojiCodeNode("twitch"),
-                                    SmallNode(
-                                        start = 8,
-                                        content = arrayListOf(TextNode("[EN]")),
-                                    ),
-                                ),
-                            url = "http://is.gd/sQII2q",
-                            silent = false,
-                        ),
-                        TextNode("便利リンク┣"),
-                        LinkNode(
-                            content = arrayListOf(TextNode("公式HP")),
-                            url = "http://t.ly/GlOB5",
-                            silent = false,
-                        ),
-                        TextNode("┣"),
-                        LinkNode(
-                            content = arrayListOf(TextNode("マップ")),
-                            url = "http://t.ly/E0AR-",
-                            silent = false,
-                        ),
-                        TextNode("┣"),
-                        LinkNode(
-                            content = arrayListOf(TextNode("パイモン")),
-                            url = "http://t.ly/MS3NK",
-                            silent = false,
-                        ),
-                        TextNode("┗"),
-                        LinkNode(
-                            content = arrayListOf(TextNode("Discord")),
-                            url = "http://t.ly/xld6t",
-                            silent = false,
-                        ),
-                        TextNode("外部ツール┣"),
-                        LinkNode(
-                            content = arrayListOf(TextNode("祈願カウンター")),
-                            url = "http://paimon.moe/wish",
-                            silent = false,
-                        ),
-                        TextNode("┣"),
-                        LinkNode(
-                            content = arrayListOf(TextNode("ビルドランキング")),
-                            url = "http://akasha.cv",
-                            silent = false,
-                        ),
-                        TextNode("┗"),
-                        LinkNode(
-                            content = arrayListOf(TextNode("聖遺物計算")),
-                            url = "http://is.gd/VAtEEU",
-                            silent = false,
-                        ),
-                        TextNode("管理者："),
-                        MentionNode(userName = "ms", host = null),
+                content = arrayListOf(
+TextNode(content = """オープンワールドRPG『"""),
+EmojiCodeNode("""genshin"""),
+TextNode(content = """』の総合チャンネルです。
+キャラクター、ストーリー、育成、アプデ等々、原神に関連するものであれば何でも投稿を歓迎しております！
+"""),
+CenterNode(
+                        start = 85,
+                        content = arrayListOf(
+FnNode(
+                                start = 93,
+                                name = "x2",
+                                args = hashMapOf(),
+                                content = arrayListOf(
+FnNode(
+                                        start = 98,
+                                        name = "scale",
+                                        args = hashMapOf("x" to "5"),
+                                        content = arrayListOf(
+FnNode(
+                                                start = 110,
+                                                name = "scale",
+                                                args = hashMapOf("x" to "5"),
+                                                content = arrayListOf(
+TextNode(content = """―""")
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
                     ),
+TextNode(content = """
+
+"""),
+CenterNode(
+                        start = 137,
+                        content = arrayListOf(
+BoldNode(
+                                start = 145,
+                                content = arrayListOf(
+TextNode(content = """このチャンネルのルール""")
+                                )
+                            )
+                        )
+                    ),
+TextNode(content = """
+
+・公式が許可していない話題は禁止とします
+"""),
+SmallNode(
+                        start = 192,
+                        content = arrayListOf(
+TextNode(content = """リーク、MOD、プラベ鯖を含め"""),
+LinkNode(
+                                url = "http://t.ly/Yrb7Q",
+                                silent = false,
+                                content = arrayListOf(
+TextNode(content = """原神利用規約""")
+                                )
+                            ),
+TextNode(content = """に抵触する話題等""")
+                        )
+                    ),
+TextNode(content = """
+・一部の内容は「内容を隠す」機能の使用を推奨します
+"""),
+SmallNode(
+                        start = 284,
+                        content = arrayListOf(
+TextNode(content = """最新のネタバレやNSFW、センシティブなものを含む""")
+                        )
+                    ),
+TextNode(content = """
+・実装済みの範囲内でネタバレを含む可能性があります
+・"""),
+BoldNode(
+                        start = 352,
+                        content = arrayListOf(
+TextNode(content = """ほんわかレス推奨です！""")
+                        )
+                    ),
+TextNode(content = """
+"""),
+CenterNode(
+                        start = 368,
+                        content = arrayListOf(
+FnNode(
+                                start = 376,
+                                name = "x2",
+                                args = hashMapOf(),
+                                content = arrayListOf(
+FnNode(
+                                        start = 381,
+                                        name = "scale",
+                                        args = hashMapOf("x" to "5"),
+                                        content = arrayListOf(
+FnNode(
+                                                start = 393,
+                                                name = "scale",
+                                                args = hashMapOf("x" to "5"),
+                                                content = arrayListOf(
+TextNode(content = """―""")
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+TextNode(content = """
+"""),
+SmallNode(
+                        start = 419,
+                        content = arrayListOf(
+TextNode(content = """最終更新 :"""),
+FnNode(
+                                start = 432,
+                                name = "unixtime",
+                                args = hashMapOf(),
+                                content = arrayListOf(
+TextNode(content = """1773656919.3219297""")
+                                )
+                            )
+                        )
+                    ),
+TextNode(content = """
+"""),
+CenterNode(
+                        start = 471,
+                        content = arrayListOf(
+FnNode(
+                                start = 479,
+                                name = "x2",
+                                args = hashMapOf(),
+                                content = arrayListOf(
+EmojiCodeNode("""blank""")
+                                )
+                            ),
+BoldNode(
+                                start = 492,
+                                content = arrayListOf(
+TextNode(content = """ゲームタイマー""")
+                                )
+                            ),
+FnNode(
+                                start = 503,
+                                name = "x2",
+                                args = hashMapOf(),
+                                content = arrayListOf(
+EmojiCodeNode("""blank""")
+                                )
+                            )
+                        )
+                    ),
+TextNode(content = """
+"""),
+LinkNode(
+                        url = "https://is.gd/cB406l",
+                        silent = false,
+                        content = arrayListOf(
+FnNode(
+                                start = 0,
+                                name = "unixtime",
+                                args = hashMapOf(),
+                                content = arrayListOf(
+TextNode(content = """1773676800""")
+                                )
+                            ),
+TextNode(content = """HoYoLabログボ更新""")
+                        )
+                    ),
+TextNode(content = """
+"""),
+FnNode(
+                        start = 585,
+                        name = "unixtime",
+                        args = hashMapOf(),
+                        content = arrayListOf(
+TextNode(content = """1773691200""")
+                        )
+                    ),
+TextNode(content = """デイリー更新
+"""),
+FnNode(
+                        start = 614,
+                        name = "unixtime",
+                        args = hashMapOf(),
+                        content = arrayListOf(
+TextNode(content = """1774209600""")
+                        )
+                    ),
+TextNode(content = """ウィークリー更新
+"""),
+CenterNode(
+                        start = 645,
+                        content = arrayListOf(
+FnNode(
+                                start = 653,
+                                name = "x2",
+                                args = hashMapOf(),
+                                content = arrayListOf(
+FnNode(
+                                        start = 658,
+                                        name = "scale",
+                                        args = hashMapOf("x" to "5"),
+                                        content = arrayListOf(
+FnNode(
+                                                start = 670,
+                                                name = "scale",
+                                                args = hashMapOf("x" to "5"),
+                                                content = arrayListOf(
+TextNode(content = """―""")
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+TextNode(content = """
+公式SNS："""),
+LinkNode(
+                        url = "http://is.gd/rRlhOa",
+                        silent = false,
+                        content = arrayListOf(
+EmojiCodeNode("""unicode_1d54f_bg_black""")
+                        )
+                    ),
+TextNode(content = """｜"""),
+LinkNode(
+                        url = "http://is.gd/g3wqTi",
+                        silent = false,
+                        content = arrayListOf(
+EmojiCodeNode("""youtube""")
+                        )
+                    ),
+TextNode(content = """｜"""),
+LinkNode(
+                        url = "http://is.gd/sQII2q",
+                        silent = false,
+                        content = arrayListOf(
+EmojiCodeNode("""twitch"""),
+TextNode(content = """<small>[EN]</small>""")
+                        )
+                    ),
+TextNode(content = """
+便利リンク
+┣"""),
+LinkNode(
+                        url = "http://t.ly/GlOB5",
+                        silent = false,
+                        content = arrayListOf(
+TextNode(content = """公式HP""")
+                        )
+                    ),
+TextNode(content = """
+┣"""),
+LinkNode(
+                        url = "http://t.ly/E0AR-",
+                        silent = false,
+                        content = arrayListOf(
+TextNode(content = """マップ""")
+                        )
+                    ),
+TextNode(content = """
+┣"""),
+LinkNode(
+                        url = "http://t.ly/MS3NK",
+                        silent = false,
+                        content = arrayListOf(
+TextNode(content = """パイモン""")
+                        )
+                    ),
+TextNode(content = """
+┗"""),
+LinkNode(
+                        url = "http://t.ly/xld6t",
+                        silent = false,
+                        content = arrayListOf(
+TextNode(content = """Discord""")
+                        )
+                    ),
+TextNode(content = """
+
+外部ツール
+┣"""),
+LinkNode(
+                        url = "http://paimon.moe/wish",
+                        silent = false,
+                        content = arrayListOf(
+TextNode(content = """祈願カウンター""")
+                        )
+                    ),
+TextNode(content = """
+┣"""),
+LinkNode(
+                        url = "http://akasha.cv",
+                        silent = false,
+                        content = arrayListOf(
+TextNode(content = """ビルドランキング""")
+                        )
+                    ),
+TextNode(content = """
+┗"""),
+LinkNode(
+                        url = "http://is.gd/VAtEEU",
+                        silent = false,
+                        content = arrayListOf(
+TextNode(content = """聖遺物計算""")
+                        )
+                    ),
+TextNode(content = """
+
+管理者："""),
+MentionNode(
+                        userName = "ms",
+    host = null
+                    )
+                )
             ),
             builderResult,
         )
