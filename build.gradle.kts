@@ -6,7 +6,7 @@ plugins {
 
 val libName = "mfm-multiplatform"
 val libGroup = "moe.tlaster"
-val libVersion = "0.2.7"
+val libVersion = "0.2.8-SNAPSHOT"
 
 group = libGroup
 version = libVersion
