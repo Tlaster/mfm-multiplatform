@@ -2,7 +2,6 @@ plugins {
     kotlin("multiplatform") version "2.3.0"
     id("org.jetbrains.kotlinx.kover") version "0.9.7"
     id("com.vanniktech.maven.publish") version "0.34.0"
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
 }
 
 val libName = "mfm-multiplatform"
@@ -87,8 +86,4 @@ mavenPublishing {
             developerConnection.set("scm:git:git://github.com/Tlaster/mfm-multiplatform.git")
         }
     }
-}
-
-ktlint {
-    version.set("1.5.0")
 }
