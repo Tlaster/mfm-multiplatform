@@ -15,7 +15,7 @@ private fun prevIsNotAsciiAlphanumeric(
         reader.pushback(3) // push back 1 for char before *, 1 for *
         val before = reader.consume() // char before *
         reader.consume() // *
-        if (before !in asciiAlphanumericAndEmpty) {
+        if (before in asciiAlphanumeric) {
             tokenizer.emit(TokenCharacterType.Character, reader.position)
             tokenizer.switch(DataState)
             return true
@@ -33,7 +33,9 @@ private val asciiDigit = '0'..'9'
 private val asciiAlphanumeric = asciiAlpha + asciiDigit
 private val asciiAlphanumericUnderscore = asciiAlphanumeric + '_'
 private val asciiAlphanumericUnderscoreDash = asciiAlphanumericUnderscore + '-'
+private val asciiAlphanumericUnderscoreDashDot = asciiAlphanumericUnderscoreDash + '.'
 private val asciiAlphanumericUnderscoreDashPlus = asciiAlphanumericUnderscoreDash + '+'
+private val codeBlockLanguageChar = asciiAlphanumericUnderscoreDashPlus + '#' + '.'
 private val asciiUpperHexDigit = 'A'..'F'
 private val asciiLowerHexDigit = 'a'..'f'
 private val asciiHexDigit = asciiUpperHexDigit + asciiLowerHexDigit
@@ -45,10 +47,81 @@ private const val FULLWIDTHSPACE = '\u3000'
 private val hashTagExclude = "[ \t.,!?'\"#:/[]【】()「」（）<>]".toList() + EOF + emptyChar + FULLWIDTHSPACE
 private val asciiAlphanumericAndEmpty = asciiAlphanumeric + ' ' + TAB + LF + FULLWIDTHSPACE
 private val marks = "-._~:/?#[]@!\$&'()*+,;=%".toList()
-private val urlDisallowedEndMarks = ".".toList()
+private val urlDisallowedEndMarks = "., ".trim().toList()
 private val urlChar = asciiAlphanumeric + marks
+private const val VARIATION_SELECTOR_16 = '\uFE0F'
+private const val COMBINING_ENCLOSING_KEYCAP = '\u20E3'
 
 private fun isAtStartOfLine(reader: Reader): Boolean = reader.position == 1 || reader.readAt(reader.position - 2) == LF
+
+private fun hasAsciiAlphanumericBeforeMarker(reader: Reader): Boolean =
+    reader.position > 1 && reader.readAt(reader.position - 2) in asciiAlphanumeric
+
+private fun isPrintableAscii(current: Char): Boolean = current.code in 0x20..0x7E
+
+private fun hasValidUrlAuthority(url: String): Boolean {
+    val authority =
+        url
+            .removePrefix("https://")
+            .removePrefix("http://")
+            .takeWhile { it != '/' && it != '?' && it != '#' }
+    if (authority.isEmpty()) {
+        return false
+    }
+    return authority.contains('.') && !authority.startsWith('.') && !authority.endsWith('.')
+}
+
+private fun tryReadPlainSearch(
+    tokenizer: Tokenizer,
+    reader: Reader,
+    current: Char,
+): Boolean {
+    if (reader.position < 2) {
+        tokenizer.emit(TokenCharacterType.Character, reader.position)
+        return true
+    }
+    val previous = reader.readAt(reader.position - 2)
+    if (previous !in listOf(' ', TAB, FULLWIDTHSPACE)) {
+        tokenizer.emit(TokenCharacterType.Character, reader.position)
+        return true
+    }
+
+    return when (current) {
+        'S', 's' -> {
+            if (reader.isFollowedBy("earch", ignoreCase = true)) {
+                val end = reader.position - 1 + "Search".length
+                val next = reader.readAt(end)
+                if (next == LF || next == EOF) {
+                    tokenizer.emitRange(TokenCharacterType.Search, reader.position - 1, end)
+                    reader.consume("earch".length)
+                } else {
+                    tokenizer.emit(TokenCharacterType.Character, reader.position)
+                }
+            } else {
+                tokenizer.emit(TokenCharacterType.Character, reader.position)
+            }
+            true
+        }
+
+        '検' -> {
+            if (reader.isFollowedBy("索")) {
+                val end = reader.position - 1 + "検索".length
+                val next = reader.readAt(end)
+                if (next == LF || next == EOF) {
+                    tokenizer.emitRange(TokenCharacterType.Search, reader.position - 1, end)
+                    reader.consume("索".length)
+                } else {
+                    tokenizer.emit(TokenCharacterType.Character, reader.position)
+                }
+            } else {
+                tokenizer.emit(TokenCharacterType.Character, reader.position)
+            }
+            true
+        }
+
+        else -> false
+    }
+}
 
 internal data object DataState : State {
     override fun read(
@@ -56,6 +129,24 @@ internal data object DataState : State {
         reader: Reader,
     ) {
         when (val current = reader.consume()) {
+            in Char.MIN_HIGH_SURROGATE..Char.MAX_HIGH_SURROGATE -> {
+                if (reader.hasNext() && reader.next() in Char.MIN_LOW_SURROGATE..Char.MAX_LOW_SURROGATE) {
+                    tokenizer.emitRange(TokenCharacterType.UnicodeEmoji, reader.position - 1, reader.position + 1)
+                    reader.consume()
+                } else {
+                    tokenizer.emit(TokenCharacterType.Character, reader.position)
+                }
+            }
+            '#' -> {
+                if (reader.isFollowedBy("$VARIATION_SELECTOR_16$COMBINING_ENCLOSING_KEYCAP")) {
+                    tokenizer.emitRange(TokenCharacterType.UnicodeEmoji, reader.position - 1, reader.position + 2)
+                    reader.consume(2)
+                } else if (!tokenizer.emojiOnly) {
+                    tokenizer.switch(HashState)
+                } else {
+                    tokenizer.emit(TokenCharacterType.Character, reader.position)
+                }
+            }
             ']' if !tokenizer.emojiOnly -> tokenizer.emit(TokenCharacterType.FnEndBracket, reader.position)
             'h' if !tokenizer.emojiOnly -> tokenizer.switch(HState)
             '?' if !tokenizer.emojiOnly -> tokenizer.switch(QuestionState)
@@ -69,8 +160,22 @@ internal data object DataState : State {
             '`' if !tokenizer.emojiOnly -> tokenizer.switch(BacktickState)
             '$' if !tokenizer.emojiOnly -> tokenizer.switch(DollarState)
             '@' if !tokenizer.emojiOnly -> tokenizer.switch(AtState)
-            '#' if !tokenizer.emojiOnly -> tokenizer.switch(HashState)
             ':' -> tokenizer.switch(ColonState)
+            'S' if !tokenizer.emojiOnly -> {
+                if (!tryReadPlainSearch(tokenizer, reader, current)) {
+                    tokenizer.emit(TokenCharacterType.Character, reader.position)
+                }
+            }
+            's' if !tokenizer.emojiOnly -> {
+                if (!tryReadPlainSearch(tokenizer, reader, current)) {
+                    tokenizer.emit(TokenCharacterType.Character, reader.position)
+                }
+            }
+            '検' if !tokenizer.emojiOnly -> {
+                if (!tryReadPlainSearch(tokenizer, reader, current)) {
+                    tokenizer.emit(TokenCharacterType.Character, reader.position)
+                }
+            }
             EOF -> tokenizer.emit(TokenCharacterType.Eof, reader.position)
             LF -> tokenizer.emit(TokenCharacterType.LineBreak, reader.position)
             else -> tokenizer.emit(TokenCharacterType.Character, reader.position)
@@ -110,7 +215,6 @@ internal data object UrlState : State {
             ';',
             ':',
             '+',
-            ',',
             '[',
             ']',
         )
@@ -127,12 +231,17 @@ internal data object UrlState : State {
             }
             index--
         }
-        val url = reader.readAt(index, reader.position - index)
-        if (!url.contains(".")) {
-            tokenizer.emitRange(TokenCharacterType.Character, index, reader.position)
+        val start = if (tokenizer.readAt(index) == TokenCharacterType.Url || tokenizer.readAt(index) == TokenCharacterType.UnKnown) index else index + 1
+        val rawUrl = reader.readAt(start, reader.position - start)
+        val trimmedUrl = rawUrl.trimEnd { it in urlDisallowedEndMarks }
+        if (!trimmedUrl.contains(".") || !hasValidUrlAuthority(trimmedUrl)) {
+            tokenizer.emitRange(TokenCharacterType.Character, start, reader.position)
             tokenizer.switch(DataState)
             reader.pushback()
         } else {
+            if (trimmedUrl.length != rawUrl.length) {
+                tokenizer.emitRange(TokenCharacterType.Character, start + trimmedUrl.length, reader.position)
+            }
             tokenizer.accept()
             tokenizer.switch(DataState)
             reader.pushback()
@@ -261,6 +370,21 @@ internal data object QuestionState : State {
 }
 
 internal data object LinkNameState : State {
+    private fun hasFutureLinkClose(reader: Reader): Boolean {
+        var index = reader.position
+        while (index < reader.length) {
+            val current = reader.readAt(index)
+            if (current == LF || current == EOF) {
+                return false
+            }
+            if (current == ']' && index + 1 < reader.length && reader.readAt(index + 1) == '(') {
+                return true
+            }
+            index++
+        }
+        return false
+    }
+
     override fun read(
         tokenizer: Tokenizer,
         reader: Reader,
@@ -273,7 +397,7 @@ internal data object LinkNameState : State {
                     tokenizer.emit(TokenCharacterType.LinkContent, reader.position)
                 }
                 ']' -> {
-                    if (reader.next() == '(') {
+                    if (reader.next() == '(' && (stackCount == 0 || !hasFutureLinkClose(reader))) {
                         tokenizer.emit(TokenCharacterType.LinkClose, reader.position)
                         tokenizer.emit(TokenCharacterType.LinkHrefOpen, reader.position + 1)
                         tokenizer.switch(LinkHrefState)
@@ -497,6 +621,7 @@ internal data object InlineMathBodyMightEndState : State {
             }
 
             else -> {
+                tokenizer.emit(TokenCharacterType.InlineMathContent, reader.position - 1)
                 tokenizer.emit(TokenCharacterType.InlineMathContent, reader.position)
                 tokenizer.switch(InlineMathBodyState)
             }
@@ -535,6 +660,7 @@ internal data object MathBlockBodyMightEndState : State {
             }
 
             else -> {
+                tokenizer.emit(TokenCharacterType.MathBlockContent, reader.position - 1)
                 tokenizer.emit(TokenCharacterType.MathBlockContent, reader.position)
                 tokenizer.switch(MathBlockBodyState)
             }
@@ -680,9 +806,15 @@ internal data object UnderscoreItalicState : State {
             }
 
             '_' -> {
-                tokenizer.emit(TokenCharacterType.UnderscoreItalicStart, reader.position)
-                tokenizer.accept()
-                tokenizer.switch(DataState)
+                if (reader.hasNext() && reader.next() in asciiAlphanumeric) {
+                    tokenizer.reject(reader.position)
+                    tokenizer.emit(TokenCharacterType.Character, reader.position)
+                    tokenizer.switch(DataState)
+                } else {
+                    tokenizer.emit(TokenCharacterType.UnderscoreItalicStart, reader.position)
+                    tokenizer.accept()
+                    tokenizer.switch(DataState)
+                }
             }
 
             else -> {
@@ -736,9 +868,15 @@ internal data object AsteriskItalicState : State {
             }
 
             '*' -> {
-                tokenizer.emit(TokenCharacterType.AsteriskItalicStart, reader.position)
-                tokenizer.accept()
-                tokenizer.switch(DataState)
+                if (reader.hasNext() && reader.next() in asciiAlphanumeric) {
+                    tokenizer.reject(reader.position)
+                    tokenizer.emit(TokenCharacterType.Character, reader.position)
+                    tokenizer.switch(DataState)
+                } else {
+                    tokenizer.emit(TokenCharacterType.AsteriskItalicStart, reader.position)
+                    tokenizer.accept()
+                    tokenizer.switch(DataState)
+                }
             }
 
             else -> {
@@ -790,7 +928,7 @@ internal data object CodeBlockOpenState : State {
         reader: Reader,
     ) {
         when (val current = reader.consume()) {
-            in asciiAlphanumericUnderscore -> {
+            in codeBlockLanguageChar -> {
                 // language
                 tokenizer.emit(TokenCharacterType.CodeBlockLanguage, reader.position)
             }
@@ -817,8 +955,23 @@ internal data object CodeBlockBodyState : State {
     ) {
         when (val current = reader.consume()) {
             '`' -> {
-                tokenizer.emit(TokenCharacterType.CodeBlockStart, reader.position)
-                tokenizer.switch(CodeBlockBodyMightEndState)
+                if (reader.isFollowedBy("``\n") || reader.isFollowedBy("``$EOF")) {
+                    tokenizer.emit(TokenCharacterType.CodeBlockStart, reader.position)
+                    tokenizer.emit(TokenCharacterType.CodeBlockStart, reader.position + 1)
+                    tokenizer.emit(TokenCharacterType.CodeBlockStart, reader.position + 2)
+                    tokenizer.accept()
+                    tokenizer.switch(DataState)
+                    reader.consume() // 2nd `
+                    reader.consume() // 3rd `
+                    return
+                }
+                tokenizer.emit(TokenCharacterType.CodeBlock, reader.position)
+                tokenizer.switch(CodeBlockBodyTextState)
+            }
+
+            LF -> {
+                tokenizer.emit(TokenCharacterType.CodeBlock, reader.position)
+                // stay in CodeBlockBodyState
             }
 
             EOF -> {
@@ -829,27 +982,21 @@ internal data object CodeBlockBodyState : State {
 
             else -> {
                 tokenizer.emit(TokenCharacterType.CodeBlock, reader.position)
+                tokenizer.switch(CodeBlockBodyTextState)
             }
         }
     }
 }
 
-internal data object CodeBlockBodyMightEndState : State {
+internal data object CodeBlockBodyTextState : State {
     override fun read(
         tokenizer: Tokenizer,
         reader: Reader,
     ) {
         when (val current = reader.consume()) {
-            '`' -> {
-                tokenizer.emit(TokenCharacterType.CodeBlockStart, reader.position)
-                if (reader.hasNext() && reader.next() == '`') {
-                    tokenizer.emit(TokenCharacterType.CodeBlockStart, reader.position + 1)
-                    tokenizer.accept()
-                    tokenizer.switch(DataState)
-                    reader.consume() // consume next `
-                } else {
-                    tokenizer.switch(CodeBlockBodyState)
-                }
+            LF -> {
+                tokenizer.emit(TokenCharacterType.CodeBlock, reader.position)
+                tokenizer.switch(CodeBlockBodyState)
             }
 
             EOF -> {
@@ -860,7 +1007,6 @@ internal data object CodeBlockBodyMightEndState : State {
 
             else -> {
                 tokenizer.emit(TokenCharacterType.CodeBlock, reader.position)
-                tokenizer.switch(CodeBlockBodyState)
             }
         }
     }
@@ -892,7 +1038,13 @@ internal data object InlineCodeState : State {
             }
 
             else -> {
-                tokenizer.emit(TokenCharacterType.InlineCode, reader.position)
+                if (isPrintableAscii(current)) {
+                    tokenizer.emit(TokenCharacterType.InlineCode, reader.position)
+                } else {
+                    tokenizer.reject(reader.position)
+                    tokenizer.switch(DataState)
+                    reader.pushback()
+                }
             }
         }
     }
@@ -1011,21 +1163,13 @@ internal data object AtState : State {
         tokenizer: Tokenizer,
         reader: Reader,
     ) {
-//        if (reader.position != 1) {
-//            reader.pushback(2) // push back 1 for char before @, 1 for @
-//            val before = reader.consume() // char before @
-//            reader.consume() // @
-//            if (before !in asciiAlphanumericAndEmpty) {
-//                tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
-//                tokenizer.switch(DataState)
-//                return
-//            }
-//        }
+        if (hasAsciiAlphanumericBeforeMarker(reader)) {
+            tokenizer.emit(TokenCharacterType.Character, reader.position)
+            tokenizer.switch(DataState)
+            return
+        }
         when (val current = reader.consume()) {
-            in asciiAlphanumericUnderscoreDash -> {
-//                if (prevIsNotAsciiAlphanumeric(tokenizer, reader)) {
-//                    return
-//                }
+            in asciiAlphanumericUnderscore -> {
                 tokenizer.emit(TokenCharacterType.UserAt, reader.position - 1)
                 tokenizer.switch(UserNameState)
                 reader.pushback()
@@ -1050,8 +1194,8 @@ internal data object UserNameState : State {
                 tokenizer.emit(TokenCharacterType.UserName, reader.position)
             }
 
-            '-' -> {
-                if (reader.hasNext() && reader.next() !in asciiAlphanumericUnderscore + '@') {
+            in listOf('-', '.') -> {
+                if (reader.hasNext() && reader.next() !in asciiAlphanumericUnderscoreDashDot) {
                     tokenizer.accept()
                     tokenizer.switch(DataState)
                     reader.pushback()
@@ -1065,6 +1209,7 @@ internal data object UserNameState : State {
                     tokenizer.emit(TokenCharacterType.UserAt, reader.position)
                     tokenizer.switch(UserHostState)
                 } else {
+                    tokenizer.reject(reader.position)
                     tokenizer.emit(TokenCharacterType.Character, reader.position)
                     tokenizer.switch(DataState)
                 }
@@ -1089,8 +1234,8 @@ internal data object UserHostState : State {
                 tokenizer.emit(TokenCharacterType.UserHost, reader.position)
             }
 
-            '-', '.' -> {
-                if (reader.hasNext() && reader.next() !in asciiAlphanumericUnderscore) {
+            in listOf('-', '.') -> {
+                if (reader.hasNext() && reader.next() !in asciiAlphanumericUnderscoreDashDot) {
                     tokenizer.accept()
                     tokenizer.switch(DataState)
                     reader.pushback()
@@ -1113,6 +1258,11 @@ internal data object HashState : State {
         tokenizer: Tokenizer,
         reader: Reader,
     ) {
+        if (hasAsciiAlphanumericBeforeMarker(reader)) {
+            tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
+            tokenizer.switch(DataState)
+            return
+        }
 //        if (reader.position != 1) {
 //            reader.pushback(2) // push back 1 for char before #, 1 for #
 //            val before = reader.consume() // char before #
@@ -1126,9 +1276,6 @@ internal data object HashState : State {
 
         when (val current = reader.consume()) {
             in hashTagExclude -> {
-                if (prevIsNotAsciiAlphanumeric(tokenizer, reader)) {
-                    return
-                }
                 // TODO: 括弧は対になっている時のみ内容に含めることができる。対象: () [] 「」 （）
                 tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                 tokenizer.emit(TokenCharacterType.Character, reader.position)
@@ -1136,9 +1283,6 @@ internal data object HashState : State {
             }
 
             else -> {
-                if (prevIsNotAsciiAlphanumeric(tokenizer, reader)) {
-                    return
-                }
                 tokenizer.emit(TokenCharacterType.HashTagStart, reader.position - 1)
                 tokenizer.switch(HashNameState)
                 reader.pushback()
@@ -1172,6 +1316,11 @@ internal data object ColonState : State {
         tokenizer: Tokenizer,
         reader: Reader,
     ) {
+        if (hasAsciiAlphanumericBeforeMarker(reader)) {
+            tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
+            tokenizer.switch(DataState)
+            return
+        }
         when (val current = reader.consume()) {
             in asciiAlphanumericUnderscoreDashPlus -> {
                 tokenizer.switch(EmojiNameState)

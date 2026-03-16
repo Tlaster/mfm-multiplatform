@@ -88,6 +88,67 @@ class TreeBuilderTest {
     }
 
     @Test
+    fun testMentionAllowsDotsInUsername() {
+        val tokenizer = Tokenizer()
+        val content = "@first.last@misskey.io"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        MentionNode(
+                            userName = "first.last",
+                            host = "misskey.io",
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testMentionMustNotStartAfterAsciiAlphanumeric() {
+        val tokenizer = Tokenizer()
+        val content = "a@test"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        TextNode(
+                            content = "a@test",
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testMentionMustNotStartWithHyphen() {
+        val tokenizer = Tokenizer()
+        val content = "@-test"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        TextNode(
+                            content = "@-test",
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
     fun testHashTag() {
         val tokenizer = Tokenizer()
         val content = "#test"
@@ -171,7 +232,7 @@ class TreeBuilderTest {
     @Test
     fun testCodeBlockWithLanguage() {
         val tokenizer = Tokenizer()
-        val content = "```kotlin\ntest```"
+        val content = "```kotlin\ntest\n```"
         val result = tokenizer.parse(StringReader(content))
         val builder = TreeBuilder()
         val builderResult = builder.build(StringReader(content), result)
@@ -182,6 +243,27 @@ class TreeBuilderTest {
                         CodeBlockNode(
                             code = "test",
                             language = "kotlin",
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testCodeBlockWithSpecialLanguage() {
+        val tokenizer = Tokenizer()
+        val content = "```objective-c\ntest\n```"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        CodeBlockNode(
+                            code = "test",
+                            language = "objective-c",
                         ),
                     ),
             ),
@@ -344,6 +426,85 @@ class TreeBuilderTest {
                                     ),
                                 ),
                         ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testQuoteMergesAdjacentLines() {
+        val tokenizer = Tokenizer()
+        val content = "> foo\n> bar"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        QuoteNode(
+                            start = 0,
+                            content =
+                                arrayListOf(
+                                    TextNode("foo"),
+                                    TextNode("\n"),
+                                    TextNode("bar"),
+                                ),
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testQuoteAllowsBlankLinesInside() {
+        val tokenizer = Tokenizer()
+        val content = "> foo\n>\n> bar"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        QuoteNode(
+                            start = 0,
+                            content =
+                                arrayListOf(
+                                    TextNode("foo"),
+                                    TextNode("\n"),
+                                    TextNode("\n"),
+                                    TextNode("bar"),
+                                ),
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testQuoteIgnoresTrailingBlankLine() {
+        val tokenizer = Tokenizer()
+        val content = "> foo\n>\noutside"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        QuoteNode(
+                            start = 0,
+                            content = arrayListOf(TextNode("foo")),
+                        ),
+                        TextNode("\n"),
+                        TextNode("outside"),
                     ),
             ),
             builderResult,
@@ -523,6 +684,72 @@ class TreeBuilderTest {
                         SearchNode(
                             query = "misskey",
                             search = "[Search]",
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testPlainSearch() {
+        val tokenizer = Tokenizer()
+        val content = "misskey Search"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        SearchNode(
+                            query = "misskey",
+                            search = "Search",
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testPlainSearchIgnoreCase() {
+        val tokenizer = Tokenizer()
+        val content = "misskey search"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        SearchNode(
+                            query = "misskey",
+                            search = "search",
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testPlainSearchJapanese() {
+        val tokenizer = Tokenizer()
+        val content = "misskey 検索"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        SearchNode(
+                            query = "misskey",
+                            search = "検索",
                         ),
                     ),
             ),
@@ -911,7 +1138,7 @@ class TreeBuilderTest {
             RootNode(
                 0,
                 arrayListOf(
-                    TextNode(content = "**bold** @user $[x2 test]"),
+                    TextNode(content = "**bold** @user $[x2 test]", plain = true),
                 ),
             )
         assertEquals(expected, builderResult)
@@ -1104,6 +1331,72 @@ class TreeBuilderTest {
                         LinkNode(
                             content = arrayListOf(TextNode("[test link]")),
                             url = "https://test.com",
+                            silent = false,
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testLinkLabelDoesNotParseMention() {
+        val tokenizer = Tokenizer()
+        val content = "[@alice](https://test.com)"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        LinkNode(
+                            content = arrayListOf(TextNode("@alice")),
+                            url = "https://test.com",
+                            silent = false,
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testLinkLabelDoesNotParseUrl() {
+        val tokenizer = Tokenizer()
+        val content = "[https://example.com/@alice](https://test.com)"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        LinkNode(
+                            content = arrayListOf(TextNode("https://example.com/@alice")),
+                            url = "https://test.com",
+                            silent = false,
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testLinkLabelDoesNotParseNestedLink() {
+        val tokenizer = Tokenizer()
+        val content = "[[inner](https://inner.test)](https://outer.test)"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        LinkNode(
+                            content = arrayListOf(TextNode("[inner](https://inner.test)")),
+                            url = "https://outer.test",
                             silent = false,
                         ),
                     ),

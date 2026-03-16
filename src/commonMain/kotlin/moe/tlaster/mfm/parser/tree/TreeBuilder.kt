@@ -21,6 +21,7 @@ internal class TreeBuilder {
                 val state =
                     when (tokenCharacterTypes[reader.position]) {
                         TokenCharacterType.LineBreak -> LineBreakState
+                        TokenCharacterType.UnicodeEmoji -> UnicodeEmojiState
                         TokenCharacterType.Character, TokenCharacterType.Italic, TokenCharacterType.Bold -> TextState
                         TokenCharacterType.EmojiNameStart -> EmojiNameState
                         TokenCharacterType.HashTagStart -> HashTagState

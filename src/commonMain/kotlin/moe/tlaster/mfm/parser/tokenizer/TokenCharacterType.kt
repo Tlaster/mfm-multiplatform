@@ -4,6 +4,7 @@ internal enum class TokenCharacterType {
     Eof,
     LineBreak,
     Character,
+    UnicodeEmoji,
     EmojiNameStart,
     EmojiName,
     HashTagStart,

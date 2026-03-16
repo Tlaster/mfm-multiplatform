@@ -42,6 +42,7 @@ import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.Strike
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.Tag
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.TagClose
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.TagOpen
+import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.UnicodeEmoji
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.UnderscoreBoldStart
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.UnderscoreItalicStart
 import moe.tlaster.mfm.parser.tokenizer.TokenCharacterType.Url
@@ -69,6 +70,29 @@ internal data class TreeBuilderContext(
     fun isCurrentClosingTag(tagName: String): Boolean {
         val closingTag = "</$tagName>"
         return reader.position + closingTag.length <= reader.length && reader.readAt(reader.position, closingTag.length) == closingTag
+    }
+
+    fun trimSurroundingSingleLineBreak(node: ContainerNode) {
+        val first = node.content.firstOrNull()
+        if (first is TextNode && first.content.startsWith("\n")) {
+            val trimmed = first.content.removePrefix("\n")
+            if (trimmed.isEmpty()) {
+                node.content.removeAt(0)
+            } else {
+                node.content[0] = TextNode(trimmed)
+            }
+        }
+
+        val lastIndex = node.content.lastIndex
+        val last = node.content.getOrNull(lastIndex)
+        if (last is TextNode && last.content.endsWith("\n")) {
+            val trimmed = last.content.removeSuffix("\n")
+            if (trimmed.isEmpty()) {
+                node.content.removeAt(lastIndex)
+            } else {
+                node.content[lastIndex] = TextNode(trimmed)
+            }
+        }
     }
 
     inline fun <reified T : Node> endNode(start: Int) {
@@ -102,10 +126,7 @@ internal sealed interface State {
 internal data object LineBreakState : State {
     override fun TreeBuilderContext.build() {
         val start = reader.position
-
-        stack.findLast { it is QuoteNode }?.let {
-            endNode<QuoteNode>(start)
-        }
+        val isInQuote = stack.findLast { it is QuoteNode } != null
 
         val text = StringBuilder()
         while (reader.hasNext()) {
@@ -116,6 +137,44 @@ internal data object LineBreakState : State {
                 break
             }
         }
+
+        if (isInQuote) {
+            val next = tokenCharacterTypes.getOrNull(reader.position)
+            if (next == Blockquote) {
+                if (text.length > 1) {
+                    endNode<QuoteNode>(start)
+                    return
+                }
+
+                var lookahead = reader.position
+                while (tokenCharacterTypes.getOrNull(lookahead) == Blockquote) {
+                    lookahead++
+                }
+
+                val afterQuoteMarks = tokenCharacterTypes.getOrNull(lookahead)
+                val isTrailingBlankQuoteLine =
+                    afterQuoteMarks == LineBreak && tokenCharacterTypes.getOrNull(lookahead + 1) != Blockquote
+
+                while (reader.hasNext() && tokenCharacterTypes[reader.position] == Blockquote) {
+                    reader.consume()
+                }
+
+                if (isTrailingBlankQuoteLine) {
+                    endNode<QuoteNode>(start)
+                    return
+                }
+
+                currentContainer.content.add(TextNode(text.toString()))
+                return
+            }
+
+            endNode<QuoteNode>(start)
+
+            if (text.length > 1) {
+                return
+            }
+        }
+
         currentContainer.content.add(TextNode(text.toString()))
     }
 }
@@ -158,6 +217,16 @@ internal data object EmojiNameState : State {
     }
 }
 
+internal data object UnicodeEmojiState : State {
+    override fun TreeBuilderContext.build() {
+        val text = StringBuilder()
+        while (reader.hasNext() && tokenCharacterTypes[reader.position] == UnicodeEmoji) {
+            text.append(reader.consume())
+        }
+        currentContainer.content.add(UnicodeEmojiNode(text.toString()))
+    }
+}
+
 internal data object HashTagState : State {
     override fun TreeBuilderContext.build() {
         val text = StringBuilder()
@@ -172,7 +241,12 @@ internal data object HashTagState : State {
                 break
             }
         }
-        currentContainer.content.add(HashtagNode(text.toString()))
+        val tag = text.toString()
+        if (tag.all { it in '0'..'9' }) {
+            currentContainer.content.add(TextNode("#$tag"))
+        } else {
+            currentContainer.content.add(HashtagNode(tag))
+        }
     }
 }
 
@@ -254,9 +328,14 @@ internal data object CodeBlockState : State {
             }
         }
         if (text.isEmpty() && language.isNotEmpty()) {
-            currentContainer.content.add(CodeBlockNode(language.toString(), null))
+            currentContainer.content.add(CodeBlockNode(language.toString().removeSuffix("\n"), null))
         } else {
-            currentContainer.content.add(CodeBlockNode(text.toString(), language.toString()))
+            currentContainer.content.add(
+                CodeBlockNode(
+                    text.toString().removeSuffix("\n"),
+                    language.toString().takeIf { it.isNotEmpty() }
+                )
+            )
         }
     }
 }
@@ -473,7 +552,14 @@ internal data object TagState : State {
                     while (reader.hasNext() && tokenCharacterTypes[reader.position] != Eof && !isCurrentClosingTag("plain")) {
                         text.append(reader.consume())
                     }
-                    currentContainer.content.add(TextNode(text.toString()))
+                    var content = text.toString()
+                    if (content.startsWith("\n")) {
+                        content = content.drop(1)
+                    }
+                    if (content.endsWith("\n")) {
+                        content = content.dropLast(1)
+                    }
+                    currentContainer.content.add(TextNode(content, plain = true))
                     if (isCurrentClosingTag("plain")) {
                         reader.consume("</plain>".length)
                     }
@@ -521,6 +607,13 @@ internal data object EndTagState : State {
         when (name.toString()) {
             "center" -> {
                 // TODO: check center end
+                stack
+                    .findLast { it is CenterNode }
+                    ?.let { center ->
+                        if (center.content.none { it is UrlNode }) {
+                            trimSurroundingSingleLineBreak(center)
+                        }
+                    }
                 endNode<CenterNode>(start)
 //                val next = tokenCharacterTypes.getOrNull(reader.position)
 //                if (next == LineBreak || next == null || next == Eof) {
@@ -601,11 +694,121 @@ internal data object LinkState : State {
         }
         val tokenizer = Tokenizer(emojiOnly = false)
         val reader = StringReader(content.toString())
-        val tokens = tokenizer.parse(reader)
+        val tokens =
+            tokenizer
+                .parse(reader)
+                .map { token ->
+                    when (token) {
+                        UserAt,
+                        UserName,
+                        UserHost,
+                        Url,
+                        LinkOpen,
+                        LinkClose,
+                        LinkContent,
+                        LinkHrefOpen,
+                        LinkHrefClose,
+                        LinkHref,
+                        SilentLink,
+                        -> Character
+                        else -> token
+                    }
+                }
         reader.reset()
         val node = TreeBuilder().build(reader, tokens)
-        currentContainer.content.add(LinkNode(node.content, href.toString(), silent))
+        mergeAdjacentTextNodes(node)
+        val rawHref = href.toString()
+        val normalizedHref =
+            decodePercentEncodedUrl(
+                if (rawHref.startsWith("<") && rawHref.endsWith(">") && rawHref.length >= 2) {
+                    rawHref.substring(1, rawHref.length - 1)
+                } else {
+                    rawHref
+                },
+            )
+        if (!isSupportedLinkHref(normalizedHref)) {
+            val prefix = if (silent) "?[" else "["
+            currentContainer.content.add(TextNode("$prefix${content}]($rawHref)"))
+        } else {
+            currentContainer.content.add(LinkNode(node.content, normalizedHref, silent))
+        }
     }
+}
+
+private fun mergeAdjacentTextNodes(container: ContainerNode) {
+    val merged = arrayListOf<Node>()
+    for (node in container.content) {
+        if (node is ContainerNode) {
+            mergeAdjacentTextNodes(node)
+        }
+        val previous = merged.lastOrNull()
+        if (previous is TextNode && node is TextNode) {
+            merged[merged.lastIndex] = TextNode(previous.content + node.content)
+        } else {
+            merged.add(node)
+        }
+    }
+    container.content.clear()
+    container.content.addAll(merged)
+}
+
+private fun parseFnHeader(header: String): Pair<String, HashMap<String, String>> {
+    val args = hashMapOf<String, String>()
+    val nameEnd = header.indexOf('.').let { if (it >= 0) it else header.length }
+    val name = header.substring(0, nameEnd)
+    var index = nameEnd
+    while (index < header.length) {
+        if (header[index] != '.') {
+            index++
+            continue
+        }
+        index++
+        val keyStart = index
+        while (index < header.length && header[index] != '=' && header[index] != '.' && header[index] != ',') {
+            index++
+        }
+        if (keyStart == index) {
+            continue
+        }
+        val key = header.substring(keyStart, index)
+        if (index < header.length && header[index] == '=') {
+            index++
+            val valueStart = index
+            while (index < header.length) {
+                if (header[index] == '.' && index + 1 < header.length && header[index + 1].isLetter()) {
+                    break
+                }
+                index++
+            }
+            args[key] = header.substring(valueStart, index)
+        } else {
+            args[key] = "true"
+            while (index < header.length && header[index] == ',') {
+                index++
+                val flagStart = index
+                while (index < header.length && header[index] != ',' && header[index] != '.') {
+                    index++
+                }
+                val flag = header.substring(flagStart, index)
+                if (flag.isNotEmpty()) {
+                    args[flag] = "true"
+                }
+            }
+        }
+    }
+    return name to args
+}
+
+private fun isSupportedLinkHref(href: String): Boolean {
+    if (!href.startsWith("https://") && !href.startsWith("http://")) {
+        return false
+    }
+    val authority =
+        href
+            .removePrefix("https://")
+            .removePrefix("http://")
+            .takeWhile { it != '/' && it != '?' && it != '#' }
+    return authority.contains('.') && !authority.startsWith('.') && !authority.endsWith('.')
 }
 
 internal data object UrlState : State {
@@ -644,7 +847,8 @@ internal data object FnState : State {
                 break
             }
         }
-        val node = FnNode(start, body.toString())
+        val (name, args) = parseFnHeader(body.toString())
+        val node = FnNode(start, name, args = args)
         currentContainer.content.add(node)
         stack.add(node)
         currentContainer = node
@@ -670,8 +874,15 @@ internal data object EofState : State {
     override fun TreeBuilderContext.build() {
         val start = reader.position
 
-        stack.findLast { it is QuoteNode }?.let {
-            endNode<QuoteNode>(start)
+        stack.findLast { it is QuoteNode }?.let { quote ->
+            if (quote.content.isEmpty()) {
+                stack.remove(quote)
+                currentContainer = stack.last()
+                currentContainer.content.remove(quote)
+                currentContainer.content.add(TextNode(reader.readAt(quote.start, start - quote.start)))
+            } else {
+                endNode<QuoteNode>(start)
+            }
         }
 
         if (stack.size > 1) {

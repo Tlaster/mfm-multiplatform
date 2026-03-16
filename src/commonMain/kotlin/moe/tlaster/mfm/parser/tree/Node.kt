@@ -47,6 +47,10 @@ data class EmojiCodeNode(
     val emoji: String,
 ) : InlineNode
 
+data class UnicodeEmojiNode(
+    val emoji: String,
+) : InlineNode
+
 data class BoldNode(
     override val start: Int,
     override val content: ArrayList<Node> = arrayListOf(),
@@ -90,6 +94,7 @@ data class HashtagNode(
 
 data class UrlNode(
     val url: String,
+    val brackets: Boolean = false,
 ) : InlineNode
 
 data class LinkNode(
@@ -109,6 +114,7 @@ data class FnNode(
 
 data class TextNode(
     val content: String,
+    internal val plain: Boolean = false,
 ) : InlineNode
 
 data class CashNode(

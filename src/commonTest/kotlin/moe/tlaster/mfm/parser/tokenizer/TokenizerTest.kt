@@ -176,22 +176,7 @@ class TokenizerTest {
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
         assertContentEquals(
-            listOf(
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.UserAt,
-                TokenCharacterType.UserName,
-                TokenCharacterType.UserName,
-                TokenCharacterType.UserName,
-                TokenCharacterType.UserName,
-                TokenCharacterType.UserAt,
-                TokenCharacterType.UserHost,
-                TokenCharacterType.UserHost,
-                TokenCharacterType.UserHost,
-                TokenCharacterType.UserHost,
-                TokenCharacterType.Eof,
-            ),
+            content.map { TokenCharacterType.Character } + listOf(TokenCharacterType.Eof),
             result,
         )
     }
@@ -607,6 +592,35 @@ class TokenizerTest {
     }
 
     @Test
+    fun testCodeBlockLanguageWithPlus() {
+        val tokenizer = Tokenizer()
+        val content = "```c++\ntest\n```"
+        val result = tokenizer.parse(StringReader(content))
+        assertEquals(content.length, result.size - 1)
+        assertContentEquals(
+            listOf(
+                TokenCharacterType.CodeBlockStart,
+                TokenCharacterType.CodeBlockStart,
+                TokenCharacterType.CodeBlockStart,
+                TokenCharacterType.CodeBlockLanguage,
+                TokenCharacterType.CodeBlockLanguage,
+                TokenCharacterType.CodeBlockLanguage,
+                TokenCharacterType.CodeBlockLanguageEnd,
+                TokenCharacterType.CodeBlock,
+                TokenCharacterType.CodeBlock,
+                TokenCharacterType.CodeBlock,
+                TokenCharacterType.CodeBlock,
+                TokenCharacterType.CodeBlock,
+                TokenCharacterType.CodeBlockStart,
+                TokenCharacterType.CodeBlockStart,
+                TokenCharacterType.CodeBlockStart,
+                TokenCharacterType.Eof,
+            ),
+            result,
+        )
+    }
+
+    @Test
     fun testQuoteAtStartOfNextLine() {
         val tokenizer = Tokenizer()
         val content = "a\n>b"
@@ -800,6 +814,48 @@ class TokenizerTest {
                 TokenCharacterType.Search,
                 TokenCharacterType.Eof,
             ),
+            result,
+        )
+    }
+
+    @Test
+    fun testPlainSearch() {
+        val tokenizer = Tokenizer()
+        val content = "misskey Search"
+        val result = tokenizer.parse(StringReader(content))
+        assertEquals(content.length, result.size - 1)
+        assertContentEquals(
+            "misskey ".map { TokenCharacterType.Character } +
+                "Search".map { TokenCharacterType.Search } +
+                listOf(TokenCharacterType.Eof),
+            result,
+        )
+    }
+
+    @Test
+    fun testPlainSearchIgnoreCase() {
+        val tokenizer = Tokenizer()
+        val content = "misskey search"
+        val result = tokenizer.parse(StringReader(content))
+        assertEquals(content.length, result.size - 1)
+        assertContentEquals(
+            "misskey ".map { TokenCharacterType.Character } +
+                "search".map { TokenCharacterType.Search } +
+                listOf(TokenCharacterType.Eof),
+            result,
+        )
+    }
+
+    @Test
+    fun testPlainSearchJapanese() {
+        val tokenizer = Tokenizer()
+        val content = "misskey 検索"
+        val result = tokenizer.parse(StringReader(content))
+        assertEquals(content.length, result.size - 1)
+        assertContentEquals(
+            "misskey ".map { TokenCharacterType.Character } +
+                "検索".map { TokenCharacterType.Search } +
+                listOf(TokenCharacterType.Eof),
             result,
         )
     }
