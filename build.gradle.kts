@@ -1,6 +1,6 @@
 plugins {
-    kotlin("multiplatform") version "2.1.0"
-    id("org.jetbrains.kotlinx.kover") version "0.9.0"
+    kotlin("multiplatform") version "2.3.0"
+    id("org.jetbrains.kotlinx.kover") version "0.9.7"
     id("com.vanniktech.maven.publish") version "0.34.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
 }
@@ -22,9 +22,6 @@ kotlin {
         freeCompilerArgs.add("-Xwhen-guards")
     }
     jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = "1.8"
-        }
         testRuns.named("test") {
             executionTask.configure {
                 useJUnitPlatform()
