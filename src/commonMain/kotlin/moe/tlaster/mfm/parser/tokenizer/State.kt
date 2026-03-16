@@ -1259,7 +1259,7 @@ internal data object HashState : State {
         reader: Reader,
     ) {
         if (hasAsciiAlphanumericBeforeMarker(reader)) {
-            tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
+            tokenizer.emit(TokenCharacterType.Character, reader.position)
             tokenizer.switch(DataState)
             return
         }
@@ -1317,7 +1317,7 @@ internal data object ColonState : State {
         reader: Reader,
     ) {
         if (hasAsciiAlphanumericBeforeMarker(reader)) {
-            tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
+            tokenizer.emit(TokenCharacterType.Character, reader.position)
             tokenizer.switch(DataState)
             return
         }

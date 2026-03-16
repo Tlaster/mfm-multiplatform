@@ -95,11 +95,11 @@ class TokenizerTest {
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
                 TokenCharacterType.Character,
-                TokenCharacterType.HashTagStart,
-                TokenCharacterType.HashTag,
-                TokenCharacterType.HashTag,
-                TokenCharacterType.HashTag,
-                TokenCharacterType.HashTag,
+                TokenCharacterType.Character,
+                TokenCharacterType.Character,
+                TokenCharacterType.Character,
+                TokenCharacterType.Character,
+                TokenCharacterType.Character,
                 TokenCharacterType.Eof,
             ),
             result,
@@ -115,11 +115,11 @@ class TokenizerTest {
         assertContentEquals(
             listOf(
                 TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
+                TokenCharacterType.HashTagStart,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
+                TokenCharacterType.HashTag,
                 TokenCharacterType.Eof,
             ),
             result,
@@ -398,12 +398,16 @@ class TokenizerTest {
         val result = tokenizer.parse(StringReader(content))
         assertEquals(content.length, result.size - 1)
         assertContentEquals(
-            content
-                .map {
-                    TokenCharacterType.Character
-                }.plus(
-                    TokenCharacterType.Eof,
-                ),
+            listOf(
+                TokenCharacterType.Character,
+                TokenCharacterType.AsteriskItalicStart,
+                TokenCharacterType.Italic,
+                TokenCharacterType.Italic,
+                TokenCharacterType.Italic,
+                TokenCharacterType.Italic,
+                TokenCharacterType.AsteriskItalicStart,
+                TokenCharacterType.Eof,
+            ),
             result,
         )
     }
@@ -478,12 +482,12 @@ class TokenizerTest {
         assertContentEquals(
             listOf(
                 TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
-                TokenCharacterType.Character,
+                TokenCharacterType.UnderscoreItalicStart,
+                TokenCharacterType.Italic,
+                TokenCharacterType.Italic,
+                TokenCharacterType.Italic,
+                TokenCharacterType.Italic,
+                TokenCharacterType.UnderscoreItalicStart,
                 TokenCharacterType.Eof,
             ),
             result,
