@@ -520,20 +520,15 @@ internal data object TagState : State {
         } else {
             when (name.toString()) {
                 "center" -> {
-                    // TODO: check center start
-//                    val prev = tokenCharacterTypes.getOrNull(start - 1)
-//                    if (prev == LineBreak || prev == null) {
-//                        currentContainer.content.add(CenterNode(start))
-//                        val node = CenterNode(start)
-//                        currentContainer.content.add(node)
-//                        currentContainer = node
-//                    } else {
-//                        currentContainer.content.add(TextNode(reader.readAt(start, reader.position - start)))
-//                    }
-                    val node = CenterNode(start)
-                    currentContainer.content.add(node)
-                    stack.add(node)
-                    currentContainer = node
+                    val prevToken = if (start > 0) tokenCharacterTypes[start - 1] else null
+                    if (prevToken == LineBreak || prevToken == null || prevToken == Blockquote) {
+                        val node = CenterNode(start)
+                        currentContainer.content.add(node)
+                        stack.add(node)
+                        currentContainer = node
+                    } else {
+                        currentContainer.content.add(TextNode(reader.readAt(start, reader.position - start)))
+                    }
                 }
                 "b" -> {
                     val node = BoldNode(start)
@@ -606,21 +601,19 @@ internal data object EndTagState : State {
 
         when (name.toString()) {
             "center" -> {
-                // TODO: check center end
-                stack
-                    .findLast { it is CenterNode }
-                    ?.let { center ->
-                        if (center.content.none { it is UrlNode }) {
-                            trimSurroundingSingleLineBreak(center)
+                val nextToken = if (reader.hasNext()) tokenCharacterTypes[reader.position] else null
+                if (nextToken == LineBreak || nextToken == null || nextToken == Eof) {
+                    stack
+                        .findLast { it is CenterNode }
+                        ?.let { center ->
+                            if (center.content.none { it is UrlNode }) {
+                                trimSurroundingSingleLineBreak(center)
+                            }
                         }
-                    }
-                endNode<CenterNode>(start)
-//                val next = tokenCharacterTypes.getOrNull(reader.position)
-//                if (next == LineBreak || next == null || next == Eof) {
-//                    endNode<CenterNode>(start)
-//                } else {
-//                    currentContainer.content.add(TextNode(reader.readAt(start, reader.position - start)))
-//                }
+                    endNode<CenterNode>(start)
+                } else {
+                    currentContainer.content.add(TextNode(reader.readAt(start, reader.position - start)))
+                }
             }
             "b" -> {
                 endNode<BoldNode>(start)
@@ -710,6 +703,10 @@ internal data object LinkState : State {
                         LinkHrefClose,
                         LinkHref,
                         SilentLink,
+                        TagOpen,
+                        EndTagOpen,
+                        Tag,
+                        TagClose,
                         -> Character
                         else -> token
                     }
@@ -735,15 +732,15 @@ internal data object LinkState : State {
     }
 }
 
-private fun mergeAdjacentTextNodes(container: ContainerNode) {
+internal fun mergeAdjacentTextNodes(container: ContainerNode) {
     val merged = arrayListOf<Node>()
     for (node in container.content) {
         if (node is ContainerNode) {
             mergeAdjacentTextNodes(node)
         }
         val previous = merged.lastOrNull()
-        if (previous is TextNode && node is TextNode) {
-            merged[merged.lastIndex] = TextNode(previous.content + node.content)
+        if (previous is TextNode && node is TextNode && previous.plain == node.plain) {
+            merged[merged.lastIndex] = TextNode(previous.content + node.content, previous.plain)
         } else {
             merged.add(node)
         }

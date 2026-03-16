@@ -53,6 +53,7 @@ internal class TreeBuilder {
                 }
             }
         }
+        mergeAdjacentTextNodes(root)
         return root
     }
 }

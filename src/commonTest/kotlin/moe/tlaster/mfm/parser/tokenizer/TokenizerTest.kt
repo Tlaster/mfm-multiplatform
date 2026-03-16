@@ -27,6 +27,30 @@ class TokenizerTest {
     }
 
     @Test
+    fun testEmojiWithTextStart() {
+        val tokenizer = Tokenizer()
+        val content = "test:test:"
+        val result = tokenizer.parse(StringReader(content))
+        assertEquals(content.length, result.size - 1)
+        assertContentEquals(
+            listOf(
+                TokenCharacterType.Character,
+                TokenCharacterType.Character,
+                TokenCharacterType.Character,
+                TokenCharacterType.Character,
+                TokenCharacterType.EmojiNameStart,
+                TokenCharacterType.EmojiName,
+                TokenCharacterType.EmojiName,
+                TokenCharacterType.EmojiName,
+                TokenCharacterType.EmojiName,
+                TokenCharacterType.EmojiNameStart,
+                TokenCharacterType.Eof,
+            ),
+            result,
+        )
+    }
+
+    @Test
     fun testColonNonEmoji() {
         val tokenizer = Tokenizer()
         val content = ":test"

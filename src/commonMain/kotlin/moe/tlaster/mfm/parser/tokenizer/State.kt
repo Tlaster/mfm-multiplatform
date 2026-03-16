@@ -480,7 +480,7 @@ internal data object BracketOpenState : State {
             reader.consume("検索]".length)
         } else {
             when (val current = reader.consume()) {
-                in listOf(']', '<', '>') -> {
+                ']' -> {
                     tokenizer.emit(TokenCharacterType.Character, reader.position - 1)
                     tokenizer.switch(DataState)
                     reader.pushback()

@@ -448,9 +448,7 @@ class TreeBuilderTest {
                             start = 0,
                             content =
                                 arrayListOf(
-                                    TextNode("foo"),
-                                    TextNode("\n"),
-                                    TextNode("bar"),
+                                    TextNode("foo\nbar"),
                                 ),
                         ),
                     ),
@@ -475,10 +473,7 @@ class TreeBuilderTest {
                             start = 0,
                             content =
                                 arrayListOf(
-                                    TextNode("foo"),
-                                    TextNode("\n"),
-                                    TextNode("\n"),
-                                    TextNode("bar"),
+                                    TextNode("foo\n\nbar"),
                                 ),
                         ),
                     ),
@@ -905,9 +900,7 @@ class TreeBuilderTest {
             RootNode(
                 content =
                     arrayListOf(
-                        TextNode(content = "<test>"),
-                        TextNode(content = "test"),
-                        TextNode(content = "</test>"),
+                        TextNode(content = "<test>test</test>"),
                     ),
             ),
             builderResult,
@@ -978,11 +971,7 @@ class TreeBuilderTest {
                             url = "https://test.com",
                             silent = false,
                         ),
-                        TextNode(content = " \$[test"),
-                        TextNode(content = "]"),
-                        TextNode(content = " \$[test"),
-                        TextNode(content = "]"),
-                        TextNode(content = "("),
+                        TextNode(content = " \$[test] \$[test]("),
                         UrlNode(url = "https://test.com"),
                         TextNode(content = ") "),
                         HashtagNode(tag = "test"),
@@ -1015,8 +1004,7 @@ class TreeBuilderTest {
                         name = "flip",
                         content =
                             arrayListOf(
-                                TextNode(content = "eefewfe"),
-                                TextNode(content = "~~fds<b>afd</b>f"),
+                                TextNode(content = "eefewfe~~fds<b>afd</b>f"),
                             ),
                     ),
                     TextNode(content = "~~"),
@@ -1077,8 +1065,7 @@ class TreeBuilderTest {
             RootNode(
                 0,
                 arrayListOf(
-                    TextNode(content = "111111111111"),
-                    TextNode("\n"),
+                    TextNode(content = "111111111111\n"),
                     SearchNode(
                         query = "fewfew few few",
                         search = "[Search]",
@@ -1294,8 +1281,7 @@ class TreeBuilderTest {
                             content =
                                 arrayListOf(
                                     HashtagNode(tag = "きょうのにゃんぷっぷー"),
-                                    TextNode(" は"),
-                                    TextNode("\n"),
+                                    TextNode(" は\n"),
                                     FnNode(
                                         start = 23,
                                         name = "tada",
@@ -1310,10 +1296,7 @@ class TreeBuilderTest {
                                             ),
                                         args = hashMapOf("speed" to "0s"),
                                     ),
-                                    TextNode("\n"),
-                                    TextNode("タグ：ブロブキャット, catblob"),
-                                    TextNode("\n"),
-                                    TextNode("にゃぷあつめ率：0.48% "),
+                                    TextNode("\nタグ：ブロブキャット, catblob\nにゃぷあつめ率：0.48% "),
                                     UrlNode("https://misskey.io/play/9pcmdcebfyat037j"),
                                 ),
                         ),
@@ -1706,6 +1689,46 @@ class TreeBuilderTest {
                             url = "https://test.com",
                             silent = false,
                         ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testLinkWithCenterTag() {
+        val tokenizer = Tokenizer()
+        val content = "[<center>haha!</center>](https://www.google.com)"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        LinkNode(
+                            content = arrayListOf(TextNode("<center>haha!</center>")),
+                            url = "https://www.google.com",
+                            silent = false,
+                        ),
+                    ),
+            ),
+            builderResult,
+        )
+    }
+
+    @Test
+    fun testCenterOnlyAtLineStartEnd() {
+        val tokenizer = Tokenizer()
+        val content = "123<center>abc</center>213123"
+        val result = tokenizer.parse(StringReader(content))
+        val builder = TreeBuilder()
+        val builderResult = builder.build(StringReader(content), result)
+        assertEquals(
+            RootNode(
+                content =
+                    arrayListOf(
+                        TextNode(content = "123<center>abc</center>213123"),
                     ),
             ),
             builderResult,
