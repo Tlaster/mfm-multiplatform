@@ -837,10 +837,6 @@ class UpstreamParserCompatibilityTest {
         )
     }
 
-    @Ignore("nestLimit option is not implemented in the current Kotlin parser API")
-    @Test
-    fun fullParserNestingLimitCases() {
-    }
 
     @Test
     fun fullParserComposite() {

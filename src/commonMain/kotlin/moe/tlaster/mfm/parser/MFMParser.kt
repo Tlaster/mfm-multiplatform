@@ -36,7 +36,9 @@ private fun normalizeNodes(
     nodes: ArrayList<Node>,
     insideLink: Boolean = false,
 ) {
-    nodes.replaceAll { normalizeNode(it, insideLink) }
+    for (i in nodes.indices) {
+        nodes[i] = normalizeNode(nodes[i], insideLink)
+    }
 
     var index = 0
     while (index < nodes.size) {
