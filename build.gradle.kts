@@ -31,16 +31,7 @@ kotlin {
             }
         }
     }
-    js {
-        browser()
-        nodejs()
-    }
-    //    @OptIn(ExperimentalWasmDsl::class)
-    //    wasm {
-    //        browser()
-    //        nodejs()
-    //        d8()
-    //    }
+    wasmJs()
     iosX64()
     iosArm64()
     iosSimulatorArm64()
