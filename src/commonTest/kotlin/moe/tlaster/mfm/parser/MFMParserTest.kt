@@ -1,4 +1,4 @@
-package moe.tlaster.mfm.parser.tokenizer
+package moe.tlaster.mfm.parser
 
 import moe.tlaster.mfm.parser.tree.BoldNode
 import moe.tlaster.mfm.parser.tree.CashNode
@@ -19,19 +19,15 @@ import moe.tlaster.mfm.parser.tree.SearchNode
 import moe.tlaster.mfm.parser.tree.SmallNode
 import moe.tlaster.mfm.parser.tree.StrikeNode
 import moe.tlaster.mfm.parser.tree.TextNode
-import moe.tlaster.mfm.parser.tree.TreeBuilder
 import moe.tlaster.mfm.parser.tree.UrlNode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TreeBuilderTest {
+class MFMParserTest {
     @Test
     fun testText() {
-        val tokenizer = Tokenizer()
         val content = ":test:"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -47,11 +43,8 @@ class TreeBuilderTest {
 
     @Test
     fun testUserName() {
-        val tokenizer = Tokenizer()
         val content = "@test"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -68,11 +61,8 @@ class TreeBuilderTest {
 
     @Test
     fun testUserNameWithHost() {
-        val tokenizer = Tokenizer()
         val content = "@test@host"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -89,11 +79,8 @@ class TreeBuilderTest {
 
     @Test
     fun testMentionAllowsDotsInUsername() {
-        val tokenizer = Tokenizer()
         val content = "@first.last@misskey.io"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -110,11 +97,8 @@ class TreeBuilderTest {
 
     @Test
     fun testMentionMustNotStartAfterAsciiAlphanumeric() {
-        val tokenizer = Tokenizer()
         val content = "a@test"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -130,11 +114,8 @@ class TreeBuilderTest {
 
     @Test
     fun testMentionMustNotStartWithHyphen() {
-        val tokenizer = Tokenizer()
         val content = "@-test"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -150,11 +131,8 @@ class TreeBuilderTest {
 
     @Test
     fun testHashTag() {
-        val tokenizer = Tokenizer()
         val content = "#test"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -170,11 +148,8 @@ class TreeBuilderTest {
 
     @Test
     fun testCashTag() {
-        val tokenizer = Tokenizer()
         val content = "\$test"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -190,11 +165,8 @@ class TreeBuilderTest {
 
     @Test
     fun testInlineCode() {
-        val tokenizer = Tokenizer()
         val content = "`test`"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -210,11 +182,8 @@ class TreeBuilderTest {
 
     @Test
     fun testCodeBlock() {
-        val tokenizer = Tokenizer()
         val content = "```test```"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -231,11 +200,8 @@ class TreeBuilderTest {
 
     @Test
     fun testCodeBlockWithLanguage() {
-        val tokenizer = Tokenizer()
         val content = "```kotlin\ntest\n```"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -252,11 +218,8 @@ class TreeBuilderTest {
 
     @Test
     fun testCodeBlockWithSpecialLanguage() {
-        val tokenizer = Tokenizer()
         val content = "```objective-c\ntest\n```"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -273,11 +236,8 @@ class TreeBuilderTest {
 
     @Test
     fun testAsteriskBold() {
-        val tokenizer = Tokenizer()
         val content = "**test**"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -299,11 +259,8 @@ class TreeBuilderTest {
 
     @Test
     fun testAsteriskItalic() {
-        val tokenizer = Tokenizer()
         val content = "*test*"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -325,11 +282,8 @@ class TreeBuilderTest {
 
     @Test
     fun testUnderscoreBold() {
-        val tokenizer = Tokenizer()
         val content = "__test__"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -351,11 +305,8 @@ class TreeBuilderTest {
 
     @Test
     fun testUnderscoreItalic() {
-        val tokenizer = Tokenizer()
         val content = "_test_"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -377,11 +328,8 @@ class TreeBuilderTest {
 
     @Test
     fun testInelineMath() {
-        val tokenizer = Tokenizer()
         val content = "\\(test\\)"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -397,21 +345,15 @@ class TreeBuilderTest {
 
     @Test
     fun testMathBlock() {
-        val tokenizer = Tokenizer()
         val content = "\\[test\\]"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(RootNode(content = arrayListOf(MathBlockNode(formula = "test"))), builderResult)
     }
 
     @Test
     fun testQuote() {
-        val tokenizer = Tokenizer()
         val content = "> test"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -434,11 +376,8 @@ class TreeBuilderTest {
 
     @Test
     fun testQuoteMergesAdjacentLines() {
-        val tokenizer = Tokenizer()
         val content = "> foo\n> bar"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -459,11 +398,8 @@ class TreeBuilderTest {
 
     @Test
     fun testQuoteAllowsBlankLinesInside() {
-        val tokenizer = Tokenizer()
         val content = "> foo\n>\n> bar"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -484,11 +420,8 @@ class TreeBuilderTest {
 
     @Test
     fun testQuoteIgnoresTrailingBlankLine() {
-        val tokenizer = Tokenizer()
         val content = "> foo\n>\noutside"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -507,11 +440,8 @@ class TreeBuilderTest {
 
     @Test
     fun testLink() {
-        val tokenizer = Tokenizer()
         val content = "[test](https://test.com)"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -530,11 +460,8 @@ class TreeBuilderTest {
 
     @Test
     fun testSilentLink() {
-        val tokenizer = Tokenizer()
         val content = "?[test](https://test.com)"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -553,11 +480,8 @@ class TreeBuilderTest {
 
     @Test
     fun testUrl() {
-        val tokenizer = Tokenizer()
         val content = "https://test.com"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -574,12 +498,9 @@ class TreeBuilderTest {
 
     @Test
     fun testCJKUrl() {
-        val tokenizer = Tokenizer()
         val encoded = "https://example.com/%E6%B5%8B%E8%AF%95"
         val decoded = "https://example.com/测试"
-        val result = tokenizer.parse(StringReader(encoded))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(encoded), result)
+        val builderResult = MFMParser().parse(encoded)
 
         assertEquals(
             RootNode(
@@ -596,11 +517,8 @@ class TreeBuilderTest {
 
     @Test
     fun testFn() {
-        val tokenizer = Tokenizer()
         val content = "\$[flip.h,v MisskeyでFediverseの世界が広がります]"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -619,11 +537,8 @@ class TreeBuilderTest {
 
     @Test
     fun testNonFn() {
-        val tokenizer = Tokenizer()
         val content = "\$[flip.h,v Miss~~keyでFedivers*eの世**界が広_が__ります"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -639,11 +554,8 @@ class TreeBuilderTest {
 
     @Test
     fun testTildeStrikethrough() {
-        val tokenizer = Tokenizer()
         val content = "~~test~~"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -666,11 +578,8 @@ class TreeBuilderTest {
 
     @Test
     fun testSearch() {
-        val tokenizer = Tokenizer()
         val content = "misskey [Search]"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -688,11 +597,8 @@ class TreeBuilderTest {
 
     @Test
     fun testPlainSearch() {
-        val tokenizer = Tokenizer()
         val content = "misskey Search"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -710,11 +616,8 @@ class TreeBuilderTest {
 
     @Test
     fun testPlainSearchIgnoreCase() {
-        val tokenizer = Tokenizer()
         val content = "misskey search"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -732,11 +635,8 @@ class TreeBuilderTest {
 
     @Test
     fun testPlainSearchJapanese() {
-        val tokenizer = Tokenizer()
         val content = "misskey 検索"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -754,11 +654,8 @@ class TreeBuilderTest {
 
     @Test
     fun testBoldTag() {
-        val tokenizer = Tokenizer()
         val content = "<b>test</b>"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -781,11 +678,8 @@ class TreeBuilderTest {
 
     @Test
     fun testItalicTag() {
-        val tokenizer = Tokenizer()
         val content = "<i>test</i>"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -808,11 +702,8 @@ class TreeBuilderTest {
 
     @Test
     fun testStrikeTag() {
-        val tokenizer = Tokenizer()
         val content = "<s>test</s>"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -835,11 +726,8 @@ class TreeBuilderTest {
 
     @Test
     fun testSmallTag() {
-        val tokenizer = Tokenizer()
         val content = "<small>test</small>"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -862,11 +750,8 @@ class TreeBuilderTest {
 
     @Test
     fun testCenterTag() {
-        val tokenizer = Tokenizer()
         val content = "<center>test</center>"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -889,11 +774,8 @@ class TreeBuilderTest {
 
     @Test
     fun testNonTag() {
-        val tokenizer = Tokenizer()
         val content = "<test>test</test>"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -908,11 +790,8 @@ class TreeBuilderTest {
 
     @Test
     fun testNonTag2() {
-        val tokenizer = Tokenizer()
         val content = "<b>test<small</center>"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         assertEquals(
             RootNode(
@@ -927,12 +806,9 @@ class TreeBuilderTest {
 
     @Test
     fun testMixed() {
-        val tokenizer = Tokenizer()
         val content =
             "test **test** *test* ~~test~~ `test` [test](https://test.com) \$[test] \$[test](https://test.com) #test @test@host \$test"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
 
         val expected =
             RootNode(
@@ -970,9 +846,13 @@ class TreeBuilderTest {
                             url = "https://test.com",
                             silent = false,
                         ),
-                        TextNode(content = " \$[test] \$[test]("),
-                        UrlNode(url = "https://test.com"),
-                        TextNode(content = ") "),
+                        TextNode(content = " \$[test] \$"),
+                        LinkNode(
+                            content = arrayListOf(TextNode("test")),
+                            url = "https://test.com",
+                            silent = false,
+                        ),
+                        TextNode(content = " "),
                         HashtagNode(tag = "test"),
                         TextNode(content = " "),
                         MentionNode(
@@ -989,11 +869,8 @@ class TreeBuilderTest {
 
     @Test
     fun testMixed2() {
-        val tokenizer = Tokenizer()
         val content = "\$[flip eefewfe~~fds<b>afd</b>f]~~"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 0,
@@ -1015,11 +892,8 @@ class TreeBuilderTest {
 
     @Test
     fun testMixed3() {
-        val tokenizer = Tokenizer()
         val content = "~~\$[flip.h,v Misskeyで\$[flip.h,v MisskeyでFediverseの世界が広がります]]~~"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         val expected =
             RootNode(
                 0,
@@ -1055,11 +929,8 @@ class TreeBuilderTest {
 
     @Test
     fun testSearch2() {
-        val tokenizer = Tokenizer()
         val content = "111111111111\nfewfew few few [Search]"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         val expected =
             RootNode(
                 0,
@@ -1076,11 +947,8 @@ class TreeBuilderTest {
 
     @Test
     fun testQuote2() {
-        val tokenizer = Tokenizer()
         val content = "> haha!\nwo!"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         val expected =
             RootNode(
                 0,
@@ -1100,11 +968,8 @@ class TreeBuilderTest {
 
     @Test
     fun testQuoteOnlyAtLineStart() {
-        val tokenizer = Tokenizer()
         val content = "a->b"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         val expected =
             RootNode(
                 0,
@@ -1117,11 +982,8 @@ class TreeBuilderTest {
 
     @Test
     fun testPlain() {
-        val tokenizer = Tokenizer()
         val content = "<plain>**bold** @user $[x2 test]</plain>"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         val expected =
             RootNode(
                 0,
@@ -1134,11 +996,8 @@ class TreeBuilderTest {
 
     @Test
     fun testMixed5() {
-        val tokenizer = Tokenizer()
         val content = "?[:mikan_muite_agemasyoune:りしちか](https://misskey.io/@Lysitka)さんに勝ちました♪"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         val expected =
             RootNode(
                 0,
@@ -1160,17 +1019,13 @@ class TreeBuilderTest {
 
     @Test
     fun testMixed6() {
-        val tokenizer = Tokenizer()
         val content =
             "<center>:role_nyanpuppu:$[border.width=2,color=0000 $[border.radius=4,width=0 $[bg.color=00385C $[position.x=1.5,y=1 $[jump.speed=20s $[twitch.speed=30s $[scale.x=2,y=2 $[flip :meowbongopeak:]]]]]$[position.x=-.9 $[border.width=0 **$[position.x=-.6,y=.1 #にゃんぷっぷー同盟]**]]$[position.x=-1.2 $[border.width=0 $[position.y=1 $[flip $[spin.speed=1s,alternate $[flip $[spin.speed=1s,alternate,delay=.01s $[position.y=-1 :blobcatmeltlove:]]]]]]]]]]]:blobcat_mudamudamuda::dododododo::dododododo::dododododo::dododododo::resonyance::tuuti_hakai::ga::hoshii:あと:5000t_5000tyouen::5000t_hosii:</center>"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
     }
 
     @Test
     fun testMixed7() {
-        val tokenizer = Tokenizer()
         val content =
             """
             バリくそ極小絵描き
@@ -1184,18 +1039,13 @@ class TreeBuilderTest {
             https://knoow.jp/@/setsna
             $[border.width=2,radius=40,color=83a5b9 $[fg.color=f5b2b2 $[bg.color=dcdcdc $[scale.x=0.8,y=0.8 ?[$[fg.color=f5b2b2 ガキ貿易大臣]](https://msk.kitazawa.me/@setuna)]]]] $[border.width=2,radius=40,color=10b5x9 $[fg.color=f5b2b2 $[bg.color=dcdcdc $[scale.x=0.8,y=0.8 ?[$[fg.color=f5 千葉のガキ使い見習い]](https://msk.kitazawa.me/@setuna)]]]] $[border.width=2,radius=40,color=93a0b0 $[fg.color=f5b2b2 $[bg.color=ddcdc $[scale.x=0.8,y=0.8 ?[$[fg.color=c2b2f2 マスカットキャラクター:character_muscat:]](https://msk.kitazawa.me/@setuna)]]]]
             """.trimIndent()
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
     }
 
     @Test
     fun testSpaceInLink() {
-        val tokenizer = Tokenizer()
         val content = "[test link](https://test.com)"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -1213,11 +1063,8 @@ class TreeBuilderTest {
 
     @Test
     fun testEmojiOnlyMode() {
-        val tokenizer = Tokenizer(emojiOnly = true)
         val content = "test :emoji: with [link in :emoji:](https://test.com)"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser(emojiOnly = true).parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -1235,11 +1082,8 @@ class TreeBuilderTest {
 
     @Test
     fun testHashtagMultiline() {
-        val tokenizer = Tokenizer()
         val content = "#test　#test\n#test #test"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -1259,7 +1103,6 @@ class TreeBuilderTest {
 
     @Test
     fun testText1() {
-        val tokenizer = Tokenizer()
         val content =
             """
             <center>#きょうのにゃんぷっぷー は
@@ -1267,9 +1110,7 @@ class TreeBuilderTest {
             タグ：ブロブキャット, catblob
             にゃぷあつめ率：0.48% https://misskey.io/play/9pcmdcebfyat037j</center>
             """.trimIndent()
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -1306,11 +1147,8 @@ class TreeBuilderTest {
 
     @Test
     fun testLink2() {
-        val tokenizer = Tokenizer()
         val content = "[[test link]](https://test.com)"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -1328,11 +1166,8 @@ class TreeBuilderTest {
 
     @Test
     fun testLinkLabelDoesNotParseMention() {
-        val tokenizer = Tokenizer()
         val content = "[@alice](https://test.com)"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -1350,11 +1185,8 @@ class TreeBuilderTest {
 
     @Test
     fun testLinkLabelDoesNotParseUrl() {
-        val tokenizer = Tokenizer()
         val content = "[https://example.com/@alice](https://test.com)"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -1372,20 +1204,20 @@ class TreeBuilderTest {
 
     @Test
     fun testLinkLabelDoesNotParseNestedLink() {
-        val tokenizer = Tokenizer()
         val content = "[[inner](https://inner.test)](https://outer.test)"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
                     arrayListOf(
                         LinkNode(
-                            content = arrayListOf(TextNode("[inner](https://inner.test)")),
+                            content = arrayListOf(TextNode("[inner")),
                             url = "https://outer.test",
                             silent = false,
                         ),
+                        TextNode("]("),
+                        UrlNode("https://inner.test"),
+                        TextNode(")"),
                     ),
             ),
             builderResult,
@@ -1394,7 +1226,6 @@ class TreeBuilderTest {
 
     @Test
     fun testComplexMfm() {
-        val tokenizer = Tokenizer()
         val content =
             "オープンワールドRPG『:genshin:』の総合チャンネルです。\n" +
                 "キャラクター、ストーリー、育成、アプデ等々、原神に関連するものであれば何でも投稿を歓迎しております！\n" +
@@ -1424,9 +1255,7 @@ class TreeBuilderTest {
                 "┣[ビルドランキング](http://akasha.cv)\n" +
                 "┗[聖遺物計算](http://is.gd/VAtEEU)\n\n" +
                 "管理者：@ms"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content = arrayListOf(
@@ -1759,11 +1588,8 @@ MentionNode(
 
     @Test
     fun testLink3() {
-        val tokenizer = Tokenizer()
         val content = "[[test link](https://test.com)"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -1781,11 +1607,8 @@ MentionNode(
 
     @Test
     fun testLinkWithCenterTag() {
-        val tokenizer = Tokenizer()
         val content = "[<center>haha!</center>](https://www.google.com)"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =
@@ -1803,11 +1626,8 @@ MentionNode(
 
     @Test
     fun testCenterOnlyAtLineStartEnd() {
-        val tokenizer = Tokenizer()
         val content = "123<center>abc</center>213123"
-        val result = tokenizer.parse(StringReader(content))
-        val builder = TreeBuilder()
-        val builderResult = builder.build(StringReader(content), result)
+        val builderResult = MFMParser().parse(content)
         assertEquals(
             RootNode(
                 content =

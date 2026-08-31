@@ -1,0 +1,370 @@
+{
+  "environment": {
+    "target": "iosSimulatorArm64",
+    "simulatedDevice": "iPhone 17 Pro",
+    "simulatedOS": "iOS 27.0",
+    "host": "Apple M1 Ultra (20 cores, 128 GB)",
+    "hostOS": "macOS 27.0 (26A5406e)",
+    "xcode": "26.6 (17F113)",
+    "kotlinNative": "2.3.0",
+    "binary": "release"
+  },
+  "methodology": {
+    "processIsolation": "one process per benchmark",
+    "calibrationTargetMilliseconds": 500,
+    "warmupIterations": 3,
+    "measurementIterations": 5,
+    "metric": "throughput",
+    "note": "Mean throughput and sample standard deviation; median latency is derived from five ns/op samples."
+  },
+  "baseline": {
+    "sourceCommit": "e52d1dbee925f56e9c6b15ad9b22694c1bcbffa8",
+    "benchmarks": [
+      {
+        "benchmark": "parseShortPlain",
+        "operationsPerSample": 32768,
+        "throughputOpsPerSecond": {
+          "mean": 42744.34667596633,
+          "sampleStandardDeviation": 795.6575587826092
+        },
+        "medianNanosecondsPerOperation": 23488.765716552734,
+        "samplesNanosecondsPerOperation": [
+          23808.523803710938,
+          23749.27392578125,
+          23488.765716552734,
+          23198.34262084961,
+          22761.75308227539
+        ],
+        "resultHash": -842488972
+      },
+      {
+        "benchmark": "parseShortRich",
+        "operationsPerSample": 1024,
+        "throughputOpsPerSecond": {
+          "mean": 1420.5217901575322,
+          "sampleStandardDeviation": 10.150071991204715
+        },
+        "medianNanosecondsPerOperation": 703283.935546875,
+        "samplesNanosecondsPerOperation": [
+          712106.7705078125,
+          703283.935546875,
+          698107.1376953125,
+          703319.580078125,
+          703160.3603515625
+        ],
+        "resultHash": -1072672040
+      },
+      {
+        "benchmark": "parseBatchOf1000Posts",
+        "operationsPerSample": 1,
+        "throughputOpsPerSecond": {
+          "mean": 1.607533725682241,
+          "sampleStandardDeviation": 0.08366913355885643
+        },
+        "medianNanosecondsPerOperation": 626560833,
+        "samplesNanosecondsPerOperation": [
+          594697917,
+          629222792,
+          626560833,
+          674418292,
+          592379542
+        ],
+        "resultHash": 2020633192
+      },
+      {
+        "benchmark": "parseLargePlain1MiB",
+        "operationsPerSample": 4,
+        "throughputOpsPerSecond": {
+          "mean": 5.1289564789212685,
+          "sampleStandardDeviation": 0.18618666108133136
+        },
+        "medianNanosecondsPerOperation": 192641333.5,
+        "samplesNanosecondsPerOperation": [
+          192840406.25,
+          191198062.5,
+          192641333.5,
+          190861343.75,
+          208395458.5
+        ],
+        "resultHash": -1627388684
+      },
+      {
+        "benchmark": "parseLargeRich1MiB",
+        "operationsPerSample": 1,
+        "throughputOpsPerSecond": {
+          "mean": 1.1827492486860403,
+          "sampleStandardDeviation": 0.062326860213063995
+        },
+        "medianNanosecondsPerOperation": 842862625,
+        "samplesNanosecondsPerOperation": [
+          872800500,
+          842201125,
+          897443917,
+          842862625,
+          781289375
+        ],
+        "resultHash": -941375165
+      },
+      {
+        "benchmark": "parseFunctionHeavy64KiB",
+        "operationsPerSample": 16,
+        "throughputOpsPerSecond": {
+          "mean": 18.271143401167766,
+          "sampleStandardDeviation": 0.9468327494774358
+        },
+        "medianNanosecondsPerOperation": 56226075.5,
+        "samplesNanosecondsPerOperation": [
+          51677710.9375,
+          51956156.25,
+          56226075.5,
+          57142015.625,
+          57233065.125
+        ],
+        "resultHash": 1780872463
+      },
+      {
+        "benchmark": "parseUnmatchedClosings4KiB",
+        "operationsPerSample": 256,
+        "throughputOpsPerSecond": {
+          "mean": 369.019666979392,
+          "sampleStandardDeviation": 34.44067997155355
+        },
+        "medianNanosecondsPerOperation": 2559611.98046875,
+        "samplesNanosecondsPerOperation": [
+          2917918.78125,
+          3106825.359375,
+          2552069.98828125,
+          2512604.8203125,
+          2559611.98046875
+        ],
+        "resultHash": -39648012
+      },
+      {
+        "benchmark": "parseUnmatchedClosings32KiB",
+        "operationsPerSample": 4,
+        "throughputOpsPerSecond": {
+          "mean": 4.714795781015899,
+          "sampleStandardDeviation": 0.14634094507089326
+        },
+        "medianNanosecondsPerOperation": 213265802,
+        "samplesNanosecondsPerOperation": [
+          203262947.75,
+          215051781.25,
+          213265802,
+          220721333.25,
+          209003177
+        ],
+        "resultHash": -317192972
+      },
+      {
+        "benchmark": "parseUnmatchedClosings128KiB",
+        "operationsPerSample": 1,
+        "throughputOpsPerSecond": {
+          "mean": 0.15509063831167885,
+          "sampleStandardDeviation": 0.005679601393887073
+        },
+        "medianNanosecondsPerOperation": 6458775709,
+        "samplesNanosecondsPerOperation": [
+          6797831041,
+          6458775709,
+          6272109958,
+          6551263500,
+          6194211416
+        ],
+        "resultHash": -1268775692
+      },
+      {
+        "benchmark": "parseDeepFunctions750Levels",
+        "operationsPerSample": 256,
+        "throughputOpsPerSecond": {
+          "mean": 385.48239003650355,
+          "sampleStandardDeviation": 6.633094824519081
+        },
+        "medianNanosecondsPerOperation": 2597966.47265625,
+        "samplesNanosecondsPerOperation": [
+          2597966.47265625,
+          2572809.89453125,
+          2602885.41796875,
+          2661068.84765625,
+          2539118
+        ],
+        "resultHash": -138222737
+      }
+    ]
+  },
+  "optimized": {
+    "source": "current working tree",
+    "benchmarks": [
+      {
+        "benchmark": "parseShortPlain",
+        "operationsPerSample": 524288,
+        "throughputOpsPerSecond": {
+          "mean": 671954.2270980907,
+          "sampleStandardDeviation": 4697.857691099639
+        },
+        "medianNanosecondsPerOperation": 1494.8012828826904,
+        "samplesNanosecondsPerOperation": [
+          1494.8012828826904,
+          1496.9396591186523,
+          1478.7568244934082,
+          1495.5307655334473,
+          1475.2446823120117
+        ],
+        "resultHash": -842488972
+      },
+      {
+        "benchmark": "parseShortRich",
+        "operationsPerSample": 16384,
+        "throughputOpsPerSecond": {
+          "mean": 30791.953420176764,
+          "sampleStandardDeviation": 303.7365228233639
+        },
+        "medianNanosecondsPerOperation": 32538.3427734375,
+        "samplesNanosecondsPerOperation": [
+          32264.938354492188,
+          32079.15496826172,
+          32538.3427734375,
+          32912.241638183594,
+          32598.05548095703
+        ],
+        "resultHash": -1072672040
+      },
+      {
+        "benchmark": "parseBatchOf1000Posts",
+        "operationsPerSample": 32,
+        "throughputOpsPerSecond": {
+          "mean": 32.33681798795892,
+          "sampleStandardDeviation": 6.628187980360454
+        },
+        "medianNanosecondsPerOperation": 29635380.1875,
+        "samplesNanosecondsPerOperation": [
+          27009295.5625,
+          27263372.40625,
+          29956208.34375,
+          47950042.96875,
+          29635380.1875
+        ],
+        "resultHash": 2020633192
+      },
+      {
+        "benchmark": "parseLargePlain1MiB",
+        "operationsPerSample": 128,
+        "throughputOpsPerSecond": {
+          "mean": 203.06391167922547,
+          "sampleStandardDeviation": 0.46493341057775395
+        },
+        "medianNanosecondsPerOperation": 4924333.0078125,
+        "samplesNanosecondsPerOperation": [
+          4937334.640625,
+          4907883.7890625,
+          4921314.453125,
+          4924333.0078125,
+          4932027.015625
+        ],
+        "resultHash": -1627388684
+      },
+      {
+        "benchmark": "parseLargeRich1MiB",
+        "operationsPerSample": 32,
+        "throughputOpsPerSecond": {
+          "mean": 49.91213870547807,
+          "sampleStandardDeviation": 0.3416709750682487
+        },
+        "medianNanosecondsPerOperation": 20022476.5625,
+        "samplesNanosecondsPerOperation": [
+          19870242.1875,
+          19941104.1875,
+          20196088.53125,
+          20022476.5625,
+          20149876.3125
+        ],
+        "resultHash": -941375165
+      },
+      {
+        "benchmark": "parseFunctionHeavy64KiB",
+        "operationsPerSample": 256,
+        "throughputOpsPerSecond": {
+          "mean": 433.3670880200448,
+          "sampleStandardDeviation": 112.04512572342772
+        },
+        "medianNanosecondsPerOperation": 2248409.5078125,
+        "samplesNanosecondsPerOperation": [
+          1763677.41015625,
+          2108466.1484375,
+          2370470.21484375,
+          2248409.5078125,
+          3861841.30859375
+        ],
+        "resultHash": 1780872463
+      },
+      {
+        "benchmark": "parseUnmatchedClosings4KiB",
+        "operationsPerSample": 16384,
+        "throughputOpsPerSecond": {
+          "mean": 20246.578041420937,
+          "sampleStandardDeviation": 107.93614506703157
+        },
+        "medianNanosecondsPerOperation": 49422.706604003906,
+        "samplesNanosecondsPerOperation": [
+          49579.94842529297,
+          49184.02355957031,
+          49422.706604003906,
+          49072.845458984375,
+          49701.40075683594
+        ],
+        "resultHash": -39648012
+      },
+      {
+        "benchmark": "parseUnmatchedClosings32KiB",
+        "operationsPerSample": 2048,
+        "throughputOpsPerSecond": {
+          "mean": 2524.063535265197,
+          "sampleStandardDeviation": 29.879268055094368
+        },
+        "medianNanosecondsPerOperation": 396346.7607421875,
+        "samplesNanosecondsPerOperation": [
+          394547.2001953125,
+          402459.92041015625,
+          398100.2607421875,
+          396346.7607421875,
+          389700.37841796875
+        ],
+        "resultHash": -317192972
+      },
+      {
+        "benchmark": "parseUnmatchedClosings128KiB",
+        "operationsPerSample": 512,
+        "throughputOpsPerSecond": {
+          "mean": 639.645855388306,
+          "sampleStandardDeviation": 1.8686811649673343
+        },
+        "medianNanosecondsPerOperation": 1563300.943359375,
+        "samplesNanosecondsPerOperation": [
+          1567392.171875,
+          1559118.5703125,
+          1558576.578125,
+          1563300.943359375,
+          1568490.560546875
+        ],
+        "resultHash": -1268775692
+      },
+      {
+        "benchmark": "parseDeepFunctions750Levels",
+        "operationsPerSample": 4096,
+        "throughputOpsPerSecond": {
+          "mean": 5764.864047860157,
+          "sampleStandardDeviation": 173.24547531592378
+        },
+        "medianNanosecondsPerOperation": 173790.333984375,
+        "samplesNanosecondsPerOperation": [
+          171949.45263671875,
+          165993.703125,
+          179722.42236328125,
+          173790.333984375,
+          176487.09106445312
+        ],
+        "resultHash": -138222737
+      }
+    ]
+  }
+}
