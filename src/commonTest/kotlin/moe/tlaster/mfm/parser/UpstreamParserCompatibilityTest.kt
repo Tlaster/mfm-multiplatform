@@ -693,6 +693,31 @@ class UpstreamParserCompatibilityTest {
     }
 
     @Test
+    fun fullParserUrlSpecialCharacterCases() {
+        val nestedUrl =
+            "https://bsky.brid.gy/r/https://bsky.app/profile/" +
+                "did:plc:e5utgfbui36qwd7qg74n6rgg/post/3mtyxnfgd4s2j"
+        val plusUrl = "https://example.com/?campaign=We+warned+this+could+happen&done=true"
+        val parenthesizedPathUrl = "https://www.cell.com/current-biology/fulltext/S0960-9822(26)00948-6"
+        val tildeUrl = "https://vote.debian.org/~secretary/gr_ltm/results.txt"
+        val portAndPathColonUrl = "https://example.com:8080/a:b"
+        val nestedParenthesesUrl = "https://example.com/a(b(c)d)e"
+        val squareBracketsUrl = "https://example.com/a[b]c"
+
+        assertEquals(listOf(N_URL(nestedUrl)), parseFull(nestedUrl))
+        assertEquals(listOf(N_URL(plusUrl)), parseFull(plusUrl))
+        assertEquals(listOf(N_URL(parenthesizedPathUrl)), parseFull(parenthesizedPathUrl))
+        assertEquals(listOf(N_URL(tildeUrl)), parseFull(tildeUrl))
+        assertEquals(listOf(N_URL(portAndPathColonUrl)), parseFull(portAndPathColonUrl))
+        assertEquals(listOf(N_URL(nestedParenthesesUrl)), parseFull(nestedParenthesesUrl))
+        assertEquals(listOf(N_URL(squareBracketsUrl)), parseFull(squareBracketsUrl))
+        assertEquals(
+            listOf(N_URL("https://example.com/a"), TEXT("(b")),
+            parseFull("https://example.com/a(b"),
+        )
+    }
+
+    @Test
     fun fullParserLinkCases() {
         assertEquals(
             listOf(

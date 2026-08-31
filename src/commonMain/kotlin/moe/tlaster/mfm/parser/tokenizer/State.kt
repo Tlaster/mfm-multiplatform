@@ -46,9 +46,8 @@ private val emptyChar = listOf(TAB, LF, '\u000C', '\u0020')
 private const val FULLWIDTHSPACE = '\u3000'
 private val hashTagExclude = "[ \t.,!?'\"#:/[]【】()「」（）<>]".toList() + EOF + emptyChar + FULLWIDTHSPACE
 private val asciiAlphanumericAndEmpty = asciiAlphanumeric + ' ' + TAB + LF + FULLWIDTHSPACE
-private val marks = "-._~:/?#[]@!\$&'()*+,;=%".toList()
-private val urlDisallowedEndMarks = "., ".trim().toList()
-private val urlChar = asciiAlphanumeric + marks
+private val urlChar = asciiAlphanumeric + ".,_/:%#@\$&?!~=+-".toList()
+private val urlDisallowedEndMarks = listOf('.', ',')
 private const val VARIATION_SELECTOR_16 = '\uFE0F'
 private const val COMBINING_ENCLOSING_KEYCAP = '\u20E3'
 
@@ -69,6 +68,38 @@ private fun hasValidUrlAuthority(url: String): Boolean {
         return false
     }
     return authority.contains('.') && !authority.startsWith('.') && !authority.endsWith('.')
+}
+
+private fun findBalancedUrlItemEnd(
+    reader: Reader,
+    start: Int,
+): Int? {
+    val firstClosingMark =
+        when (reader.readAt(start)) {
+            '(' -> ')'
+            '[' -> ']'
+            else -> return null
+        }
+    val closingMarks = mutableListOf(firstClosingMark)
+    var index = start + 1
+    while (index < reader.length) {
+        when (val current = reader.readAt(index)) {
+            '(' -> closingMarks.add(')')
+            '[' -> closingMarks.add(']')
+            ')', ']' -> {
+                if (closingMarks.last() != current) {
+                    return null
+                }
+                closingMarks.removeAt(closingMarks.lastIndex)
+                if (closingMarks.isEmpty()) {
+                    return index + 1
+                }
+            }
+            else -> if (current !in urlChar) return null
+        }
+        index++
+    }
+    return null
 }
 
 private fun tryReadPlainSearch(
@@ -204,21 +235,6 @@ internal data object HState : State {
 }
 
 internal data object UrlState : State {
-    private val urlEscapeChars =
-        listOf(
-            '!',
-            '~',
-            '*',
-            '\'',
-            '(',
-            ')',
-            ';',
-            ':',
-            '+',
-            '[',
-            ']',
-        )
-
     private fun urlCheck(
         tokenizer: Tokenizer,
         reader: Reader,
@@ -255,6 +271,17 @@ internal data object UrlState : State {
         }
     }
 
+    private fun emitBalancedUrlItem(
+        tokenizer: Tokenizer,
+        reader: Reader,
+    ): Boolean {
+        val start = reader.position - 1
+        val end = findBalancedUrlItemEnd(reader, start) ?: return false
+        tokenizer.emitRange(TokenCharacterType.Url, start, end)
+        reader.consume(end - reader.position)
+        return true
+    }
+
     override fun read(
         tokenizer: Tokenizer,
         reader: Reader,
@@ -264,77 +291,23 @@ internal data object UrlState : State {
                 urlCheck(tokenizer, reader)
             }
 
-            ':' -> {
-                val next = reader.next()
-                if (next in asciiDigit) {
-                    tokenizer.emit(TokenCharacterType.Url, reader.position)
-                    tokenizer.switch(UrlPortState)
-                } else {
+            '(', '[' -> {
+                if (!emitBalancedUrlItem(tokenizer, reader)) {
                     urlCheck(tokenizer, reader)
                 }
             }
 
             else -> {
-                if (current in urlEscapeChars) {
+                if (current !in urlChar) {
                     urlCheck(tokenizer, reader)
                 } else {
-                    if (!current.isLetterOrDigit()) {
-                        val next = reader.next()
-                        if (current in marks) {
-                            if (next in emptyChar + EOF) {
-                                if (current in urlDisallowedEndMarks) {
-                                    urlCheck(tokenizer, reader)
-                                } else {
-                                    tokenizer.emit(TokenCharacterType.Url, reader.position)
-                                }
-                            } else {
-                                tokenizer.emit(TokenCharacterType.Url, reader.position)
-                            }
-                        } else {
-                            if (next in emptyChar + EOF) {
-                                urlCheck(tokenizer, reader)
-                            } else {
-                                urlCheck(tokenizer, reader)
-                            }
-                        }
+                    val next = reader.next()
+                    if (current in urlDisallowedEndMarks && next in emptyChar + EOF) {
+                        urlCheck(tokenizer, reader)
                     } else {
-                        if (current in urlChar) {
-                            tokenizer.emit(TokenCharacterType.Url, reader.position)
-                        } else {
-                            urlCheck(tokenizer, reader)
-                        }
+                        tokenizer.emit(TokenCharacterType.Url, reader.position)
                     }
                 }
-            }
-        }
-    }
-}
-
-internal data object UrlPortState : State {
-    override fun read(
-        tokenizer: Tokenizer,
-        reader: Reader,
-    ) {
-        when (val current = reader.consume()) {
-            in asciiDigit -> {
-                tokenizer.emit(TokenCharacterType.Url, reader.position)
-            }
-
-            in listOf('/', '?') -> {
-                tokenizer.emit(TokenCharacterType.Url, reader.position)
-                tokenizer.switch(UrlState)
-            }
-
-            in emptyChar + EOF -> {
-                tokenizer.accept()
-                tokenizer.switch(DataState)
-                reader.pushback()
-            }
-
-            else -> {
-                tokenizer.accept()
-                tokenizer.switch(DataState)
-                reader.pushback()
             }
         }
     }
