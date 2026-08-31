@@ -1,7 +1,6 @@
 package moe.tlaster.mfm.parser
 
 import moe.tlaster.mfm.parser.tree.BoldNode
-import moe.tlaster.mfm.parser.tree.CashNode
 import moe.tlaster.mfm.parser.tree.CenterNode
 import moe.tlaster.mfm.parser.tree.CodeBlockNode
 import moe.tlaster.mfm.parser.tree.EmojiCodeNode
@@ -31,10 +30,11 @@ internal class DirectParser(
     private val rangeEnd: Int = source.length,
     private val positionBase: Int = 0,
     private val insideLinkLabel: Boolean = false,
+    private val nestLimit: Int = 20,
+    private val initialDepth: Int = 0,
 ) {
     private enum class FrameKind {
         Root,
-        Quote,
         Center,
         Bold,
         Small,
@@ -50,6 +50,8 @@ internal class DirectParser(
         val openEnd: Int,
         val name: String? = null,
         val args: HashMap<String, String>? = null,
+        val booleanArgs: Set<String>? = null,
+        val closeMarker: String? = null,
     ) {
         val content = arrayListOf<Node>()
         var pendingStart = -1
@@ -59,6 +61,7 @@ internal class DirectParser(
     }
 
     private val frames = arrayListOf(Frame(FrameKind.Root, rangeStart, rangeStart))
+    private var emojiSource: String? = null
     private var cursor = rangeStart
     private var textStart = rangeStart
     private var lineContentStart = rangeStart
@@ -67,18 +70,31 @@ internal class DirectParser(
     fun parse(): RootNode = RootNode(content = parseContent())
 
     private fun parseContent(): ArrayList<Node> {
+        if (isNestLimitReached()) parseLimitedContent()
         while (cursor < rangeEnd) {
-            if (tryUnicodeEmoji() || tryEmojiCode()) {
+            val current = source[cursor]
+            if (current.isPlainAsciiLetter()) {
+                do {
+                    cursor++
+                } while (cursor < rangeEnd && source[cursor].isPlainAsciiLetter())
                 continue
             }
+            if (current.code < 0xA9) {
+                if (current.mayStartKeycapEmoji() && tryUnicodeEmoji(unicodeEmojiFastLengthAt(source, cursor))) continue
+            } else if (current != '検') {
+                consumeUnicodeTextOrEmoji()
+                continue
+            }
+            if (current == ':' && tryEmojiCode()) continue
             if (emojiOnly) {
+                if (current == '<' && tryPlainOnly()) continue
                 advanceCharacter()
                 continue
             }
 
-            when (source[cursor]) {
-                '\n' -> handleLineBreak()
-                ']' -> if (!closeFrame(FrameKind.Fn, cursor, cursor + 1)) advanceCharacter()
+            when (current) {
+                '\n', '\r' -> handleLineBreak()
+                ']' -> consumeFunctionClose()
                 '>' -> if (!tryQuote()) advanceCharacter()
                 '`' -> if (!tryCode()) advanceCharacter()
                 '\\' -> if (!tryMath()) advanceCharacter()
@@ -94,7 +110,7 @@ internal class DirectParser(
                 '~' -> if (!tryStrike()) advanceCharacter()
                 '_' -> if (!tryUnderscore()) advanceCharacter()
                 '*' -> if (!tryAsterisk()) advanceCharacter()
-                '$' -> if (!tryFunction() && !tryCash()) advanceCharacter()
+                '$' -> if (!tryFunction()) advanceCharacter()
                 '@' -> if (insideLinkLabel || !tryMention()) advanceCharacter()
                 '#' -> if (!tryHashtag()) advanceCharacter()
                 else -> advanceCharacter()
@@ -107,6 +123,29 @@ internal class DirectParser(
 
     private fun advanceCharacter() {
         cursor++
+    }
+
+    private fun consumeUnicodeTextOrEmoji() {
+        val emojiLength = unicodeEmojiFastLengthAt(source, cursor)
+        if (emojiLength != 0) {
+            if (!tryUnicodeEmoji(emojiLength)) cursor++
+            return
+        }
+        do {
+            cursor++
+        } while (
+            cursor < rangeEnd &&
+                source[cursor].code >= 0x80 &&
+                source[cursor] != '検' &&
+                unicodeEmojiFastLengthAt(source, cursor) == 0
+        )
+    }
+
+    private fun consumeFunctionClose() {
+        if (closeFrame(FrameKind.Fn, cursor, cursor + 1)) return
+        do {
+            cursor++
+        } while (cursor < rangeEnd && source[cursor] == ']')
     }
 
     private fun appendRange(
@@ -208,9 +247,12 @@ internal class DirectParser(
     ) {
         var index = cursor
         while (index < end) {
-            if (source[index] == '\n') {
-                lineContentStart = index + 1
+            val newlineLength = newlineLengthAt(index)
+            if (newlineLength > 0) {
+                lineContentStart = index + newlineLength
                 lineHadNode = false
+                index += newlineLength
+                continue
             }
             index++
         }
@@ -236,11 +278,35 @@ internal class DirectParser(
         openEnd: Int,
         name: String? = null,
         args: HashMap<String, String>? = null,
+        booleanArgs: Set<String>? = null,
+        closeMarker: String? = null,
     ) {
         flushSource(start)
         commitText(frames.last())
-        frames.add(Frame(kind, start, openEnd, name, args))
+        frames.add(Frame(kind, start, openEnd, name, args, booleanArgs, closeMarker))
         advanceTo(openEnd, semantic = true)
+        if (isNestLimitReached()) parseLimitedContent()
+    }
+
+    private fun parseLimitedContent() {
+        while (cursor < rangeEnd) {
+            if (tryCloseLimitedFrame()) return
+            if (newlineLengthAt(cursor) > 0) handleLineBreak() else advanceCharacter()
+        }
+    }
+
+    private fun tryCloseLimitedFrame(): Boolean {
+        val frame = frames.lastOrNull() ?: return false
+        val marker = frame.closeMarker ?: return false
+        if (!matches(cursor, marker)) return false
+        val closeEnd =
+            if (frame.kind == FrameKind.Center) {
+                if (!isLineEnd(cursor + marker.length)) return false
+                consumeBoundaryAfter(cursor + marker.length, 1)
+            } else {
+                cursor + marker.length
+            }
+        return closeFrame(frame.kind, cursor, closeEnd)
     }
 
     private fun lastFrameIndex(kind: FrameKind): Int {
@@ -269,7 +335,11 @@ internal class DirectParser(
         }
         commitText(frame)
         frames.removeAt(frameIndex)
-        appendNode(frames.last(), frame.toNode())
+        if (frame.content.isEmpty()) {
+            appendRange(frames.last(), frame.start, closeEnd)
+        } else {
+            appendNode(frames.last(), frame.toNode())
+        }
         cursor = closeStart
         advanceTo(closeEnd, semantic = true)
         return true
@@ -277,16 +347,22 @@ internal class DirectParser(
 
     private fun Frame.toNode(): Node =
         when (kind) {
-            FrameKind.Quote -> QuoteNode(publicPosition(start), content)
             FrameKind.Center -> {
-                if (content.none { it is UrlNode }) trimSurroundingLineBreak(content)
+                trimSurroundingLineBreak(content)
                 CenterNode(publicPosition(start), content)
             }
             FrameKind.Bold -> normalizeBold(publicPosition(start), content)
             FrameKind.Small -> SmallNode(publicPosition(start), content)
             FrameKind.Italic -> ItalicNode(publicPosition(start), content)
             FrameKind.Strike -> StrikeNode(publicPosition(start), content)
-            FrameKind.Fn -> FnNode(publicPosition(start), name.orEmpty(), content, args ?: hashMapOf())
+            FrameKind.Fn ->
+                FnNode(
+                    publicPosition(start),
+                    name.orEmpty(),
+                    content,
+                    args ?: hashMapOf(),
+                    booleanArgs ?: emptySet(),
+                )
             FrameKind.Tada -> FnNode(publicPosition(start), "tada", content)
             FrameKind.Root -> error("The root frame is never materialized")
         }
@@ -312,27 +388,39 @@ internal class DirectParser(
 
     private fun trimSurroundingLineBreak(content: ArrayList<Node>) {
         val first = content.firstOrNull()
-        if (first is TextNode && first.content.startsWith('\n')) {
-            val value = first.content.drop(1)
-            if (value.isEmpty()) content.removeAt(0) else content[0] = TextNode(value, first.plain)
+        if (first is TextNode) {
+            val length = leadingNewlineLength(first.content)
+            if (length > 0) {
+                val value = first.content.drop(length)
+                if (value.isEmpty()) content.removeAt(0) else content[0] = TextNode(value, first.plain)
+            }
         }
         val lastIndex = content.lastIndex
         val last = content.getOrNull(lastIndex)
-        if (last is TextNode && last.content.endsWith('\n')) {
-            val value = last.content.dropLast(1)
-            if (value.isEmpty()) content.removeAt(lastIndex) else content[lastIndex] = TextNode(value, last.plain)
+        if (last is TextNode) {
+            val length = trailingNewlineLength(last.content)
+            if (length > 0) {
+                val value = last.content.dropLast(length)
+                if (value.isEmpty()) content.removeAt(lastIndex) else content[lastIndex] = TextNode(value, last.plain)
+            }
         }
     }
 
-    private fun finishAtEnd() {
-        val quoteIndex = lastFrameIndex(FrameKind.Quote)
-        if (quoteIndex >= 0) {
-            val quote = frames[quoteIndex]
-            if (rangeEnd > quote.openEnd) {
-                closeFrame(FrameKind.Quote, rangeEnd, rangeEnd)
-            }
+    private fun leadingNewlineLength(value: String): Int =
+        when {
+            value.startsWith("\r\n") -> 2
+            value.startsWith('\r') || value.startsWith('\n') -> 1
+            else -> 0
         }
 
+    private fun trailingNewlineLength(value: String): Int =
+        when {
+            value.endsWith("\r\n") -> 2
+            value.endsWith('\r') || value.endsWith('\n') -> 1
+            else -> 0
+        }
+
+    private fun finishAtEnd() {
         if (frames.size > 1) {
             val outer = frames[1]
             while (frames.size > 1) frames.removeAt(frames.lastIndex)
@@ -344,17 +432,16 @@ internal class DirectParser(
         commitText(frames[0])
     }
 
-    private fun tryUnicodeEmoji(): Boolean {
-        var end = cursor
-        while (end < rangeEnd) {
-            end =
-                when {
-                    source[end].isHighSurrogate() && end + 1 < rangeEnd && source[end + 1].isLowSurrogate() -> end + 2
-                    source[end] == '#' && matches(end, "#\uFE0F\u20E3") -> end + 3
-                    else -> break
-                }
-        }
-        if (end == cursor) return false
+    private fun tryUnicodeEmoji(fastLength: Int): Boolean {
+        val length =
+            if (fastLength >= 0) {
+                fastLength
+            } else {
+                val encodedSource = emojiSource ?: encodeUnicodeEmojiInput(source).also { emojiSource = it }
+                unicodeEmojiComplexLengthAt(encodedSource, cursor)
+            }
+        if (length == 0 || cursor + length > rangeEnd) return false
+        val end = cursor + length
         emitNode(UnicodeEmojiNode(source.substring(cursor, end)), end)
         return true
     }
@@ -364,65 +451,53 @@ internal class DirectParser(
         var end = cursor + 2
         while (end < rangeEnd && source[end].isEmojiNameChar()) end++
         if (end >= rangeEnd || source[end] != ':') return false
-        val before = source.getOrNull(cursor - 1)
         val after = source.getOrNull(end + 1)
-        if (before?.isAsciiAlphanumeric() == true && after?.isAsciiAlphanumeric() == true) return false
+        if (after?.isAsciiAlphanumeric() == true) return false
         emitNode(EmojiCodeNode(source.substring(cursor + 1, end)), end + 1)
         return true
     }
 
     private fun tryQuote(): Boolean {
-        if (source[cursor] != '>' || (cursor != rangeStart && source[cursor - 1] != '\n')) return false
-        val openEnd = if (cursor + 1 < rangeEnd && source[cursor + 1] == ' ') cursor + 2 else cursor + 1
-        pushFrame(FrameKind.Quote, cursor, openEnd)
-        lineContentStart = openEnd
-        lineHadNode = false
+        if (frames.lastIndex != 0 || source[cursor] != '>' || !isLineBegin(cursor)) return false
+        val innerSource = StringBuilder()
+        var lineCount = 0
+        var index = cursor
+        var end = cursor
+        while (index < rangeEnd && source[index] == '>') {
+            var contentStart = index + 1
+            if (source.getOrNull(contentStart)?.isMfmSpace() == true) contentStart++
+            var lineEnd = contentStart
+            while (lineEnd < rangeEnd && newlineLengthAt(lineEnd) == 0) lineEnd++
+            if (lineCount > 0) innerSource.append('\n')
+            innerSource.append(source, contentStart, lineEnd)
+            lineCount++
+            end = lineEnd
+            val newlineLength = newlineLengthAt(lineEnd)
+            if (newlineLength == 0 || source.getOrNull(lineEnd + newlineLength) != '>') break
+            index = lineEnd + newlineLength
+        }
+        if (lineCount == 1 && innerSource.isEmpty()) return false
+
+        val content =
+            DirectParser(
+                source = innerSource.toString(),
+                emojiOnly = false,
+                nestLimit = nestLimit,
+                initialDepth = initialDepth + 1,
+            ).parse().content
+        consumeBoundaryBefore(cursor, 2)
+        emitNode(QuoteNode(publicPosition(cursor), content), consumeBoundaryAfter(end, 2))
         return true
     }
 
     private fun handleLineBreak() {
-        val quoteIndex = lastFrameIndex(FrameKind.Quote)
-        if (quoteIndex < 0) {
-            cursor++
-            lineContentStart = cursor
-            lineHadNode = false
-            return
-        }
-
-        var afterBreaks = cursor
-        while (afterBreaks < rangeEnd && source[afterBreaks] == '\n') afterBreaks++
-        if (afterBreaks - cursor > 1) {
-            closeFrame(FrameKind.Quote, cursor, cursor)
-            cursor = afterBreaks
-            textStart = afterBreaks
-            lineContentStart = afterBreaks
-            lineHadNode = false
-            return
-        }
-
-        if (afterBreaks < rangeEnd && source[afterBreaks] == '>') {
-            var markerEnd = afterBreaks + 1
-            if (markerEnd < rangeEnd && source[markerEnd] == ' ') markerEnd++
-            val trailingBlankLine =
-                markerEnd < rangeEnd &&
-                    source[markerEnd] == '\n' &&
-                    !(markerEnd + 1 < rangeEnd && source[markerEnd + 1] == '>')
-            if (trailingBlankLine) {
-                closeFrame(FrameKind.Quote, cursor, cursor)
-            } else {
-                flushSource(afterBreaks)
-            }
-            cursor = markerEnd
-            textStart = markerEnd
-            lineContentStart = markerEnd
-            lineHadNode = false
-            return
-        }
-
-        closeFrame(FrameKind.Quote, cursor, cursor)
+        cursor += newlineLengthAt(cursor)
+        lineContentStart = cursor
+        lineHadNode = false
     }
 
     private fun trySearch(): Boolean {
+        if (frames.lastIndex != 0) return false
         val markerLength =
             when {
                 matches(cursor, "[Search]", ignoreCase = true) -> 8
@@ -432,111 +507,98 @@ internal class DirectParser(
                 else -> return false
             }
         val markerEnd = cursor + markerLength
-        if (markerEnd < rangeEnd && source[markerEnd] != '\n') return false
-        if (source[cursor] != '[') {
-            val previous = source.getOrNull(cursor - 1)
-            if (previous != ' ' && previous != '\t' && previous != '\u3000') return false
-        }
+        if (!isLineEnd(markerEnd)) return false
+        val separator = cursor - 1
+        if (separator < lineContentStart || source[separator].isMfmSpace().not()) return false
         if (lineHadNode || lineContentStart >= cursor || textStart > lineContentStart) return false
 
         val frame = frames.last()
-        appendRange(frame, textStart, lineContentStart)
-        val query = source.substring(lineContentStart, cursor).trim()
-        appendNode(frame, SearchNode(query, source.substring(cursor, markerEnd)))
-        advanceTo(markerEnd, semantic = true)
+        consumeBoundaryBefore(lineContentStart, 1)
+        val query = source.substring(lineContentStart, separator)
+        if (query.isEmpty()) return false
+        appendNode(
+            frame,
+            SearchNode(
+                query = query,
+                search = source.substring(cursor, markerEnd),
+                content = source.substring(lineContentStart, markerEnd),
+            ),
+        )
+        advanceTo(consumeBoundaryAfter(markerEnd, 1), semantic = true)
         return true
     }
 
     private fun tryCode(): Boolean {
-        if (matches(cursor, "```")) return tryCodeBlock()
-        if (matches(cursor, "``")) {
-            cursor += 2
-            return true
-        }
+        if (frames.lastIndex == 0 && matches(cursor, "```")) return tryCodeBlock()
 
         var end = cursor + 1
         while (end < rangeEnd) {
             val current = source[end]
             if (current == '`') {
+                if (end == cursor + 1) return false
                 emitNode(InlineCodeNode(source.substring(cursor + 1, end)), end + 1)
                 return true
             }
-            if (current == '\n' || current.code !in 0x20..0x7E) {
-                cursor = end
-                return true
+            if (current == '\n' || current == '\r' || current == '´') {
+                return false
             }
             end++
         }
-        cursor = rangeEnd
-        return true
+        return false
     }
 
     private fun tryCodeBlock(): Boolean {
+        if (!isLineBegin(cursor)) return false
         val languageStart = cursor + 3
-        var bodyStart = languageStart
-        while (bodyStart < rangeEnd && source[bodyStart].isCodeLanguageChar()) bodyStart++
-        val languageEnd = bodyStart
-        if (bodyStart < rangeEnd && source[bodyStart] == '\n') bodyStart++
-
-        var close = -1
-        var lineStart = true
-        var index = bodyStart
-        while (index < rangeEnd) {
-            if (lineStart && matches(index, "```") && (index + 3 == rangeEnd || source[index + 3] == '\n')) {
-                close = index
-                break
+        var headerEnd = languageStart
+        while (headerEnd < rangeEnd && newlineLengthAt(headerEnd) == 0) headerEnd++
+        val headerBreak = newlineLengthAt(headerEnd)
+        if (headerBreak == 0) return false
+        val bodyStart = headerEnd + headerBreak
+        var close = bodyStart
+        var codeEnd = -1
+        while (close < rangeEnd) {
+            if (isLineBegin(close) && matches(close, "```") && isLineEnd(close + 3)) {
+                codeEnd = previousNewlineStart(close)
+                if (codeEnd >= bodyStart) break
             }
-            lineStart = source[index] == '\n'
-            index++
+            close++
         }
-        if (close < 0) {
-            advanceTextTo(rangeEnd)
-            return true
-        }
+        if (close >= rangeEnd || codeEnd <= bodyStart) return false
 
-        val language = source.substring(languageStart, languageEnd)
-        val rawCode = source.substring(bodyStart, close)
-        val code = rawCode.removeSuffix("\n")
-        val node =
-            if (code.isEmpty() && language.isNotEmpty()) {
-                CodeBlockNode(language.removeSuffix("\n"), null)
-            } else {
-                CodeBlockNode(code, language.takeIf { it.isNotEmpty() })
-            }
-        emitNode(node, close + 3)
+        val language = source.substring(languageStart, headerEnd).trim()
+        val code = source.substring(bodyStart, codeEnd)
+        consumeBoundaryBefore(cursor, 1)
+        emitNode(CodeBlockNode(code, language.takeIf { it.isNotEmpty() }), consumeBoundaryAfter(close + 3, 1))
         return true
     }
 
     private fun tryMath(): Boolean {
         if (matches(cursor, "\\(")) {
             var end = cursor + 2
-            while (end < rangeEnd && source[end] != '\n') {
+            while (end < rangeEnd && newlineLengthAt(end) == 0) {
                 if (matches(end, "\\)")) {
+                    if (end == cursor + 2) return false
                     emitNode(MathInlineNode(source.substring(cursor + 2, end)), end + 2)
                     return true
                 }
                 end++
             }
-            cursor = end
-            return true
+            return false
         }
-        if (!matches(cursor, "\\[")) return false
+        if (frames.lastIndex != 0 || !matches(cursor, "\\[") || !isLineBegin(cursor)) return false
 
         var end = cursor + 2
-        while (end < rangeEnd && !matches(end, "\\]")) end++
-        if (end >= rangeEnd) {
-            advanceTextTo(rangeEnd)
-            return true
-        }
+        while (end < rangeEnd && !(matches(end, "\\]") && isLineEnd(end + 2))) end++
+        if (end >= rangeEnd) return false
         val markerEnd = end + 2
-        val onOwnLine =
-            (cursor == rangeStart || source[cursor - 1] == '\n') &&
-                (markerEnd == rangeEnd || source[markerEnd] == '\n')
-        if (onOwnLine) {
-            emitNode(MathBlockNode(source.substring(cursor + 2, end)), markerEnd)
-        } else {
-            advanceTextTo(markerEnd)
-        }
+        var formulaStart = cursor + 2
+        formulaStart += newlineLengthAt(formulaStart)
+        var formulaEnd = end
+        previousNewlineStart(formulaEnd).takeIf { it >= formulaStart }?.let { formulaEnd = it }
+        if (formulaStart >= formulaEnd) return false
+        consumeBoundaryBefore(cursor, 1)
+        emitNode(MathBlockNode(source.substring(formulaStart, formulaEnd)), consumeBoundaryAfter(markerEnd, 1))
         return true
     }
 
@@ -546,49 +608,67 @@ internal class DirectParser(
         if (first != '/' && !first.isAsciiAlpha()) return false
         var end = cursor + 1
         while (end < rangeEnd && source[end] != '>' && !source[end].isTagWhitespace()) end++
-        if (end >= rangeEnd || source[end] != '>') {
-            advanceTextTo(rangeEnd)
-            return true
-        }
+        if (end >= rangeEnd || source[end] != '>') return false
         val tagEnd = end + 1
         val closing = first == '/'
         val nameStart = cursor + if (closing) 2 else 1
         val name = source.substring(nameStart, end)
 
         if (!closing && (name.startsWith("http://") || name.startsWith("https://"))) {
-            emitNode(UrlNode(name, brackets = name.any { it.code > 0x7F }), tagEnd)
+            emitNode(UrlNode(name, brackets = true), tagEnd)
             return true
         }
 
         if (closing) {
-            val kind = tagKind(name) ?: run {
+            val kind = tagKind(name) ?: return false
+            if (kind == FrameKind.Center && !isLineEnd(tagEnd)) {
                 cursor = tagEnd
                 return true
             }
-            if (kind == FrameKind.Center && tagEnd < rangeEnd && source[tagEnd] != '\n') {
-                cursor = tagEnd
-                return true
-            }
-            if (!closeFrame(kind, cursor, tagEnd)) cursor = tagEnd
+            val closeEnd = if (kind == FrameKind.Center) consumeBoundaryAfter(tagEnd, 1) else tagEnd
+            if (!closeFrame(kind, cursor, closeEnd)) cursor = tagEnd
             return true
         }
 
         when (name) {
             "center" -> {
-                if (cursor != lineContentStart) {
+                if (frames.lastIndex != 0 || !isLineBegin(cursor) || !hasValidCenterBody(tagEnd)) {
                     cursor = tagEnd
                 } else {
-                    pushFrame(FrameKind.Center, cursor, tagEnd)
+                    consumeBoundaryBefore(cursor, 1)
+                    pushFrame(
+                        FrameKind.Center,
+                        cursor,
+                        tagEnd + newlineLengthAt(tagEnd),
+                        closeMarker = "</center>",
+                    )
                 }
             }
-            "b" -> pushFrame(FrameKind.Bold, cursor, tagEnd)
-            "small" -> pushFrame(FrameKind.Small, cursor, tagEnd)
-            "i" -> pushFrame(FrameKind.Italic, cursor, tagEnd)
-            "s" -> pushFrame(FrameKind.Strike, cursor, tagEnd)
-            "plain" -> parsePlainTag(tagEnd)
-            else -> cursor = tagEnd
+            "b" -> pushFrame(FrameKind.Bold, cursor, tagEnd, closeMarker = "</b>")
+            "small" -> pushFrame(FrameKind.Small, cursor, tagEnd, closeMarker = "</small>")
+            "i" -> pushFrame(FrameKind.Italic, cursor, tagEnd, closeMarker = "</i>")
+            "s" -> pushFrame(FrameKind.Strike, cursor, tagEnd, closeMarker = "</s>")
+            "plain" -> if (!parsePlainTag(tagEnd)) cursor = tagEnd
+            else -> return false
         }
         return true
+    }
+
+    private fun hasValidCenterBody(openEnd: Int): Boolean {
+        var close = openEnd
+        while (close < rangeEnd) {
+            close = indexOf("</center>", close)
+            if (close < 0) return false
+            val closeEnd = close + "</center>".length
+            if (isLineEnd(closeEnd)) {
+                var contentStart = openEnd + newlineLengthAt(openEnd)
+                var contentEnd = close
+                previousNewlineStart(contentEnd).takeIf { it >= contentStart }?.let { contentEnd = it }
+                return contentStart < contentEnd
+            }
+            close++
+        }
+        return false
     }
 
     private fun tagKind(name: String): FrameKind? =
@@ -601,18 +681,25 @@ internal class DirectParser(
             else -> null
         }
 
-    private fun parsePlainTag(openEnd: Int) {
+    private fun tryPlainOnly(): Boolean {
+        if (!matches(cursor, "<plain>")) return false
+        return parsePlainTag(cursor + "<plain>".length)
+    }
+
+    private fun parsePlainTag(openEnd: Int): Boolean {
         val close = indexOf("</plain>", openEnd)
-        val contentEnd = if (close >= 0) close else rangeEnd
+        if (close < 0) return false
+        val contentEnd = close
         var valueStart = openEnd
         var valueEnd = contentEnd
-        if (valueStart < valueEnd && source[valueStart] == '\n') valueStart++
-        if (valueStart < valueEnd && source[valueEnd - 1] == '\n') valueEnd--
+        valueStart += newlineLengthAt(valueStart)
+        valueEnd = previousNewlineStart(valueEnd).takeIf { it >= valueStart } ?: valueEnd
+        if (valueStart >= valueEnd) return false
 
         flushSource(cursor)
         appendRange(frames.last(), valueStart, valueEnd, plain = true)
-        val end = if (close >= 0) close + "</plain>".length else rangeEnd
-        advanceTo(end, semantic = true)
+        advanceTo(close + "</plain>".length, semantic = true)
+        return true
     }
 
     private fun tryAsterisk(): Boolean {
@@ -621,12 +708,12 @@ internal class DirectParser(
             return closeFrame(FrameKind.Tada, cursor, cursor + 3)
         }
         if (run == 3 && lastFrameIndex(FrameKind.Bold) < 0) {
-            pushFrame(FrameKind.Tada, cursor, cursor + 3)
+            pushFrame(FrameKind.Tada, cursor, cursor + 3, closeMarker = "***")
             return true
         }
         if (run >= 2) {
             if (!closeFrame(FrameKind.Bold, cursor, cursor + 2)) {
-                pushFrame(FrameKind.Bold, cursor, cursor + 2)
+                pushFrame(FrameKind.Bold, cursor, cursor + 2, closeMarker = "**")
             }
             return true
         }
@@ -656,7 +743,7 @@ internal class DirectParser(
         }
         var end = cursor + 1
         while (end < rangeEnd && source[end].isEmphasisContent()) end++
-        if (end >= rangeEnd || source[end] != marker || source.getOrNull(end + 1)?.isAsciiAlphanumeric() == true) {
+        if (end >= rangeEnd || source[end] != marker) {
             return false
         }
         emitNode(
@@ -669,57 +756,89 @@ internal class DirectParser(
     private fun tryStrike(): Boolean {
         if (!matches(cursor, "~~")) return false
         if (!closeFrame(FrameKind.Strike, cursor, cursor + 2)) {
-            pushFrame(FrameKind.Strike, cursor, cursor + 2)
+            var close = cursor + 2
+            while (close < rangeEnd && !matches(close, "~~")) {
+                if (newlineLengthAt(close) > 0) {
+                    advanceTextTo(close)
+                    return true
+                }
+                close++
+            }
+            if (close >= rangeEnd) {
+                advanceTextTo(rangeEnd)
+                return true
+            }
+            if (close == cursor + 2) return false
+            pushFrame(FrameKind.Strike, cursor, cursor + 2, closeMarker = "~~")
         }
         return true
     }
 
     private fun tryFunction(): Boolean {
-        if (!matches(cursor, "\$[") || cursor + 2 >= rangeEnd || !source[cursor + 2].isAsciiAlphanumeric()) return false
-        var headerEnd = cursor + 2
-        while (headerEnd < rangeEnd) {
-            val current = source[headerEnd]
-            if (current.isFnWhitespace()) break
-            if (current.isFnContent()) {
-                headerEnd++
-                continue
+        if (!matches(cursor, "\$[")) return false
+        var index = cursor + 2
+        val nameStart = index
+        while (index < rangeEnd && source[index].isFnNameChar()) index++
+        if (index == nameStart) return false
+        val name = source.substring(nameStart, index)
+        val args = hashMapOf<String, String>()
+        var booleanArgs: HashSet<String>? = null
+        if (source.getOrNull(index) == '.') {
+            index++
+            while (true) {
+                val keyStart = index
+                while (index < rangeEnd && source[index].isFnNameChar()) index++
+                if (index == keyStart) return false
+                val key = source.substring(keyStart, index)
+                if (source.getOrNull(index) == '=') {
+                    index++
+                    val valueStart = index
+                    while (index < rangeEnd && source[index].isFnValueChar()) index++
+                    if (index == valueStart) return false
+                    args[key] = source.substring(valueStart, index)
+                } else {
+                    args[key] = "true"
+                    val flags = booleanArgs ?: hashSetOf<String>().also { booleanArgs = it }
+                    flags.add(key)
+                }
+                if (source.getOrNull(index) != ',') break
+                index++
             }
-            if ((current == ',' || current == '=') && source.getOrNull(headerEnd + 1)?.isFnContent() == true) {
-                headerEnd++
-                continue
-            }
-            return false
         }
-        if (headerEnd >= rangeEnd || !source[headerEnd].isFnWhitespace()) return false
-        val header = source.substring(cursor + 2, headerEnd)
-        val (name, args) = parseFnHeader(header)
-        pushFrame(FrameKind.Fn, cursor, headerEnd + 1, name, args)
-        return true
-    }
-
-    private fun tryCash(): Boolean {
-        if (source[cursor] != '$' || source.getOrNull(cursor + 1)?.isAsciiAlphanumeric() != true) return false
-        var end = cursor + 1
-        while (end < rangeEnd && source[end].isAsciiAlphanumeric()) end++
-        emitNode(CashNode(source.substring(cursor + 1, end)), end)
+        if (source.getOrNull(index) != ' ') return false
+        pushFrame(FrameKind.Fn, cursor, index + 1, name, args, booleanArgs, closeMarker = "]")
         return true
     }
 
     private fun tryMention(): Boolean {
         if (source[cursor] != '@' || source.getOrNull(cursor - 1)?.isAsciiAlphanumeric() == true) return false
         val nameStart = cursor + 1
-        if (source.getOrNull(nameStart)?.isMentionBasic() != true) return false
+        if (source.getOrNull(nameStart)?.isMentionChar() != true) return false
         val nameEnd = scanMentionPart(nameStart)
+        val rawName = source.substring(nameStart, nameEnd)
         var end = nameEnd
-        var host: String? = null
-        if (end < rangeEnd && source[end] == '@') {
+        var rawHost: String? = null
+        if (source.getOrNull(end) == '@' && source.getOrNull(end + 1)?.isMentionChar() == true) {
             val hostStart = end + 1
-            if (source.getOrNull(hostStart)?.isMentionBasic() != true) return false
             val hostEnd = scanMentionPart(hostStart)
-            host = source.substring(hostStart, hostEnd)
+            rawHost = source.substring(hostStart, hostEnd)
             end = hostEnd
         }
-        emitNode(MentionNode(source.substring(nameStart, nameEnd), host), end)
+
+        var host = rawHost?.trimEnd('.', '-')
+        var name = rawName
+        var invalid = host != null && (host.isEmpty() || host[0] == '.' || host[0] == '-')
+        if (name.endsWith('.') || name.endsWith('-')) {
+            if (host == null) name = name.trimEnd('.', '-') else invalid = true
+        }
+        if (name.isEmpty() || name[0] == '.' || name[0] == '-') invalid = true
+        if (invalid) {
+            advanceTextTo(end)
+            return true
+        }
+
+        val mentionEnd = cursor + 1 + name.length + if (host == null) 0 else 1 + host.length
+        emitNode(MentionNode(name, host), mentionEnd)
         return true
     }
 
@@ -727,41 +846,60 @@ internal class DirectParser(
         var end = start
         while (end < rangeEnd) {
             val current = source[end]
-            if (current.isMentionBasic()) {
-                end++
-            } else if ((current == '-' || current == '.') && source.getOrNull(end + 1)?.isMentionContinuation() == true) {
-                end++
-            } else {
-                break
-            }
+            if (!current.isMentionChar()) break
+            end++
         }
         return end
     }
 
     private fun tryHashtag(): Boolean {
         if (source[cursor] != '#' || source.getOrNull(cursor - 1)?.isAsciiAlphanumeric() == true) return false
-        val first = source.getOrNull(cursor + 1) ?: return false
-        if (first.isHashtagExcluded()) {
-            cursor = minOf(cursor + 2, rangeEnd)
-            return true
-        }
         var end = cursor + 1
-        while (end < rangeEnd && !source[end].isHashtagExcluded()) end++
-        end = includeBalancedSuffix(end)
-        val tag = source.substring(cursor + 1, end)
-        if (tag.all { it in '0'..'9' }) {
-            cursor = end
-        } else {
-            emitNode(HashtagNode(tag), end)
+        while (end < rangeEnd) {
+            val balancedEnd = balancedHashtagItemEnd(end)
+            if (balancedEnd >= 0) {
+                end = balancedEnd
+            } else if (!source[end].isHashtagExcluded()) {
+                end++
+            } else {
+                break
+            }
         }
+        if (end == cursor + 1) return false
+        val tag = source.substring(cursor + 1, end)
+        if (tag.all { it in '0'..'9' }) return false
+        emitNode(HashtagNode(tag), end)
         return true
+    }
+
+    private fun balancedHashtagItemEnd(start: Int): Int {
+        val firstClose = source.getOrNull(start)?.hashtagClose() ?: return -1
+        val closings = arrayListOf(firstClose)
+        var index = start + 1
+        while (index < rangeEnd) {
+            val current = source[index]
+            val nestedClose = current.hashtagClose()
+            when {
+                nestedClose != null -> {
+                    if (initialDepth + frames.lastIndex + closings.size >= nestLimit) return -1
+                    closings.add(nestedClose)
+                }
+                current == closings.last() -> {
+                    closings.removeAt(closings.lastIndex)
+                    if (closings.isEmpty()) return index + 1
+                }
+                current.isHashtagExcluded() -> return -1
+            }
+            index++
+        }
+        return -1
     }
 
     private fun tryUrl(): Boolean {
         val schemeLength =
             when {
-                matches(cursor, "https://", ignoreCase = true) -> 8
-                matches(cursor, "http://", ignoreCase = true) -> 7
+                matches(cursor, "https://") -> 8
+                matches(cursor, "http://") -> 7
                 else -> return false
             }
         var end = cursor + schemeLength
@@ -777,13 +915,13 @@ internal class DirectParser(
                 break
             }
         }
+        val rawEnd = end
         while (end > cursor + schemeLength && (source[end - 1] == '.' || source[end - 1] == ',')) end--
-        if (!hasValidUrlAuthority(cursor, end)) {
-            advanceTextTo(end)
+        if (end == cursor + schemeLength) {
+            advanceTextTo(rawEnd)
             return true
         }
-        val extendedEnd = includeBalancedSuffix(end)
-        emitNode(UrlNode(decodePercentEncodedUrl(source.substring(cursor, extendedEnd))), extendedEnd)
+        emitNode(UrlNode(source.substring(cursor, end)), end)
         return true
     }
 
@@ -824,52 +962,26 @@ internal class DirectParser(
                     } else if (depth > 0) {
                         depth--
                     } else {
-                        cursor = index + 1
-                        return true
+                        return false
                     }
                 }
             }
             index++
         }
         val labelEnd = if (index < rangeEnd && source[index] == ']' && source.getOrNull(index + 1) == '(') index else candidate
-        if (labelEnd < 0) {
-            cursor = index
-            return true
-        }
+        if (labelEnd < 0 || labelEnd == labelStart) return false
 
         val hrefStart = labelEnd + 2
-        var hrefEnd = hrefStart
-        var parentheses = 0
-        while (hrefEnd < rangeEnd) {
-            val current = source[hrefEnd]
-            if (current.isFnWhitespace() || current == '\u3000') {
-                cursor = hrefEnd
-                return true
-            }
-            if (current == '(') {
-                parentheses++
-            } else if (current == ')') {
-                if (parentheses == 0) break
-                parentheses--
-            }
-            hrefEnd++
-        }
-        if (hrefEnd >= rangeEnd || source[hrefEnd] != ')') {
-            cursor = hrefEnd
-            return true
-        }
+        val angle = source.getOrNull(hrefStart) == '<'
+        val hrefEnd = if (angle) scanAngleUrlEnd(hrefStart) else scanUrlEnd(hrefStart)
+        if (hrefEnd < 0 || source.getOrNull(hrefEnd) != ')') return false
         val rawEnd = hrefEnd + 1
-        var rawHrefStart = hrefStart
-        var rawHrefEnd = hrefEnd
-        if (rawHrefEnd - rawHrefStart >= 2 && source[rawHrefStart] == '<' && source[rawHrefEnd - 1] == '>') {
-            rawHrefStart++
-            rawHrefEnd--
-        }
-        val href = decodePercentEncodedUrl(source.substring(rawHrefStart, rawHrefEnd))
-        if (!isSupportedLinkHref(href)) {
-            cursor = rawEnd
-            return true
-        }
+        val href =
+            if (angle) {
+                source.substring(hrefStart + 1, hrefEnd - 1)
+            } else {
+                source.substring(hrefStart, hrefEnd)
+            }
 
         flushSource(cursor)
         val label =
@@ -880,6 +992,8 @@ internal class DirectParser(
                 rangeEnd = labelEnd,
                 positionBase = labelStart,
                 insideLinkLabel = true,
+                nestLimit = nestLimit,
+                initialDepth = initialDepth + frames.lastIndex + 1,
             ).parseContent()
         val link = LinkNode(label, href, silent)
         val nested = nestedLinkText(label)
@@ -895,6 +1009,43 @@ internal class DirectParser(
         }
         advanceTo(rawEnd, semantic = true)
         return true
+    }
+
+    private fun scanUrlEnd(start: Int): Int {
+        val schemeLength =
+            when {
+                matches(start, "https://") -> 8
+                matches(start, "http://") -> 7
+                else -> return -1
+            }
+        var end = start + schemeLength
+        while (end < rangeEnd) {
+            val current = source[end]
+            if (current == '(' || current == '[') {
+                val balancedEnd = balancedUrlItemEnd(end)
+                if (balancedEnd < 0) break
+                end = balancedEnd
+            } else if (current.isUrlChar()) {
+                end++
+            } else {
+                break
+            }
+        }
+        while (end > start + schemeLength && (source[end - 1] == '.' || source[end - 1] == ',')) end--
+        return end.takeIf { it > start + schemeLength } ?: -1
+    }
+
+    private fun scanAngleUrlEnd(start: Int): Int {
+        if (source.getOrNull(start) != '<') return -1
+        val schemeEnd =
+            when {
+                matches(start + 1, "https://") -> start + 9
+                matches(start + 1, "http://") -> start + 8
+                else -> return -1
+            }
+        var end = schemeEnd
+        while (end < rangeEnd && source[end] != '>' && !source[end].isMfmSpace()) end++
+        return if (end > schemeEnd && source.getOrNull(end) == '>') end + 1 else -1
     }
 
     private fun nestedLinkText(content: ArrayList<Node>): Pair<String, String>? {
@@ -913,8 +1064,14 @@ internal class DirectParser(
         var index = start + 1
         while (index < rangeEnd) {
             when (val current = source[index]) {
-                '(' -> closing.add(')')
-                '[' -> closing.add(']')
+                '(' -> {
+                    if (initialDepth + frames.lastIndex + closing.size >= nestLimit) return -1
+                    closing.add(')')
+                }
+                '[' -> {
+                    if (initialDepth + frames.lastIndex + closing.size >= nestLimit) return -1
+                    closing.add(']')
+                }
                 ')', ']' -> {
                     if (closing.lastOrNull() != current) return -1
                     closing.removeAt(closing.lastIndex)
@@ -927,53 +1084,15 @@ internal class DirectParser(
         return -1
     }
 
-    private fun includeBalancedSuffix(start: Int): Int {
-        if (start >= rangeEnd) return start
-        val close =
-            when (source[start]) {
-                '(' -> ')'
-                '[' -> ']'
-                '「' -> '」'
-                '（' -> '）'
-                else -> return start
-            }
-        val end = source.indexOf(close, start + 1)
-        return if (end in (start + 1) until rangeEnd) end + 1 else start
-    }
-
-    private fun hasValidUrlAuthority(
-        start: Int,
-        end: Int,
-    ): Boolean {
-        val authorityStart = start + if (matches(start, "https://", ignoreCase = true)) 8 else 7
-        var authorityEnd = authorityStart
-        while (authorityEnd < end && source[authorityEnd] != '/' && source[authorityEnd] != '?' && source[authorityEnd] != '#') {
-            authorityEnd++
-        }
-        if (authorityStart == authorityEnd || source[authorityStart] == '.' || source[authorityEnd - 1] == '.') return false
-        for (index in authorityStart until authorityEnd) {
-            if (source[index] == '.') return true
-        }
-        return false
-    }
-
-    private fun isSupportedLinkHref(href: String): Boolean {
-        val schemeLength =
-            when {
-                href.startsWith("https://") -> 8
-                href.startsWith("http://") -> 7
-                else -> return false
-            }
-        val authority = href.substring(schemeLength).takeWhile { it != '/' && it != '?' && it != '#' }
-        return authority.contains('.') && !authority.startsWith('.') && !authority.endsWith('.')
-    }
-
     private fun advanceTextTo(end: Int) {
         var index = cursor
         while (index < end) {
-            if (source[index] == '\n') {
-                lineContentStart = index + 1
+            val newlineLength = newlineLengthAt(index)
+            if (newlineLength > 0) {
+                lineContentStart = index + newlineLength
                 lineHadNode = false
+                index += newlineLength
+                continue
             }
             index++
         }
@@ -1007,116 +1126,100 @@ internal class DirectParser(
         value: String,
         start: Int,
     ): Int {
-        var index = start
-        while (index + value.length <= rangeEnd) {
-            if (matches(index, value)) return index
-            index++
-        }
-        return -1
+        val index = source.indexOf(value, maxOf(start, rangeStart))
+        return if (index >= 0 && index + value.length <= rangeEnd) index else -1
     }
 
-    private fun parseFnHeader(header: String): Pair<String, HashMap<String, String>> {
-        val args = hashMapOf<String, String>()
-        val nameEnd = header.indexOf('.').let { if (it >= 0) it else header.length }
-        val name = header.substring(0, nameEnd)
-        var index = nameEnd
-        while (index < header.length) {
-            if (header[index] != '.') {
-                index++
-                continue
-            }
-            index++
-            val keyStart = index
-            while (index < header.length && header[index] != '=' && header[index] != '.' && header[index] != ',') index++
-            if (keyStart == index) continue
-            val key = header.substring(keyStart, index)
-            if (index < header.length && header[index] == '=') {
-                index++
-                val valueStart = index
-                while (index < header.length && !(header[index] == '.' && index + 1 < header.length && header[index + 1].isLetter())) {
-                    index++
-                }
-                args[key] = header.substring(valueStart, index)
-            } else {
-                args[key] = "true"
-                while (index < header.length && header[index] == ',') {
-                    index++
-                    val flagStart = index
-                    while (index < header.length && header[index] != ',' && header[index] != '.') index++
-                    if (flagStart < index) args[header.substring(flagStart, index)] = "true"
-                }
-            }
+    private fun newlineLengthAt(index: Int): Int =
+        when {
+            index !in rangeStart until rangeEnd -> 0
+            source[index] == '\r' && source.getOrNull(index + 1) == '\n' && index + 1 < rangeEnd -> 2
+            source[index] == '\r' || source[index] == '\n' -> 1
+            else -> 0
         }
-        return name to args
-    }
 
-    private fun decodePercentEncodedUrl(value: String): String {
-        if ('%' !in value) return value
-        val result = StringBuilder()
-        val bytes = arrayListOf<Byte>()
-        var index = 0
-        while (index < value.length) {
-            if (value[index] == '%' && index + 2 < value.length) {
-                val high = value[index + 1].hexDigit()
-                val low = value[index + 2].hexDigit()
-                if (high >= 0 && low >= 0) {
-                    bytes.add(((high shl 4) + low).toByte())
-                    index += 3
-                    continue
-                }
-            }
-            appendDecodedBytes(bytes, result)
-            result.append(value[index])
-            index++
-        }
-        appendDecodedBytes(bytes, result)
-        return result.toString()
-    }
+    private fun isLineBegin(index: Int): Boolean = index == rangeStart || previousNewlineStart(index) >= 0
 
-    private fun appendDecodedBytes(
-        bytes: ArrayList<Byte>,
-        result: StringBuilder,
+    private fun isLineEnd(index: Int): Boolean = index == rangeEnd || newlineLengthAt(index) > 0
+
+    private fun consumeBoundaryBefore(
+        blockStart: Int,
+        limit: Int,
     ) {
-        if (bytes.isEmpty()) return
-        val data = ByteArray(bytes.size)
-        for (index in bytes.indices) data[index] = bytes[index]
-        result.append(data.decodeToString())
-        bytes.clear()
+        var boundary = blockStart
+        repeat(limit) {
+            val previous = previousNewlineStart(boundary)
+            if (previous < rangeStart) return@repeat
+            boundary = previous
+        }
+        if (textStart < boundary) flushSource(boundary)
+        textStart = blockStart
     }
 
-    private fun Char.hexDigit(): Int =
-        when (this) {
-            in '0'..'9' -> this - '0'
-            in 'a'..'f' -> this - 'a' + 10
-            in 'A'..'F' -> this - 'A' + 10
+    private fun consumeBoundaryAfter(
+        blockEnd: Int,
+        limit: Int,
+    ): Int {
+        var end = blockEnd
+        repeat(limit) {
+            val length = newlineLengthAt(end)
+            if (length > 0) end += length
+        }
+        return end
+    }
+
+    private fun previousNewlineStart(index: Int): Int {
+        if (index <= rangeStart) return -1
+        return when {
+            source[index - 1] == '\n' && index - 2 >= rangeStart && source[index - 2] == '\r' -> index - 2
+            source[index - 1] == '\n' || source[index - 1] == '\r' -> index - 1
             else -> -1
         }
+    }
+
+    private fun isNestLimitReached(): Boolean =
+        !emojiOnly &&
+            (initialDepth != 0 || frames.lastIndex != 0) &&
+            initialDepth + frames.lastIndex >= nestLimit
 
     private fun Char.isAsciiAlpha(): Boolean = this in 'A'..'Z' || this in 'a'..'z'
+
+    private fun Char.isPlainAsciiLetter(): Boolean =
+        (this in 'a'..'z' && this != 'h' && this != 's') ||
+            (this in 'A'..'Z' && this != 'S')
 
     private fun Char.isAsciiAlphanumeric(): Boolean = isAsciiAlpha() || this in '0'..'9'
 
     private fun Char.isEmojiNameChar(): Boolean = isAsciiAlphanumeric() || this == '_' || this == '-' || this == '+'
 
-    private fun Char.isCodeLanguageChar(): Boolean = isEmojiNameChar() || this == '#' || this == '.'
+    private fun Char.mayStartKeycapEmoji(): Boolean = this == '#' || this == '*' || this in '0'..'9'
 
-    private fun Char.isEmphasisContent(): Boolean = isAsciiAlphanumeric() || this == ' ' || this == '\t' || this == '\n' || this == '\u3000'
+    private fun Char.isEmphasisContent(): Boolean = isAsciiAlphanumeric() || isMfmSpace()
 
-    private fun Char.isFnWhitespace(): Boolean = this == ' ' || this == '\t' || this == '\n' || this == '\u000C'
+    private fun Char.isFnNameChar(): Boolean = isAsciiAlphanumeric() || this == '_'
 
-    private fun Char.isFnContent(): Boolean = isAsciiAlphanumeric() || this == '_' || this == '-' || this == '.'
+    private fun Char.isFnValueChar(): Boolean = isFnNameChar() || this == '-' || this == '.'
 
-    private fun Char.isMentionBasic(): Boolean = isAsciiAlphanumeric() || this == '_'
+    private fun Char.isMentionChar(): Boolean = isAsciiAlphanumeric() || this == '_' || this == '-' || this == '.'
 
-    private fun Char.isMentionContinuation(): Boolean = isMentionBasic() || this == '-' || this == '.'
+    private fun Char.isMfmSpace(): Boolean = this == ' ' || this == '\t' || this == '\u3000'
 
-    private fun Char.isTagWhitespace(): Boolean = this == ' ' || this == '\t' || this == '\n' || this == '\u000C'
+    private fun Char.isTagWhitespace(): Boolean = isMfmSpace() || this == '\n' || this == '\r' || this == '\u000C'
+
+    private fun Char.hashtagClose(): Char? =
+        when (this) {
+            '(' -> ')'
+            '[' -> ']'
+            '「' -> '」'
+            '（' -> '）'
+            else -> null
+        }
 
     private fun Char.isHashtagExcluded(): Boolean =
-        this == ' ' ||
+            this == ' ' ||
             this == '\t' ||
             this == '\n' ||
-            this == '\u000C' ||
+            this == '\r' ||
             this == '\u3000' ||
             this in ".,!?'\"#:/[]【】()「」（）<>"
 

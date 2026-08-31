@@ -18,6 +18,10 @@ repositories {
 
 kotlin {
     applyDefaultHierarchyTemplate()
+    @OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+    abiValidation {
+        enabled.set(true)
+    }
     compilerOptions {
         freeCompilerArgs.add("-Xwhen-guards")
     }
@@ -90,6 +94,23 @@ benchmark {
             iterationTime = 1
             iterationTimeUnit = "s"
             outputTimeUnit = "ms"
+        }
+        register("optimization") {
+            include("MFMParserBenchmark.parse(LargePunctuation|LargeCjk|LongPlainTag|SparseUnicode|DenseUnicode|ComplexUnicode|QuoteHeavy|Unmatched)")
+            warmups = 2
+            iterations = 5
+            iterationTime = 500
+            iterationTimeUnit = "ms"
+            outputTimeUnit = "ms"
+        }
+        register("emojiMatcher") {
+            include("EmojiMatcherBenchmark")
+            warmups = 3
+            iterations = 5
+            iterationTime = 1
+            iterationTimeUnit = "s"
+            mode = "avgt"
+            outputTimeUnit = "ns"
         }
     }
 }

@@ -154,9 +154,7 @@ class MFMParserTest {
             RootNode(
                 content =
                     arrayListOf(
-                        CashNode(
-                            content = "test",
-                        ),
+                        TextNode(content = "\$test"),
                     ),
             ),
             builderResult,
@@ -188,10 +186,9 @@ class MFMParserTest {
             RootNode(
                 content =
                     arrayListOf(
-                        CodeBlockNode(
-                            code = "test",
-                            language = null,
-                        ),
+                        TextNode(content = "``"),
+                        InlineCodeNode(code = "test"),
+                        TextNode(content = "``"),
                     ),
             ),
             builderResult,
@@ -429,9 +426,9 @@ class MFMParserTest {
                     arrayListOf(
                         QuoteNode(
                             start = 0,
-                            content = arrayListOf(TextNode("foo")),
+                            content = arrayListOf(TextNode("foo\n")),
                         ),
-                        TextNode("\noutside"),
+                        TextNode("outside"),
                     ),
             ),
             builderResult,
@@ -499,7 +496,6 @@ class MFMParserTest {
     @Test
     fun testCJKUrl() {
         val encoded = "https://example.com/%E6%B5%8B%E8%AF%95"
-        val decoded = "https://example.com/测试"
         val builderResult = MFMParser().parse(encoded)
 
         assertEquals(
@@ -507,7 +503,7 @@ class MFMParserTest {
                 content =
                     arrayListOf(
                         UrlNode(
-                            url = decoded,
+                            url = encoded,
                         ),
                     ),
             ),
@@ -859,8 +855,7 @@ class MFMParserTest {
                             userName = "test",
                             host = "host",
                         ),
-                        TextNode(content = " "),
-                        CashNode(content = "test"),
+                        TextNode(content = " \$test"),
                     ),
             )
 
@@ -935,7 +930,7 @@ class MFMParserTest {
             RootNode(
                 0,
                 arrayListOf(
-                    TextNode(content = "111111111111\n"),
+                    TextNode(content = "111111111111"),
                     SearchNode(
                         query = "fewfew few few",
                         search = "[Search]",
@@ -960,7 +955,7 @@ class MFMParserTest {
                                 TextNode(content = "haha!"),
                             ),
                     ),
-                    TextNode(content = "\nwo!"),
+                    TextNode(content = "wo!"),
                 ),
             )
         assertEquals(expected, builderResult)
@@ -1262,8 +1257,7 @@ class MFMParserTest {
 TextNode(content = """オープンワールドRPG『"""),
 EmojiCodeNode("""genshin"""),
 TextNode(content = """』の総合チャンネルです。
-キャラクター、ストーリー、育成、アプデ等々、原神に関連するものであれば何でも投稿を歓迎しております！
-"""),
+キャラクター、ストーリー、育成、アプデ等々、原神に関連するものであれば何でも投稿を歓迎しております！"""),
 CenterNode(
                         start = 85,
                         content = arrayListOf(
@@ -1291,9 +1285,6 @@ TextNode(content = """―""")
                             )
                         )
                     ),
-TextNode(content = """
-
-"""),
 CenterNode(
                         start = 137,
                         content = arrayListOf(
@@ -1306,7 +1297,6 @@ TextNode(content = """このチャンネルのルール""")
                         )
                     ),
 TextNode(content = """
-
 ・公式が許可していない話題は禁止とします
 """),
 SmallNode(
@@ -1341,8 +1331,6 @@ BoldNode(
 TextNode(content = """ほんわかレス推奨です！""")
                         )
                     ),
-TextNode(content = """
-"""),
 CenterNode(
                         start = 368,
                         content = arrayListOf(
@@ -1370,8 +1358,6 @@ TextNode(content = """―""")
                             )
                         )
                     ),
-TextNode(content = """
-"""),
 SmallNode(
                         start = 419,
                         content = arrayListOf(
@@ -1386,8 +1372,6 @@ TextNode(content = """1773656919.3219297""")
                             )
                         )
                     ),
-TextNode(content = """
-"""),
 CenterNode(
                         start = 471,
                         content = arrayListOf(
@@ -1415,8 +1399,6 @@ EmojiCodeNode("""blank""")
                             )
                         )
                     ),
-TextNode(content = """
-"""),
 LinkNode(
                         url = "https://is.gd/cB406l",
                         silent = false,
@@ -1452,8 +1434,7 @@ FnNode(
 TextNode(content = """1774209600""")
                         )
                     ),
-TextNode(content = """ウィークリー更新
-"""),
+TextNode(content = """ウィークリー更新"""),
 CenterNode(
                         start = 645,
                         content = arrayListOf(
@@ -1481,8 +1462,7 @@ TextNode(content = """―""")
                             )
                         )
                     ),
-TextNode(content = """
-公式SNS："""),
+TextNode(content = """公式SNS："""),
 LinkNode(
                         url = "http://is.gd/rRlhOa",
                         silent = false,

@@ -5,5 +5,15 @@ import moe.tlaster.mfm.parser.tree.RootNode
 class MFMParser(
     private val emojiOnly: Boolean = false,
 ) {
-    fun parse(text: String): RootNode = DirectParser(text, emojiOnly).parse()
+    private var nestLimit: Int = 20
+
+    constructor(
+        emojiOnly: Boolean = false,
+        nestLimit: Int,
+    ) : this(emojiOnly) {
+        require(nestLimit >= 0) { "nestLimit must not be negative" }
+        this.nestLimit = nestLimit
+    }
+
+    fun parse(text: String): RootNode = DirectParser(text, emojiOnly, nestLimit = nestLimit).parse()
 }

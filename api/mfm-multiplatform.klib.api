@@ -1,0 +1,350 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, linuxArm64, linuxX64, macosArm64, macosX64, mingwX64, tvosArm64, tvosSimulatorArm64, tvosX64, wasmJs, watchosArm32, watchosArm64, watchosSimulatorArm64, watchosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <moe.tlaster:mfm-multiplatform>
+sealed interface moe.tlaster.mfm.parser.tree/BlockNode : moe.tlaster.mfm.parser.tree/Node // moe.tlaster.mfm.parser.tree/BlockNode|null[0]
+
+sealed interface moe.tlaster.mfm.parser.tree/InlineNode : moe.tlaster.mfm.parser.tree/Node // moe.tlaster.mfm.parser.tree/InlineNode|null[0]
+
+sealed interface moe.tlaster.mfm.parser.tree/Node // moe.tlaster.mfm.parser.tree/Node|null[0]
+
+final class moe.tlaster.mfm.parser.tree/BoldNode : moe.tlaster.mfm.parser.tree/ContainerNode, moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/BoldNode|null[0]
+    constructor <init>(kotlin/Int, kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ...) // moe.tlaster.mfm.parser.tree/BoldNode.<init>|<init>(kotlin.Int;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>){}[0]
+
+    final val content // moe.tlaster.mfm.parser.tree/BoldNode.content|{}content[0]
+        final fun <get-content>(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/BoldNode.content.<get-content>|<get-content>(){}[0]
+    final val start // moe.tlaster.mfm.parser.tree/BoldNode.start|{}start[0]
+        final fun <get-start>(): kotlin/Int // moe.tlaster.mfm.parser.tree/BoldNode.start.<get-start>|<get-start>(){}[0]
+
+    final fun component1(): kotlin/Int // moe.tlaster.mfm.parser.tree/BoldNode.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/BoldNode.component2|component2(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ...): moe.tlaster.mfm.parser.tree/BoldNode // moe.tlaster.mfm.parser.tree/BoldNode.copy|copy(kotlin.Int;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/BoldNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/BoldNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/BoldNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/CashNode : moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/CashNode|null[0]
+    constructor <init>(kotlin/String) // moe.tlaster.mfm.parser.tree/CashNode.<init>|<init>(kotlin.String){}[0]
+
+    final val content // moe.tlaster.mfm.parser.tree/CashNode.content|{}content[0]
+        final fun <get-content>(): kotlin/String // moe.tlaster.mfm.parser.tree/CashNode.content.<get-content>|<get-content>(){}[0]
+
+    final fun component1(): kotlin/String // moe.tlaster.mfm.parser.tree/CashNode.component1|component1(){}[0]
+    final fun copy(kotlin/String = ...): moe.tlaster.mfm.parser.tree/CashNode // moe.tlaster.mfm.parser.tree/CashNode.copy|copy(kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/CashNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/CashNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/CashNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/CenterNode : moe.tlaster.mfm.parser.tree/BlockNode, moe.tlaster.mfm.parser.tree/ContainerNode { // moe.tlaster.mfm.parser.tree/CenterNode|null[0]
+    constructor <init>(kotlin/Int, kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ...) // moe.tlaster.mfm.parser.tree/CenterNode.<init>|<init>(kotlin.Int;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>){}[0]
+
+    final val content // moe.tlaster.mfm.parser.tree/CenterNode.content|{}content[0]
+        final fun <get-content>(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/CenterNode.content.<get-content>|<get-content>(){}[0]
+    final val start // moe.tlaster.mfm.parser.tree/CenterNode.start|{}start[0]
+        final fun <get-start>(): kotlin/Int // moe.tlaster.mfm.parser.tree/CenterNode.start.<get-start>|<get-start>(){}[0]
+
+    final fun component1(): kotlin/Int // moe.tlaster.mfm.parser.tree/CenterNode.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/CenterNode.component2|component2(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ...): moe.tlaster.mfm.parser.tree/CenterNode // moe.tlaster.mfm.parser.tree/CenterNode.copy|copy(kotlin.Int;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/CenterNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/CenterNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/CenterNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/CodeBlockNode : moe.tlaster.mfm.parser.tree/BlockNode { // moe.tlaster.mfm.parser.tree/CodeBlockNode|null[0]
+    constructor <init>(kotlin/String, kotlin/String?) // moe.tlaster.mfm.parser.tree/CodeBlockNode.<init>|<init>(kotlin.String;kotlin.String?){}[0]
+
+    final val code // moe.tlaster.mfm.parser.tree/CodeBlockNode.code|{}code[0]
+        final fun <get-code>(): kotlin/String // moe.tlaster.mfm.parser.tree/CodeBlockNode.code.<get-code>|<get-code>(){}[0]
+    final val language // moe.tlaster.mfm.parser.tree/CodeBlockNode.language|{}language[0]
+        final fun <get-language>(): kotlin/String? // moe.tlaster.mfm.parser.tree/CodeBlockNode.language.<get-language>|<get-language>(){}[0]
+
+    final fun component1(): kotlin/String // moe.tlaster.mfm.parser.tree/CodeBlockNode.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // moe.tlaster.mfm.parser.tree/CodeBlockNode.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String? = ...): moe.tlaster.mfm.parser.tree/CodeBlockNode // moe.tlaster.mfm.parser.tree/CodeBlockNode.copy|copy(kotlin.String;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/CodeBlockNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/CodeBlockNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/CodeBlockNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/EmojiCodeNode : moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/EmojiCodeNode|null[0]
+    constructor <init>(kotlin/String) // moe.tlaster.mfm.parser.tree/EmojiCodeNode.<init>|<init>(kotlin.String){}[0]
+
+    final val emoji // moe.tlaster.mfm.parser.tree/EmojiCodeNode.emoji|{}emoji[0]
+        final fun <get-emoji>(): kotlin/String // moe.tlaster.mfm.parser.tree/EmojiCodeNode.emoji.<get-emoji>|<get-emoji>(){}[0]
+
+    final fun component1(): kotlin/String // moe.tlaster.mfm.parser.tree/EmojiCodeNode.component1|component1(){}[0]
+    final fun copy(kotlin/String = ...): moe.tlaster.mfm.parser.tree/EmojiCodeNode // moe.tlaster.mfm.parser.tree/EmojiCodeNode.copy|copy(kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/EmojiCodeNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/EmojiCodeNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/EmojiCodeNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/FnNode : moe.tlaster.mfm.parser.tree/ContainerNode, moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/FnNode|null[0]
+    constructor <init>(kotlin/Int, kotlin/String, kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ..., kotlin.collections/HashMap<kotlin/String, kotlin/String> = ...) // moe.tlaster.mfm.parser.tree/FnNode.<init>|<init>(kotlin.Int;kotlin.String;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>;kotlin.collections.HashMap<kotlin.String,kotlin.String>){}[0]
+
+    final val args // moe.tlaster.mfm.parser.tree/FnNode.args|{}args[0]
+        final fun <get-args>(): kotlin.collections/HashMap<kotlin/String, kotlin/String> // moe.tlaster.mfm.parser.tree/FnNode.args.<get-args>|<get-args>(){}[0]
+    final val content // moe.tlaster.mfm.parser.tree/FnNode.content|{}content[0]
+        final fun <get-content>(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/FnNode.content.<get-content>|<get-content>(){}[0]
+    final val name // moe.tlaster.mfm.parser.tree/FnNode.name|{}name[0]
+        final fun <get-name>(): kotlin/String // moe.tlaster.mfm.parser.tree/FnNode.name.<get-name>|<get-name>(){}[0]
+    final val start // moe.tlaster.mfm.parser.tree/FnNode.start|{}start[0]
+        final fun <get-start>(): kotlin/Int // moe.tlaster.mfm.parser.tree/FnNode.start.<get-start>|<get-start>(){}[0]
+    final val typedArgs // moe.tlaster.mfm.parser.tree/FnNode.typedArgs|{}typedArgs[0]
+        final fun <get-typedArgs>(): kotlin.collections/Map<kotlin/String, kotlin/Any> // moe.tlaster.mfm.parser.tree/FnNode.typedArgs.<get-typedArgs>|<get-typedArgs>(){}[0]
+
+    final fun component1(): kotlin/Int // moe.tlaster.mfm.parser.tree/FnNode.component1|component1(){}[0]
+    final fun component2(): kotlin/String // moe.tlaster.mfm.parser.tree/FnNode.component2|component2(){}[0]
+    final fun component3(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/FnNode.component3|component3(){}[0]
+    final fun component4(): kotlin.collections/HashMap<kotlin/String, kotlin/String> // moe.tlaster.mfm.parser.tree/FnNode.component4|component4(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/String = ..., kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ..., kotlin.collections/HashMap<kotlin/String, kotlin/String> = ...): moe.tlaster.mfm.parser.tree/FnNode // moe.tlaster.mfm.parser.tree/FnNode.copy|copy(kotlin.Int;kotlin.String;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>;kotlin.collections.HashMap<kotlin.String,kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/FnNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/FnNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/FnNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/HashtagNode : moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/HashtagNode|null[0]
+    constructor <init>(kotlin/String) // moe.tlaster.mfm.parser.tree/HashtagNode.<init>|<init>(kotlin.String){}[0]
+
+    final val tag // moe.tlaster.mfm.parser.tree/HashtagNode.tag|{}tag[0]
+        final fun <get-tag>(): kotlin/String // moe.tlaster.mfm.parser.tree/HashtagNode.tag.<get-tag>|<get-tag>(){}[0]
+
+    final fun component1(): kotlin/String // moe.tlaster.mfm.parser.tree/HashtagNode.component1|component1(){}[0]
+    final fun copy(kotlin/String = ...): moe.tlaster.mfm.parser.tree/HashtagNode // moe.tlaster.mfm.parser.tree/HashtagNode.copy|copy(kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/HashtagNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/HashtagNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/HashtagNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/InlineCodeNode : moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/InlineCodeNode|null[0]
+    constructor <init>(kotlin/String) // moe.tlaster.mfm.parser.tree/InlineCodeNode.<init>|<init>(kotlin.String){}[0]
+
+    final val code // moe.tlaster.mfm.parser.tree/InlineCodeNode.code|{}code[0]
+        final fun <get-code>(): kotlin/String // moe.tlaster.mfm.parser.tree/InlineCodeNode.code.<get-code>|<get-code>(){}[0]
+
+    final fun component1(): kotlin/String // moe.tlaster.mfm.parser.tree/InlineCodeNode.component1|component1(){}[0]
+    final fun copy(kotlin/String = ...): moe.tlaster.mfm.parser.tree/InlineCodeNode // moe.tlaster.mfm.parser.tree/InlineCodeNode.copy|copy(kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/InlineCodeNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/InlineCodeNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/InlineCodeNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/ItalicNode : moe.tlaster.mfm.parser.tree/ContainerNode, moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/ItalicNode|null[0]
+    constructor <init>(kotlin/Int, kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ...) // moe.tlaster.mfm.parser.tree/ItalicNode.<init>|<init>(kotlin.Int;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>){}[0]
+
+    final val content // moe.tlaster.mfm.parser.tree/ItalicNode.content|{}content[0]
+        final fun <get-content>(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/ItalicNode.content.<get-content>|<get-content>(){}[0]
+    final val start // moe.tlaster.mfm.parser.tree/ItalicNode.start|{}start[0]
+        final fun <get-start>(): kotlin/Int // moe.tlaster.mfm.parser.tree/ItalicNode.start.<get-start>|<get-start>(){}[0]
+
+    final fun component1(): kotlin/Int // moe.tlaster.mfm.parser.tree/ItalicNode.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/ItalicNode.component2|component2(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ...): moe.tlaster.mfm.parser.tree/ItalicNode // moe.tlaster.mfm.parser.tree/ItalicNode.copy|copy(kotlin.Int;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/ItalicNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/ItalicNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/ItalicNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/LinkNode : moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/LinkNode|null[0]
+    constructor <init>(kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node>, kotlin/String, kotlin/Boolean) // moe.tlaster.mfm.parser.tree/LinkNode.<init>|<init>(kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>;kotlin.String;kotlin.Boolean){}[0]
+
+    final val content // moe.tlaster.mfm.parser.tree/LinkNode.content|{}content[0]
+        final fun <get-content>(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/LinkNode.content.<get-content>|<get-content>(){}[0]
+    final val silent // moe.tlaster.mfm.parser.tree/LinkNode.silent|{}silent[0]
+        final fun <get-silent>(): kotlin/Boolean // moe.tlaster.mfm.parser.tree/LinkNode.silent.<get-silent>|<get-silent>(){}[0]
+    final val url // moe.tlaster.mfm.parser.tree/LinkNode.url|{}url[0]
+        final fun <get-url>(): kotlin/String // moe.tlaster.mfm.parser.tree/LinkNode.url.<get-url>|<get-url>(){}[0]
+
+    final fun component1(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/LinkNode.component1|component1(){}[0]
+    final fun component2(): kotlin/String // moe.tlaster.mfm.parser.tree/LinkNode.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // moe.tlaster.mfm.parser.tree/LinkNode.component3|component3(){}[0]
+    final fun copy(kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ..., kotlin/String = ..., kotlin/Boolean = ...): moe.tlaster.mfm.parser.tree/LinkNode // moe.tlaster.mfm.parser.tree/LinkNode.copy|copy(kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>;kotlin.String;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/LinkNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/LinkNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/LinkNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/MathBlockNode : moe.tlaster.mfm.parser.tree/BlockNode { // moe.tlaster.mfm.parser.tree/MathBlockNode|null[0]
+    constructor <init>(kotlin/String) // moe.tlaster.mfm.parser.tree/MathBlockNode.<init>|<init>(kotlin.String){}[0]
+
+    final val formula // moe.tlaster.mfm.parser.tree/MathBlockNode.formula|{}formula[0]
+        final fun <get-formula>(): kotlin/String // moe.tlaster.mfm.parser.tree/MathBlockNode.formula.<get-formula>|<get-formula>(){}[0]
+
+    final fun component1(): kotlin/String // moe.tlaster.mfm.parser.tree/MathBlockNode.component1|component1(){}[0]
+    final fun copy(kotlin/String = ...): moe.tlaster.mfm.parser.tree/MathBlockNode // moe.tlaster.mfm.parser.tree/MathBlockNode.copy|copy(kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/MathBlockNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/MathBlockNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/MathBlockNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/MathInlineNode : moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/MathInlineNode|null[0]
+    constructor <init>(kotlin/String) // moe.tlaster.mfm.parser.tree/MathInlineNode.<init>|<init>(kotlin.String){}[0]
+
+    final val formula // moe.tlaster.mfm.parser.tree/MathInlineNode.formula|{}formula[0]
+        final fun <get-formula>(): kotlin/String // moe.tlaster.mfm.parser.tree/MathInlineNode.formula.<get-formula>|<get-formula>(){}[0]
+
+    final fun component1(): kotlin/String // moe.tlaster.mfm.parser.tree/MathInlineNode.component1|component1(){}[0]
+    final fun copy(kotlin/String = ...): moe.tlaster.mfm.parser.tree/MathInlineNode // moe.tlaster.mfm.parser.tree/MathInlineNode.copy|copy(kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/MathInlineNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/MathInlineNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/MathInlineNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/MentionNode : moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/MentionNode|null[0]
+    constructor <init>(kotlin/String, kotlin/String?) // moe.tlaster.mfm.parser.tree/MentionNode.<init>|<init>(kotlin.String;kotlin.String?){}[0]
+
+    final val acct // moe.tlaster.mfm.parser.tree/MentionNode.acct|{}acct[0]
+        final fun <get-acct>(): kotlin/String // moe.tlaster.mfm.parser.tree/MentionNode.acct.<get-acct>|<get-acct>(){}[0]
+    final val host // moe.tlaster.mfm.parser.tree/MentionNode.host|{}host[0]
+        final fun <get-host>(): kotlin/String? // moe.tlaster.mfm.parser.tree/MentionNode.host.<get-host>|<get-host>(){}[0]
+    final val userName // moe.tlaster.mfm.parser.tree/MentionNode.userName|{}userName[0]
+        final fun <get-userName>(): kotlin/String // moe.tlaster.mfm.parser.tree/MentionNode.userName.<get-userName>|<get-userName>(){}[0]
+
+    final fun component1(): kotlin/String // moe.tlaster.mfm.parser.tree/MentionNode.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // moe.tlaster.mfm.parser.tree/MentionNode.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String? = ...): moe.tlaster.mfm.parser.tree/MentionNode // moe.tlaster.mfm.parser.tree/MentionNode.copy|copy(kotlin.String;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/MentionNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/MentionNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/MentionNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/QuoteNode : moe.tlaster.mfm.parser.tree/BlockNode, moe.tlaster.mfm.parser.tree/ContainerNode { // moe.tlaster.mfm.parser.tree/QuoteNode|null[0]
+    constructor <init>(kotlin/Int, kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ...) // moe.tlaster.mfm.parser.tree/QuoteNode.<init>|<init>(kotlin.Int;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>){}[0]
+
+    final val content // moe.tlaster.mfm.parser.tree/QuoteNode.content|{}content[0]
+        final fun <get-content>(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/QuoteNode.content.<get-content>|<get-content>(){}[0]
+    final val start // moe.tlaster.mfm.parser.tree/QuoteNode.start|{}start[0]
+        final fun <get-start>(): kotlin/Int // moe.tlaster.mfm.parser.tree/QuoteNode.start.<get-start>|<get-start>(){}[0]
+
+    final fun component1(): kotlin/Int // moe.tlaster.mfm.parser.tree/QuoteNode.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/QuoteNode.component2|component2(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ...): moe.tlaster.mfm.parser.tree/QuoteNode // moe.tlaster.mfm.parser.tree/QuoteNode.copy|copy(kotlin.Int;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/QuoteNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/QuoteNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/QuoteNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/RootNode : moe.tlaster.mfm.parser.tree/ContainerNode, moe.tlaster.mfm.parser.tree/Node { // moe.tlaster.mfm.parser.tree/RootNode|null[0]
+    constructor <init>(kotlin/Int = ..., kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ...) // moe.tlaster.mfm.parser.tree/RootNode.<init>|<init>(kotlin.Int;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>){}[0]
+
+    final val content // moe.tlaster.mfm.parser.tree/RootNode.content|{}content[0]
+        final fun <get-content>(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/RootNode.content.<get-content>|<get-content>(){}[0]
+    final val start // moe.tlaster.mfm.parser.tree/RootNode.start|{}start[0]
+        final fun <get-start>(): kotlin/Int // moe.tlaster.mfm.parser.tree/RootNode.start.<get-start>|<get-start>(){}[0]
+
+    final fun component1(): kotlin/Int // moe.tlaster.mfm.parser.tree/RootNode.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/RootNode.component2|component2(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ...): moe.tlaster.mfm.parser.tree/RootNode // moe.tlaster.mfm.parser.tree/RootNode.copy|copy(kotlin.Int;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/RootNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/RootNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/RootNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/SearchNode : moe.tlaster.mfm.parser.tree/BlockNode { // moe.tlaster.mfm.parser.tree/SearchNode|null[0]
+    constructor <init>(kotlin/String, kotlin/String) // moe.tlaster.mfm.parser.tree/SearchNode.<init>|<init>(kotlin.String;kotlin.String){}[0]
+
+    final val content // moe.tlaster.mfm.parser.tree/SearchNode.content|{}content[0]
+        final fun <get-content>(): kotlin/String // moe.tlaster.mfm.parser.tree/SearchNode.content.<get-content>|<get-content>(){}[0]
+    final val query // moe.tlaster.mfm.parser.tree/SearchNode.query|{}query[0]
+        final fun <get-query>(): kotlin/String // moe.tlaster.mfm.parser.tree/SearchNode.query.<get-query>|<get-query>(){}[0]
+    final val search // moe.tlaster.mfm.parser.tree/SearchNode.search|{}search[0]
+        final fun <get-search>(): kotlin/String // moe.tlaster.mfm.parser.tree/SearchNode.search.<get-search>|<get-search>(){}[0]
+
+    final fun component1(): kotlin/String // moe.tlaster.mfm.parser.tree/SearchNode.component1|component1(){}[0]
+    final fun component2(): kotlin/String // moe.tlaster.mfm.parser.tree/SearchNode.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ...): moe.tlaster.mfm.parser.tree/SearchNode // moe.tlaster.mfm.parser.tree/SearchNode.copy|copy(kotlin.String;kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/SearchNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/SearchNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/SearchNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/SmallNode : moe.tlaster.mfm.parser.tree/ContainerNode, moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/SmallNode|null[0]
+    constructor <init>(kotlin/Int, kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ...) // moe.tlaster.mfm.parser.tree/SmallNode.<init>|<init>(kotlin.Int;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>){}[0]
+
+    final val content // moe.tlaster.mfm.parser.tree/SmallNode.content|{}content[0]
+        final fun <get-content>(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/SmallNode.content.<get-content>|<get-content>(){}[0]
+    final val start // moe.tlaster.mfm.parser.tree/SmallNode.start|{}start[0]
+        final fun <get-start>(): kotlin/Int // moe.tlaster.mfm.parser.tree/SmallNode.start.<get-start>|<get-start>(){}[0]
+
+    final fun component1(): kotlin/Int // moe.tlaster.mfm.parser.tree/SmallNode.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/SmallNode.component2|component2(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ...): moe.tlaster.mfm.parser.tree/SmallNode // moe.tlaster.mfm.parser.tree/SmallNode.copy|copy(kotlin.Int;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/SmallNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/SmallNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/SmallNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/StrikeNode : moe.tlaster.mfm.parser.tree/ContainerNode, moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/StrikeNode|null[0]
+    constructor <init>(kotlin/Int, kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ...) // moe.tlaster.mfm.parser.tree/StrikeNode.<init>|<init>(kotlin.Int;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>){}[0]
+
+    final val content // moe.tlaster.mfm.parser.tree/StrikeNode.content|{}content[0]
+        final fun <get-content>(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/StrikeNode.content.<get-content>|<get-content>(){}[0]
+    final val start // moe.tlaster.mfm.parser.tree/StrikeNode.start|{}start[0]
+        final fun <get-start>(): kotlin/Int // moe.tlaster.mfm.parser.tree/StrikeNode.start.<get-start>|<get-start>(){}[0]
+
+    final fun component1(): kotlin/Int // moe.tlaster.mfm.parser.tree/StrikeNode.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> // moe.tlaster.mfm.parser.tree/StrikeNode.component2|component2(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin.collections/ArrayList<moe.tlaster.mfm.parser.tree/Node> = ...): moe.tlaster.mfm.parser.tree/StrikeNode // moe.tlaster.mfm.parser.tree/StrikeNode.copy|copy(kotlin.Int;kotlin.collections.ArrayList<moe.tlaster.mfm.parser.tree.Node>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/StrikeNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/StrikeNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/StrikeNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/TextNode : moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/TextNode|null[0]
+    constructor <init>(kotlin/String, kotlin/Boolean = ...) // moe.tlaster.mfm.parser.tree/TextNode.<init>|<init>(kotlin.String;kotlin.Boolean){}[0]
+
+    final val content // moe.tlaster.mfm.parser.tree/TextNode.content|{}content[0]
+        final fun <get-content>(): kotlin/String // moe.tlaster.mfm.parser.tree/TextNode.content.<get-content>|<get-content>(){}[0]
+    final val plain // moe.tlaster.mfm.parser.tree/TextNode.plain|{}plain[0]
+        final fun <get-plain>(): kotlin/Boolean // moe.tlaster.mfm.parser.tree/TextNode.plain.<get-plain>|<get-plain>(){}[0]
+
+    final fun component1(): kotlin/String // moe.tlaster.mfm.parser.tree/TextNode.component1|component1(){}[0]
+    final fun component2(): kotlin/Boolean // moe.tlaster.mfm.parser.tree/TextNode.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Boolean = ...): moe.tlaster.mfm.parser.tree/TextNode // moe.tlaster.mfm.parser.tree/TextNode.copy|copy(kotlin.String;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/TextNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/TextNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/TextNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/UnicodeEmojiNode : moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/UnicodeEmojiNode|null[0]
+    constructor <init>(kotlin/String) // moe.tlaster.mfm.parser.tree/UnicodeEmojiNode.<init>|<init>(kotlin.String){}[0]
+
+    final val emoji // moe.tlaster.mfm.parser.tree/UnicodeEmojiNode.emoji|{}emoji[0]
+        final fun <get-emoji>(): kotlin/String // moe.tlaster.mfm.parser.tree/UnicodeEmojiNode.emoji.<get-emoji>|<get-emoji>(){}[0]
+
+    final fun component1(): kotlin/String // moe.tlaster.mfm.parser.tree/UnicodeEmojiNode.component1|component1(){}[0]
+    final fun copy(kotlin/String = ...): moe.tlaster.mfm.parser.tree/UnicodeEmojiNode // moe.tlaster.mfm.parser.tree/UnicodeEmojiNode.copy|copy(kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/UnicodeEmojiNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/UnicodeEmojiNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/UnicodeEmojiNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser.tree/UrlNode : moe.tlaster.mfm.parser.tree/InlineNode { // moe.tlaster.mfm.parser.tree/UrlNode|null[0]
+    constructor <init>(kotlin/String, kotlin/Boolean = ...) // moe.tlaster.mfm.parser.tree/UrlNode.<init>|<init>(kotlin.String;kotlin.Boolean){}[0]
+
+    final val brackets // moe.tlaster.mfm.parser.tree/UrlNode.brackets|{}brackets[0]
+        final fun <get-brackets>(): kotlin/Boolean // moe.tlaster.mfm.parser.tree/UrlNode.brackets.<get-brackets>|<get-brackets>(){}[0]
+    final val url // moe.tlaster.mfm.parser.tree/UrlNode.url|{}url[0]
+        final fun <get-url>(): kotlin/String // moe.tlaster.mfm.parser.tree/UrlNode.url.<get-url>|<get-url>(){}[0]
+
+    final fun component1(): kotlin/String // moe.tlaster.mfm.parser.tree/UrlNode.component1|component1(){}[0]
+    final fun component2(): kotlin/Boolean // moe.tlaster.mfm.parser.tree/UrlNode.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Boolean = ...): moe.tlaster.mfm.parser.tree/UrlNode // moe.tlaster.mfm.parser.tree/UrlNode.copy|copy(kotlin.String;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // moe.tlaster.mfm.parser.tree/UrlNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // moe.tlaster.mfm.parser.tree/UrlNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // moe.tlaster.mfm.parser.tree/UrlNode.toString|toString(){}[0]
+}
+
+final class moe.tlaster.mfm.parser/MFMParser { // moe.tlaster.mfm.parser/MFMParser|null[0]
+    constructor <init>(kotlin/Boolean = ...) // moe.tlaster.mfm.parser/MFMParser.<init>|<init>(kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/Int) // moe.tlaster.mfm.parser/MFMParser.<init>|<init>(kotlin.Boolean;kotlin.Int){}[0]
+
+    final fun parse(kotlin/String): moe.tlaster.mfm.parser.tree/RootNode // moe.tlaster.mfm.parser/MFMParser.parse|parse(kotlin.String){}[0]
+}

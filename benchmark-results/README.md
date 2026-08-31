@@ -1,5 +1,7 @@
 # MFM Parser 直接 AST 迁移基准报告
 
+> 本文记录直接 AST 迁移完成时的历史快照。后续官方行为对齐见 [MFM 官方行为对齐报告](../MFM_SPEC_AUDIT.md)，P0/P1 数据见 [P0/P1 性能优化报告](P0_P1_OPTIMIZATION.md)，最新 Emoji matcher 定向数据见 [Emoji matcher 正确性与性能报告](EMOJI_MATCHER.md)。原始 JSON 保留不改写。
+
 ## 对比对象
 
 - 基线：`Tokenizer -> TreeBuilder -> normalizeCompat`，源码基线为 `e52d1dbee925f56e9c6b15ad9b22694c1bcbffa8`。

@@ -38,7 +38,7 @@ class UpstreamParserCompatibilityTest {
 
     private data class PFn(
         val name: String,
-        val args: Map<String, String>,
+        val args: Map<String, Any>,
         val children: List<PNode>,
     ) : PNode
 
@@ -123,7 +123,7 @@ class UpstreamParserCompatibilityTest {
 
     private fun FN(
         name: String,
-        args: Map<String, String> = emptyMap(),
+        args: Map<String, Any> = emptyMap(),
         children: List<PNode>,
     ): PNode = PFn(name, args, children)
 
@@ -182,6 +182,11 @@ class UpstreamParserCompatibilityTest {
 
     private fun parseFull(input: String): List<PNode> = normalize(MFMParser().parse(input).content)
 
+    private fun parseFull(
+        input: String,
+        nestLimit: Int,
+    ): List<PNode> = normalize(MFMParser(nestLimit = nestLimit).parse(input).content)
+
     private fun normalize(nodes: List<Node>): List<PNode> {
         val result = arrayListOf<PNode>()
         for (node in nodes) {
@@ -190,7 +195,7 @@ class UpstreamParserCompatibilityTest {
                     is TextNode -> if (node.plain) PLAIN(node.content) else TEXT(node.content)
                     is EmojiCodeNode -> EMOJI_CODE(node.emoji)
                     is UnicodeEmojiNode -> UNI_EMOJI(node.emoji)
-                    is MentionNode -> MENTION(node.userName, node.host, buildAcct(node.userName, node.host))
+                    is MentionNode -> MENTION(node.userName, node.host, node.acct)
                     is HashtagNode -> HASHTAG(node.tag)
                     is UrlNode -> N_URL(node.url, node.brackets)
                     is InlineCodeNode -> INLINE_CODE(node.code)
@@ -201,9 +206,9 @@ class UpstreamParserCompatibilityTest {
                     is ItalicNode -> ITALIC(normalize(node.content))
                     is StrikeNode -> STRIKE(normalize(node.content))
                     is LinkNode -> LINK(node.silent, node.url, normalize(node.content))
-                    is FnNode -> FN(node.name, node.args.toMap(), normalize(node.content))
+                    is FnNode -> FN(node.name, node.typedArgs, normalize(node.content))
                     is QuoteNode -> QUOTE(normalize(node.content))
-                    is SearchNode -> SEARCH(node.query, "${node.query} ${node.search}".trim())
+                    is SearchNode -> SEARCH(node.query, node.content)
                     is CodeBlockNode -> CODE_BLOCK(node.code, node.language)
                     is MathBlockNode -> MATH_BLOCK(node.formula)
                     is CenterNode -> CENTER(normalize(node.content))
@@ -225,11 +230,6 @@ class UpstreamParserCompatibilityTest {
             nodes.add(node)
         }
     }
-
-    private fun buildAcct(
-        username: String,
-        host: String?,
-    ): String = if (host == null) "@$username" else "@$username@$host"
 
     @Test
     fun simpleParserTextBasic() {
@@ -269,6 +269,14 @@ class UpstreamParserCompatibilityTest {
     }
 
     @Test
+    fun simpleParserPlainSuppressesEmojiParsing() {
+        assertEquals(listOf(PLAIN(":foo:")), parseSimple("<plain>:foo:</plain>"))
+        assertEquals(listOf(PLAIN("😇")), parseSimple("<plain>😇</plain>"))
+        assertEquals(listOf(TEXT("<plain></plain>")), parseSimple("<plain></plain>"))
+        assertEquals(listOf(TEXT("<plain>abc")), parseSimple("<plain>abc"))
+    }
+
+    @Test
     fun fullParserTextBasic() {
         assertEquals(listOf(TEXT("abc")), parseFull("abc"))
     }
@@ -276,7 +284,7 @@ class UpstreamParserCompatibilityTest {
     @Test
     fun fullParserQuoteCases() {
         assertEquals(listOf(QUOTE(listOf(TEXT("abc")))), parseFull("> abc"))
-        assertEquals(listOf(QUOTE(listOf(TEXT("abc\n123")))), parseFull("> abc\n> 123"))
+        assertEquals(listOf(QUOTE(listOf(TEXT("abc\n123")))), parseFull("\n> abc\n> 123\n"))
         assertEquals(
             listOf(
                 QUOTE(
@@ -287,7 +295,7 @@ class UpstreamParserCompatibilityTest {
                     ),
                 ),
             ),
-            parseFull("> <center>\n> a\n> </center>"),
+            parseFull("\n> <center>\n> a\n> </center>\n"),
         )
         assertEquals(
             listOf(
@@ -303,16 +311,16 @@ class UpstreamParserCompatibilityTest {
                     ),
                 ),
             ),
-            parseFull("> <center>\n> I'm @ai, An bot of misskey!\n> </center>"),
+            parseFull("\n> <center>\n> I'm @ai, An bot of misskey!\n> </center>\n"),
         )
-        assertEquals(listOf(QUOTE(listOf(TEXT("abc\n\n123")))), parseFull("> abc\n>\n> 123"))
+        assertEquals(listOf(QUOTE(listOf(TEXT("abc\n\n123")))), parseFull("\n> abc\n>\n> 123\n"))
         assertEquals(listOf(TEXT("> ")), parseFull("> "))
         assertEquals(
             listOf(
                 QUOTE(listOf(TEXT("foo\nbar"))),
                 TEXT("hoge"),
             ),
-            parseFull("> foo\n> bar\n\nhoge"),
+            parseFull("\n> foo\n> bar\n\nhoge"),
         )
         assertEquals(
             listOf(
@@ -320,7 +328,7 @@ class UpstreamParserCompatibilityTest {
                 QUOTE(listOf(TEXT("bar"))),
                 TEXT("hoge"),
             ),
-            parseFull("> foo\n\n> bar\n\nhoge"),
+            parseFull("\n> foo\n\n> bar\n\nhoge"),
         )
     }
 
@@ -332,11 +340,12 @@ class UpstreamParserCompatibilityTest {
         assertEquals(listOf(SEARCH("MFM 書き方 123", "MFM 書き方 123 [search]")), parseFull("MFM 書き方 123 [search]"))
         assertEquals(listOf(SEARCH("MFM 書き方 123", "MFM 書き方 123 検索")), parseFull("MFM 書き方 123 検索"))
         assertEquals(listOf(SEARCH("MFM 書き方 123", "MFM 書き方 123 [検索]")), parseFull("MFM 書き方 123 [検索]"))
+        assertEquals(listOf(SEARCH("query", "query\tSearch")), parseFull("query\tSearch"))
         assertEquals(
             listOf(
-                TEXT("abc\n"),
+                TEXT("abc"),
                 SEARCH("hoge piyo bebeyo", "hoge piyo bebeyo 検索"),
-                TEXT("\n123"),
+                TEXT("123"),
             ),
             parseFull("abc\nhoge piyo bebeyo 検索\n123"),
         )
@@ -349,14 +358,14 @@ class UpstreamParserCompatibilityTest {
         assertEquals(listOf(CODE_BLOCK("const a = 1;", "js")), parseFull("```js\nconst a = 1;\n```"))
         assertEquals(
             listOf(
-                TEXT("abc\n"),
+                TEXT("abc"),
                 CODE_BLOCK("const abc = 1;", null),
-                TEXT("\n123"),
+                TEXT("123"),
             ),
             parseFull("abc\n```\nconst abc = 1;\n```\n123"),
         )
         assertEquals(listOf(CODE_BLOCK("aaa```bbb", null)), parseFull("```\naaa```bbb\n```"))
-        assertEquals(listOf(CODE_BLOCK("foo", null), TEXT("\nbar")), parseFull("```\nfoo\n```\nbar"))
+        assertEquals(listOf(CODE_BLOCK("foo", null), TEXT("bar")), parseFull("```\nfoo\n```\nbar"))
     }
 
     @Test
@@ -364,9 +373,9 @@ class UpstreamParserCompatibilityTest {
         assertEquals(listOf(MATH_BLOCK("math1")), parseFull("\\[math1\\]"))
         assertEquals(
             listOf(
-                TEXT("abc\n"),
+                TEXT("abc"),
                 MATH_BLOCK("math1"),
-                TEXT("\n123"),
+                TEXT("123"),
             ),
             parseFull("abc\n\\[math1\\]\n123"),
         )
@@ -379,11 +388,19 @@ class UpstreamParserCompatibilityTest {
         assertEquals(listOf(CENTER(listOf(TEXT("abc")))), parseFull("<center>abc</center>"))
         assertEquals(
             listOf(
-                TEXT("before\n"),
+                TEXT("before"),
                 CENTER(listOf(TEXT("abc\n123\n\npiyo"))),
-                TEXT("\nafter"),
+                TEXT("after"),
             ),
             parseFull("before\n<center>\nabc\n123\n\npiyo\n</center>\nafter"),
+        )
+        assertEquals(
+            listOf(TEXT("before"), CENTER(listOf(TEXT("abc"))), TEXT("after")),
+            parseFull("before\r\n<center>abc</center>\r\nafter"),
+        )
+        assertEquals(
+            listOf(TEXT("before"), CENTER(listOf(TEXT("abc"))), TEXT("after")),
+            parseFull("before\r\n<center>\r\nabc\r\n</center>\r\nafter"),
         )
     }
 
@@ -396,6 +413,16 @@ class UpstreamParserCompatibilityTest {
     fun fullParserUnicodeEmojiCases() {
         assertEquals(listOf(TEXT("今起きた"), UNI_EMOJI("😇")), parseFull("今起きた😇"))
         assertEquals(listOf(TEXT("abc"), UNI_EMOJI("#️⃣"), TEXT("123")), parseFull("abc#️⃣123"))
+        assertEquals(listOf(TEXT("𠮷𝄞")), parseFull("𠮷𝄞"))
+        assertEquals(listOf(UNI_EMOJI("☀️"), UNI_EMOJI("❤️"), UNI_EMOJI("©️")), parseFull("☀️❤️©️"))
+        assertEquals(listOf(UNI_EMOJI("1️⃣"), UNI_EMOJI("*️⃣")), parseFull("1️⃣*️⃣"))
+        assertEquals(listOf(UNI_EMOJI("👨‍👩‍👧‍👦")), parseFull("👨‍👩‍👧‍👦"))
+        assertEquals(listOf(UNI_EMOJI("😇"), UNI_EMOJI("🙂")), parseFull("😇🙂"))
+        for (component in listOf("🏻", "🏼", "🏽", "🏾", "🏿", "🦰", "🦱", "🦲", "🦳")) {
+            assertEquals(listOf(UNI_EMOJI(component)), parseFull(component))
+            assertEquals(listOf(UNI_EMOJI(component), TEXT("\uFE0E")), parseFull("$component\uFE0E"))
+            assertEquals(listOf(UNI_EMOJI(component), TEXT("\uFE0F")), parseFull("$component\uFE0F"))
+        }
     }
 
     @Test
@@ -483,6 +510,8 @@ class UpstreamParserCompatibilityTest {
             ),
             parseFull("**123\n~~abc~~\n123**"),
         )
+        assertEquals(listOf(TEXT("<b></b>")), parseFull("<b></b>"))
+        assertEquals(listOf(TEXT("****")), parseFull("****"))
     }
 
     @Test
@@ -577,12 +606,18 @@ class UpstreamParserCompatibilityTest {
             ),
             parseFull("あいう_abc_えお"),
         )
+        assertEquals(listOf(ITALIC(listOf(TEXT("abc"))), TEXT("a")), parseFull("*abc*a"))
+        assertEquals(listOf(TEXT("__a\nb__")), parseFull("__a\nb__"))
     }
 
     @Test
     fun fullParserStrikeCases() {
         assertEquals(listOf(STRIKE(listOf(TEXT("foo")))), parseFull("<s>foo</s>"))
         assertEquals(listOf(STRIKE(listOf(TEXT("foo")))), parseFull("~~foo~~"))
+        assertEquals(listOf(TEXT("~~a\nb~~")), parseFull("~~a\nb~~"))
+        assertEquals(listOf(STRIKE(listOf(TEXT("a~b")))), parseFull("~~a~b~~"))
+        assertEquals(listOf(TEXT("<s></s>")), parseFull("<s></s>"))
+        assertEquals(listOf(TEXT("~~~~")), parseFull("~~~~"))
     }
 
     @Test
@@ -590,6 +625,8 @@ class UpstreamParserCompatibilityTest {
         assertEquals(listOf(INLINE_CODE("var x = \"Strawberry Pasta\";")), parseFull("`var x = \"Strawberry Pasta\";`"))
         assertEquals(listOf(TEXT("`foo\nbar`")), parseFull("`foo\nbar`"))
         assertEquals(listOf(TEXT("`foo´bar`")), parseFull("`foo´bar`"))
+        assertEquals(listOf(INLINE_CODE("日本語")), parseFull("`日本語`"))
+        assertEquals(listOf(INLINE_CODE("😇")), parseFull("`😇`"))
     }
 
     @Test
@@ -664,6 +701,9 @@ class UpstreamParserCompatibilityTest {
         assertEquals(listOf(TEXT("「bar "), HASHTAG("foo"), TEXT("」")), parseFull("「bar #foo」"))
         assertEquals(listOf(TEXT("#123")), parseFull("#123"))
         assertEquals(listOf(TEXT("(#123)")), parseFull("(#123)"))
+        assertEquals(listOf(HASHTAG("foo(bar)baz")), parseFull("#foo(bar)baz"))
+        assertEquals(listOf(HASHTAG("foo(a(b)c)d")), parseFull("#foo(a(b)c)d"))
+        assertEquals(listOf(TEXT("["), HASHTAG("abc"), TEXT("]")), parseFull("[#abc]"))
     }
 
     @Test
@@ -714,6 +754,13 @@ class UpstreamParserCompatibilityTest {
         assertEquals(
             listOf(N_URL("https://example.com/a"), TEXT("(b")),
             parseFull("https://example.com/a(b"),
+        )
+        assertEquals(listOf(N_URL("http://localhost")), parseFull("http://localhost"))
+        assertEquals(listOf(N_URL("https://example.com/a%20b")), parseFull("https://example.com/a%20b"))
+        assertEquals(listOf(N_URL("https://example.com", brackets = true)), parseFull("<https://example.com>"))
+        assertEquals(
+            listOf(N_URL("https://example.com"), TEXT("「outside」")),
+            parseFull("https://example.com「outside」"),
         )
     }
 
@@ -822,6 +869,12 @@ class UpstreamParserCompatibilityTest {
             parseFull("[test] foo [bar](https://example.com)"),
         )
         assertEquals(listOf(TEXT("[test](http://..)")), parseFull("[test](http://..)"))
+        assertEquals(listOf(LINK(false, "http://localhost", listOf(TEXT("x")))), parseFull("[x](http://localhost)"))
+        assertEquals(
+            listOf(LINK(false, "https://example.com/a%20b", listOf(TEXT("x")))),
+            parseFull("[x](https://example.com/a%20b)"),
+        )
+        assertEquals(listOf(TEXT("["), BOLD(listOf(TEXT("bold"))), TEXT("]")), parseFull("[**bold**]"))
     }
 
     @Test
@@ -842,6 +895,19 @@ class UpstreamParserCompatibilityTest {
             ),
             parseFull("\$[spin.speed=1.1s \$[shake a]]"),
         )
+        assertEquals(listOf(FN("spin", mapOf("left" to true), listOf(TEXT("x")))), parseFull("\$[spin.left x]"))
+        assertEquals(
+            listOf(FN("flip", mapOf("h" to true, "v" to true), listOf(TEXT("x")))),
+            parseFull("\$[flip.h,v x]"),
+        )
+        assertEquals(
+            listOf(FN("x", mapOf("a" to "1", "b" to "2"), listOf(TEXT("c")))),
+            parseFull("\$[x.a=1,b=2 c]"),
+        )
+        assertEquals(listOf(TEXT("\$tag")), parseFull("\$tag"))
+        assertEquals(listOf(TEXT("\$[shake ]")), parseFull("\$[shake ]"))
+        assertEquals(listOf(TEXT("\$[foo-bar x]")), parseFull("\$[foo-bar x]"))
+        assertEquals(listOf(TEXT("\$[shake\tx]")), parseFull("\$[shake\tx]"))
     }
 
     @Test
@@ -865,6 +931,34 @@ class UpstreamParserCompatibilityTest {
     }
 
     @Test
+    fun nestingLimitMatchesUpstream() {
+        assertEquals(
+            listOf(QUOTE(listOf(QUOTE(listOf(TEXT("> abc")))))),
+            parseFull(">>> abc", nestLimit = 2),
+        )
+        assertEquals(
+            listOf(BOLD(listOf(BOLD(listOf(TEXT("***abc***")))))),
+            parseFull("<b><b>***abc***</b></b>", nestLimit = 2),
+        )
+        assertEquals(
+            listOf(ITALIC(listOf(ITALIC(listOf(TEXT("<b>abc</b>")))))),
+            parseFull("<i><i><b>abc</b></i></i>", nestLimit = 2),
+        )
+        assertEquals(
+            listOf(BOLD(listOf(HASHTAG("abc"), TEXT("(x(y)z)")))),
+            parseFull("<b>#abc(x(y)z)</b>", nestLimit = 2),
+        )
+        assertEquals(
+            listOf(BOLD(listOf(N_URL("https://example.com/abc"), TEXT("(x(y)z)")))),
+            parseFull("<b>https://example.com/abc(x(y)z)</b>", nestLimit = 2),
+        )
+        assertEquals(
+            listOf(BOLD(listOf(BOLD(listOf(TEXT("\$[a b]")))))),
+            parseFull("<b><b>\$[a b]</b></b>", nestLimit = 2),
+        )
+    }
+
+    @Test
     fun fullParserComposite() {
         val input =
             """
@@ -880,19 +974,18 @@ class UpstreamParserCompatibilityTest {
             """.trimIndent()
         assertEquals(
             listOf(
-                TEXT("before\n"),
+                TEXT("before"),
                 CENTER(
                     listOf(
-                        TEXT("\nHello "),
+                        TEXT("Hello "),
                         FN("tada", emptyMap(), listOf(TEXT("everynyan! "), UNI_EMOJI("🎉"))),
                         TEXT("\n\nI'm "),
                         MENTION("ai", null, "@ai"),
                         TEXT(", A bot of misskey!\n\n"),
                         N_URL("https://github.com/syuilo/ai"),
-                        TEXT("\n"),
                     ),
                 ),
-                TEXT("\nafter"),
+                TEXT("after"),
             ),
             parseFull(input),
         )

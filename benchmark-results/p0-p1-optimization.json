@@ -1,0 +1,795 @@
+{
+  "generatedAt": "2026-08-31T16:30:00+08:00",
+  "comparison": {
+    "baseline": "Official-MFM-aligned parser immediately before P0/P1 changes",
+    "optimized": "Working tree with P0/P1 changes"
+  },
+  "jvm": {
+    "environment": {
+      "host": "Apple M1 Ultra (20 cores, 128 GB)",
+      "hostOS": "macOS 27.0 (26A5406e)",
+      "jdk": "Amazon Corretto 21.0.6",
+      "jmh": "1.37",
+      "heap": "-Xms512m -Xmx512m"
+    },
+    "methodology": {
+      "mode": "throughput",
+      "threads": 1,
+      "forks": 1,
+      "warmup": "3 x 1 s",
+      "measurement": "5 x 1 s",
+      "profiler": "gc",
+      "error": "99.9% confidence interval"
+    },
+    "targeted": [
+      {
+        "benchmark": "parseComplexUnicodeEmoji64KiB",
+        "baseline": {
+          "benchmark": "parseComplexUnicodeEmoji64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 106.16522833039248,
+            "error99_9": 0.2053120760503256
+          },
+          "allocatedBytesPerOperation": 3834537.6011076495
+        },
+        "optimized": {
+          "benchmark": "parseComplexUnicodeEmoji64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 164.30112510124366,
+            "error99_9": 0.9486456195859057
+          },
+          "allocatedBytesPerOperation": 3834514.5973096527
+        },
+        "throughputChangePercent": 54.759828321499796,
+        "allocationReductionPercent": 0.0005999106121756803
+      },
+      {
+        "benchmark": "parseDenseUnicodeEmoji64KiB",
+        "baseline": {
+          "benchmark": "parseDenseUnicodeEmoji64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 747.8513014584285,
+            "error99_9": 9.70564386866174
+          },
+          "allocatedBytesPerOperation": 6402530.225335082
+        },
+        "optimized": {
+          "benchmark": "parseDenseUnicodeEmoji64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 989.7914503734946,
+            "error99_9": 8.26147543026403
+          },
+          "allocatedBytesPerOperation": 3453354.33024509
+        },
+        "throughputChangePercent": 32.35137098019949,
+        "allocationReductionPercent": 46.06266259267279
+      },
+      {
+        "benchmark": "parseLargeCjk1MiB",
+        "baseline": {
+          "benchmark": "parseLargeCjk1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 1.0434523635047426,
+            "error99_9": 0.0097410853408608
+          },
+          "allocatedBytesPerOperation": 178960438.4
+        },
+        "optimized": {
+          "benchmark": "parseLargeCjk1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 86.63434658591586,
+            "error99_9": 0.42059594956551805
+          },
+          "allocatedBytesPerOperation": 446.23448275862063
+        },
+        "throughputChangePercent": 8202.664272562368,
+        "allocationReductionPercent": 99.99975065188332
+      },
+      {
+        "benchmark": "parseLargePunctuation1MiB",
+        "baseline": {
+          "benchmark": "parseLargePunctuation1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 310.41836644415946,
+            "error99_9": 1.5655435743645512
+          },
+          "allocatedBytesPerOperation": 389.9580638445415
+        },
+        "optimized": {
+          "benchmark": "parseLargePunctuation1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 310.2837701665697,
+            "error99_9": 0.9012313893861832
+          },
+          "allocatedBytesPerOperation": 389.90949309130866
+        },
+        "throughputChangePercent": -0.043359637231377146,
+        "allocationReductionPercent": 0.012455378599951494
+      },
+      {
+        "benchmark": "parseQuoteHeavy64KiB",
+        "baseline": {
+          "benchmark": "parseQuoteHeavy64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 1153.6674473814785,
+            "error99_9": 24.311549547870214
+          },
+          "allocatedBytesPerOperation": 1532309.990517764
+        },
+        "optimized": {
+          "benchmark": "parseQuoteHeavy64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 1168.9205997262466,
+            "error99_9": 22.974428489631887
+          },
+          "allocatedBytesPerOperation": 1381677.938623102
+        },
+        "throughputChangePercent": 1.32214464223539,
+        "allocationReductionPercent": 9.830390249153421
+      },
+      {
+        "benchmark": "parseSparseUnicodeEmoji1MiB",
+        "baseline": {
+          "benchmark": "parseSparseUnicodeEmoji1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 358.731169700368,
+            "error99_9": 71.25470945032934
+          },
+          "allocatedBytesPerOperation": 6292148.894102524
+        },
+        "optimized": {
+          "benchmark": "parseSparseUnicodeEmoji1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 1083.682276645222,
+            "error99_9": 45.942593682936916
+          },
+          "allocatedBytesPerOperation": 1049118.7435462775
+        },
+        "throughputChangePercent": 202.08757091009764,
+        "allocationReductionPercent": 83.3265429473611
+      },
+      {
+        "benchmark": "parseUnmatchedClosings128KiB",
+        "baseline": {
+          "benchmark": "parseUnmatchedClosings128KiB",
+          "throughputOpsPerSecond": {
+            "mean": 3117.5479188901018,
+            "error99_9": 33.75223593095178
+          },
+          "allocatedBytesPerOperation": 298.1991244626218
+        },
+        "optimized": {
+          "benchmark": "parseUnmatchedClosings128KiB",
+          "throughputOpsPerSecond": {
+            "mean": 7448.980750290456,
+            "error99_9": 79.44000774422378
+          },
+          "allocatedBytesPerOperation": 296.9219321373306
+        },
+        "throughputChangePercent": 138.9371693424496,
+        "allocationReductionPercent": 0.42830183609452455
+      },
+      {
+        "benchmark": "parseUnmatchedClosings32KiB",
+        "baseline": {
+          "benchmark": "parseUnmatchedClosings32KiB",
+          "throughputOpsPerSecond": {
+            "mean": 12505.4816750522,
+            "error99_9": 105.34237721876228
+          },
+          "allocatedBytesPerOperation": 296.54731082567605
+        },
+        "optimized": {
+          "benchmark": "parseUnmatchedClosings32KiB",
+          "throughputOpsPerSecond": {
+            "mean": 29787.697300778636,
+            "error99_9": 460.2743999796751
+          },
+          "allocatedBytesPerOperation": 296.22981626492816
+        },
+        "throughputChangePercent": 138.19712086903118,
+        "allocationReductionPercent": 0.10706371265478687
+      },
+      {
+        "benchmark": "parseUnmatchedClosings4KiB",
+        "baseline": {
+          "benchmark": "parseUnmatchedClosings4KiB",
+          "throughputOpsPerSecond": {
+            "mean": 99368.10567826567,
+            "error99_9": 402.68926579928194
+          },
+          "allocatedBytesPerOperation": 296.0687257640444
+        },
+        "optimized": {
+          "benchmark": "parseUnmatchedClosings4KiB",
+          "throughputOpsPerSecond": {
+            "mean": 237729.71320252525,
+            "error99_9": 1294.5904870590116
+          },
+          "allocatedBytesPerOperation": 296.02875692759756
+        },
+        "throughputChangePercent": 139.2414664442202,
+        "allocationReductionPercent": 0.013499850868647911
+      },
+      {
+        "benchmark": "parseLongPlainTag1MiB",
+        "baseline": {
+          "benchmark": "parseLongPlainTag1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 196.962853882008,
+            "error99_9": 0.8029037805836887
+          },
+          "allocatedBytesPerOperation": 1049066.8599303588
+        },
+        "optimized": {
+          "benchmark": "parseLongPlainTag1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 357.9460543298791,
+            "error99_9": 2.40873951404588
+          },
+          "allocatedBytesPerOperation": 1049051.1894312284
+        },
+        "throughputChangePercent": 81.7327720811302,
+        "allocationReductionPercent": 0.0014937559967731495
+      }
+    ],
+    "regressionGuard": [
+      {
+        "benchmark": "parseBatchOf1000Posts",
+        "baseline": {
+          "benchmark": "parseBatchOf1000Posts",
+          "throughputOpsPerSecond": {
+            "mean": 86.94617617803763,
+            "error99_9": 1.057301165679857
+          },
+          "allocatedBytesPerOperation": 32098886.618181817
+        },
+        "optimized": {
+          "benchmark": "parseBatchOf1000Posts",
+          "throughputOpsPerSecond": {
+            "mean": 85.35982390722731,
+            "error99_9": 0.787694376306695
+          },
+          "allocatedBytesPerOperation": 32098888.224966586
+        },
+        "throughputChangePercent": -1.8245221820474167,
+        "allocationReductionPercent": -0.00000500573364980994
+      },
+      {
+        "benchmark": "parseDeepFunctions750Levels",
+        "baseline": {
+          "benchmark": "parseDeepFunctions750Levels",
+          "throughputOpsPerSecond": {
+            "mean": 20941.525759874658,
+            "error99_9": 104.61570385379568
+          },
+          "allocatedBytesPerOperation": 211456.330116172
+        },
+        "optimized": {
+          "benchmark": "parseDeepFunctions750Levels",
+          "throughputOpsPerSecond": {
+            "mean": 21363.59049913032,
+            "error99_9": 214.92103369272144
+          },
+          "allocatedBytesPerOperation": 211456.3218637695
+        },
+        "throughputChangePercent": 2.0154440707675914,
+        "allocationReductionPercent": 0.000003902650969056509
+      },
+      {
+        "benchmark": "parseFunctionHeavy64KiB",
+        "baseline": {
+          "benchmark": "parseFunctionHeavy64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 1827.0528108644903,
+            "error99_9": 83.79354955272686
+          },
+          "allocatedBytesPerOperation": 1977172.0719094835
+        },
+        "optimized": {
+          "benchmark": "parseFunctionHeavy64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 1879.473225037981,
+            "error99_9": 24.221807358829547
+          },
+          "allocatedBytesPerOperation": 1977171.610547258
+        },
+        "throughputChangePercent": 2.869124190706196,
+        "allocationReductionPercent": 0.000023334449850143102
+      },
+      {
+        "benchmark": "parseLargePlain1MiB",
+        "baseline": {
+          "benchmark": "parseLargePlain1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 431.1291529581357,
+            "error99_9": 6.087358024422424
+          },
+          "allocatedBytesPerOperation": 384.1760607190592
+        },
+        "optimized": {
+          "benchmark": "parseLargePlain1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 430.11118267555486,
+            "error99_9": 6.600797883504385
+          },
+          "allocatedBytesPerOperation": 384.3108747595235
+        },
+        "throughputChangePercent": -0.23611724597981665,
+        "allocationReductionPercent": -0.035091733777470324
+      },
+      {
+        "benchmark": "parseLargeRich1MiB",
+        "baseline": {
+          "benchmark": "parseLargeRich1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 110.30810920504557,
+            "error99_9": 3.2479437407317255
+          },
+          "allocatedBytesPerOperation": 17935869.836626004
+        },
+        "optimized": {
+          "benchmark": "parseLargeRich1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 107.15104708245667,
+            "error99_9": 3.0270244262162995
+          },
+          "allocatedBytesPerOperation": 17935871.88586127
+        },
+        "throughputChangePercent": -2.862039921943016,
+        "allocationReductionPercent": -0.000011425346446714002
+      },
+      {
+        "benchmark": "parseShortPlain",
+        "baseline": {
+          "benchmark": "parseShortPlain",
+          "throughputOpsPerSecond": {
+            "mean": 1522579.5826790005,
+            "error99_9": 28337.856454839395
+          },
+          "allocatedBytesPerOperation": 296.00452189032364
+        },
+        "optimized": {
+          "benchmark": "parseShortPlain",
+          "throughputOpsPerSecond": {
+            "mean": 1519983.7110496268,
+            "error99_9": 9316.156276837515
+          },
+          "allocatedBytesPerOperation": 296.00451422322834
+        },
+        "throughputChangePercent": -0.17049168785030488,
+        "allocationReductionPercent": 0.0000025901953248919085
+      },
+      {
+        "benchmark": "parseShortRich",
+        "baseline": {
+          "benchmark": "parseShortRich",
+          "throughputOpsPerSecond": {
+            "mean": 81643.31049525327,
+            "error99_9": 2458.106890252747
+          },
+          "allocatedBytesPerOperation": 34264.083975110654
+        },
+        "optimized": {
+          "benchmark": "parseShortRich",
+          "throughputOpsPerSecond": {
+            "mean": 87864.04762288016,
+            "error99_9": 688.0044375823503
+          },
+          "allocatedBytesPerOperation": 34264.07824689393
+        },
+        "throughputChangePercent": 7.619408240419845,
+        "allocationReductionPercent": 0.00001671784580770108
+      }
+    ]
+  },
+  "iosSimulator": {
+    "environment": {
+      "target": "iosSimulatorArm64",
+      "simulatedDevice": "iPhone 17 Pro",
+      "simulatedOS": "iOS 27.0",
+      "kotlinNative": "2.3.0",
+      "binary": "release"
+    },
+    "methodology": {
+      "processIsolation": "one process per benchmark",
+      "calibrationTargetMilliseconds": 500,
+      "warmupIterations": 3,
+      "measurementIterations": 5,
+      "throughputError": "sample standard deviation"
+    },
+    "comparisons": [
+      {
+        "benchmark": "parseShortPlain",
+        "baseline": {
+          "benchmark": "parseShortPlain",
+          "throughputOpsPerSecond": {
+            "mean": 1741903.8242868125,
+            "sampleStandardDeviation": 9379.103522852894
+          },
+          "medianNanosecondsPerOperation": 575.0213470458984,
+          "resultHash": -842488972
+        },
+        "optimized": {
+          "benchmark": "parseShortPlain",
+          "throughputOpsPerSecond": {
+            "mean": 1725563.9938500994,
+            "sampleStandardDeviation": 42641.079286019965
+          },
+          "medianNanosecondsPerOperation": 585.1722555160522,
+          "resultHash": -842488972
+        },
+        "throughputChangePercent": -0.9380443517542081,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseShortRich",
+        "baseline": {
+          "benchmark": "parseShortRich",
+          "throughputOpsPerSecond": {
+            "mean": 24112.418859420428,
+            "sampleStandardDeviation": 212.53460250643852
+          },
+          "medianNanosecondsPerOperation": 41390.63262939453,
+          "resultHash": -1072672040
+        },
+        "optimized": {
+          "benchmark": "parseShortRich",
+          "throughputOpsPerSecond": {
+            "mean": 23631.789966134398,
+            "sampleStandardDeviation": 132.1261093497892
+          },
+          "medianNanosecondsPerOperation": 42268.305419921875,
+          "resultHash": -1072672040
+        },
+        "throughputChangePercent": -1.9932836107740992,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseBatchOf1000Posts",
+        "baseline": {
+          "benchmark": "parseBatchOf1000Posts",
+          "throughputOpsPerSecond": {
+            "mean": 33.70064268688485,
+            "sampleStandardDeviation": 0.8442443837190463
+          },
+          "medianNanosecondsPerOperation": 29273868.46875,
+          "resultHash": 2020633192
+        },
+        "optimized": {
+          "benchmark": "parseBatchOf1000Posts",
+          "throughputOpsPerSecond": {
+            "mean": 34.40055584176755,
+            "sampleStandardDeviation": 0.1933516347115075
+          },
+          "medianNanosecondsPerOperation": 28995208.34375,
+          "resultHash": 2020633192
+        },
+        "throughputChangePercent": 2.07685402734199,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseLargePlain1MiB",
+        "baseline": {
+          "benchmark": "parseLargePlain1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 638.4669941028769,
+            "sampleStandardDeviation": 2.7051722028102847
+          },
+          "medianNanosecondsPerOperation": 1562578.451171875,
+          "resultHash": -1627388684
+        },
+        "optimized": {
+          "benchmark": "parseLargePlain1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 634.7547429077629,
+            "sampleStandardDeviation": 3.467116044977234
+          },
+          "medianNanosecondsPerOperation": 1572119.384765625,
+          "resultHash": -1627388684
+        },
+        "throughputChangePercent": -0.5814319658497324,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseLargePunctuation1MiB",
+        "baseline": {
+          "benchmark": "parseLargePunctuation1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 337.3587460366578,
+            "sampleStandardDeviation": 1.690461867419608
+          },
+          "medianNanosecondsPerOperation": 2958100.09765625,
+          "resultHash": -2011429644
+        },
+        "optimized": {
+          "benchmark": "parseLargePunctuation1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 336.75068705825856,
+            "sampleStandardDeviation": 0.5626462960130179
+          },
+          "medianNanosecondsPerOperation": 2969765.4609375,
+          "resultHash": -2011429644
+        },
+        "throughputChangePercent": -0.18024105956724323,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseLargeCjk1MiB",
+        "baseline": {
+          "benchmark": "parseLargeCjk1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 0.4587377035958505,
+            "sampleStandardDeviation": 0.0006181652395883296
+          },
+          "medianNanosecondsPerOperation": 2179867083,
+          "resultHash": -1481002467
+        },
+        "optimized": {
+          "benchmark": "parseLargeCjk1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 75.13410881759457,
+            "sampleStandardDeviation": 0.11309164863328565
+          },
+          "medianNanosecondsPerOperation": 13299481.765625,
+          "resultHash": -1481002467
+        },
+        "throughputChangePercent": 16278.446382028364,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseLongPlainTag1MiB",
+        "baseline": {
+          "benchmark": "parseLongPlainTag1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 102.7395011793313,
+            "sampleStandardDeviation": 0.1290469668837261
+          },
+          "medianNanosecondsPerOperation": 9731410.8125,
+          "resultHash": -1627388690
+        },
+        "optimized": {
+          "benchmark": "parseLongPlainTag1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 204.4231467314129,
+            "sampleStandardDeviation": 1.3524906754281563
+          },
+          "medianNanosecondsPerOperation": 4873948.2421875,
+          "resultHash": -1627388690
+        },
+        "throughputChangePercent": 98.97229827366331,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseLargeRich1MiB",
+        "baseline": {
+          "benchmark": "parseLargeRich1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 38.27292603642444,
+            "sampleStandardDeviation": 0.18295604815931818
+          },
+          "medianNanosecondsPerOperation": 26094828.125,
+          "resultHash": 1142963366
+        },
+        "optimized": {
+          "benchmark": "parseLargeRich1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 38.22294048300195,
+            "sampleStandardDeviation": 0.23493631497218487
+          },
+          "medianNanosecondsPerOperation": 26175111.96875,
+          "resultHash": 1142963366
+        },
+        "throughputChangePercent": -0.1306029054975233,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseSparseUnicodeEmoji1MiB",
+        "baseline": {
+          "benchmark": "parseSparseUnicodeEmoji1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 188.1084504681519,
+            "sampleStandardDeviation": 0.6296234285407585
+          },
+          "medianNanosecondsPerOperation": 5312528.6484375,
+          "resultHash": -1432662849
+        },
+        "optimized": {
+          "benchmark": "parseSparseUnicodeEmoji1MiB",
+          "throughputOpsPerSecond": {
+            "mean": 633.6373041597099,
+            "sampleStandardDeviation": 1.0320585241192357
+          },
+          "medianNanosecondsPerOperation": 1576794.677734375,
+          "resultHash": -1432662849
+        },
+        "throughputChangePercent": 236.846804374155,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseDenseUnicodeEmoji64KiB",
+        "baseline": {
+          "benchmark": "parseDenseUnicodeEmoji64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 225.0026313885162,
+            "sampleStandardDeviation": 0.4160340162728444
+          },
+          "medianNanosecondsPerOperation": 4446779.296875,
+          "resultHash": 1950351361
+        },
+        "optimized": {
+          "benchmark": "parseDenseUnicodeEmoji64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 395.2885635068835,
+            "sampleStandardDeviation": 1.3001185845373948
+          },
+          "medianNanosecondsPerOperation": 2526638.99609375,
+          "resultHash": 1950351361
+        },
+        "throughputChangePercent": 75.68175139442323,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseComplexUnicodeEmoji64KiB",
+        "baseline": {
+          "benchmark": "parseComplexUnicodeEmoji64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 49.39404445252541,
+            "sampleStandardDeviation": 0.06974587193324278
+          },
+          "medianNanosecondsPerOperation": 20235091.125,
+          "resultHash": 516807788
+        },
+        "optimized": {
+          "benchmark": "parseComplexUnicodeEmoji64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 49.87043457649398,
+            "sampleStandardDeviation": 0.14998139353462342
+          },
+          "medianNanosecondsPerOperation": 20052130.21875,
+          "resultHash": 516807788
+        },
+        "throughputChangePercent": 0.964468751746872,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseQuoteHeavy64KiB",
+        "baseline": {
+          "benchmark": "parseQuoteHeavy64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 535.2242172521535,
+            "sampleStandardDeviation": 1.9864770091213293
+          },
+          "medianNanosecondsPerOperation": 1868222.16796875,
+          "resultHash": 309672650
+        },
+        "optimized": {
+          "benchmark": "parseQuoteHeavy64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 553.2480613208556,
+            "sampleStandardDeviation": 2.9956824644985978
+          },
+          "medianNanosecondsPerOperation": 1803979.572265625,
+          "resultHash": 309672650
+        },
+        "throughputChangePercent": 3.3675314919860533,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseFunctionHeavy64KiB",
+        "baseline": {
+          "benchmark": "parseFunctionHeavy64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 700.8795957283598,
+            "sampleStandardDeviation": 5.284937743531479
+          },
+          "medianNanosecondsPerOperation": 1424863.8515625,
+          "resultHash": 1780872463
+        },
+        "optimized": {
+          "benchmark": "parseFunctionHeavy64KiB",
+          "throughputOpsPerSecond": {
+            "mean": 706.5925151542876,
+            "sampleStandardDeviation": 5.578440723008905
+          },
+          "medianNanosecondsPerOperation": 1408148.6015625,
+          "resultHash": 1780872463
+        },
+        "throughputChangePercent": 0.8151071112279862,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseUnmatchedClosings4KiB",
+        "baseline": {
+          "benchmark": "parseUnmatchedClosings4KiB",
+          "throughputOpsPerSecond": {
+            "mean": 25230.380990635138,
+            "sampleStandardDeviation": 156.3248701762093
+          },
+          "medianNanosecondsPerOperation": 39592.17834472656,
+          "resultHash": -39648012
+        },
+        "optimized": {
+          "benchmark": "parseUnmatchedClosings4KiB",
+          "throughputOpsPerSecond": {
+            "mean": 196930.23464967005,
+            "sampleStandardDeviation": 1406.4192149276446
+          },
+          "medianNanosecondsPerOperation": 5084.233924865723,
+          "resultHash": -39648012
+        },
+        "throughputChangePercent": 680.5281843455532,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseUnmatchedClosings32KiB",
+        "baseline": {
+          "benchmark": "parseUnmatchedClosings32KiB",
+          "throughputOpsPerSecond": {
+            "mean": 3216.5813637046813,
+            "sampleStandardDeviation": 12.934309287817074
+          },
+          "medianNanosecondsPerOperation": 310713.46044921875,
+          "resultHash": -317192972
+        },
+        "optimized": {
+          "benchmark": "parseUnmatchedClosings32KiB",
+          "throughputOpsPerSecond": {
+            "mean": 27506.722294008603,
+            "sampleStandardDeviation": 90.6659329048521
+          },
+          "medianNanosecondsPerOperation": 36316.235900878906,
+          "resultHash": -317192972
+        },
+        "throughputChangePercent": 755.1539409010278,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseUnmatchedClosings128KiB",
+        "baseline": {
+          "benchmark": "parseUnmatchedClosings128KiB",
+          "throughputOpsPerSecond": {
+            "mean": 788.2754591336932,
+            "sampleStandardDeviation": 1.8745018040790038
+          },
+          "medianNanosecondsPerOperation": 1267440.591796875,
+          "resultHash": -1268775692
+        },
+        "optimized": {
+          "benchmark": "parseUnmatchedClosings128KiB",
+          "throughputOpsPerSecond": {
+            "mean": 6174.196867719911,
+            "sampleStandardDeviation": 22.1249254816181
+          },
+          "medianNanosecondsPerOperation": 162010.6201171875,
+          "resultHash": -1268775692
+        },
+        "throughputChangePercent": 683.2537212950015,
+        "outputHashMatches": true
+      },
+      {
+        "benchmark": "parseDeepFunctions750Levels",
+        "baseline": {
+          "benchmark": "parseDeepFunctions750Levels",
+          "throughputOpsPerSecond": {
+            "mean": 6376.52077168642,
+            "sampleStandardDeviation": 64.97599551222899
+          },
+          "medianNanosecondsPerOperation": 157084.0556640625,
+          "resultHash": -138222737
+        },
+        "optimized": {
+          "benchmark": "parseDeepFunctions750Levels",
+          "throughputOpsPerSecond": {
+            "mean": 6325.369295310421,
+            "sampleStandardDeviation": 92.79893896411029
+          },
+          "medianNanosecondsPerOperation": 156978.25122070312,
+          "resultHash": -138222737
+        },
+        "throughputChangePercent": -0.8021847369042656,
+        "outputHashMatches": true
+      }
+    ]
+  }
+}

@@ -26,7 +26,20 @@ data class QuoteNode(
 data class SearchNode(
     val query: String,
     val search: String,
-) : BlockNode
+) : BlockNode {
+    private var parsedContent: String? = null
+
+    val content: String
+        get() = parsedContent ?: "$query $search"
+
+    internal constructor(
+        query: String,
+        search: String,
+        content: String,
+    ) : this(query, search) {
+        parsedContent = content
+    }
+}
 
 data class CodeBlockNode(
     val code: String,
@@ -86,7 +99,9 @@ data class MathInlineNode(
 data class MentionNode(
     val userName: String,
     val host: String?,
-) : InlineNode
+) : InlineNode {
+    val acct: String = if (host == null) "@$userName" else "@$userName@$host"
+}
 
 data class HashtagNode(
     val tag: String,
@@ -94,7 +109,7 @@ data class HashtagNode(
 
 data class UrlNode(
     val url: String,
-    internal val brackets: Boolean = false,
+    val brackets: Boolean = false,
 ) : InlineNode
 
 data class LinkNode(
@@ -107,14 +122,34 @@ data class FnNode(
     override val start: Int,
     val name: String,
     override val content: ArrayList<Node> = arrayListOf(),
-    // Record<string, string | true>
     val args: HashMap<String, String> = hashMapOf(),
 ) : InlineNode,
-    ContainerNode
+    ContainerNode {
+    private var booleanArgs: Set<String> = emptySet()
+
+    // Record<string, string | true>
+    val typedArgs: Map<String, Any>
+        get() =
+            if (booleanArgs.isEmpty()) {
+                args
+            } else {
+                args.mapValues { (key, value) -> if (key in booleanArgs) true else value }
+            }
+
+    internal constructor(
+        start: Int,
+        name: String,
+        content: ArrayList<Node>,
+        args: HashMap<String, String>,
+        booleanArgs: Set<String>,
+    ) : this(start, name, content, args) {
+        this.booleanArgs = booleanArgs
+    }
+}
 
 data class TextNode(
     val content: String,
-    internal val plain: Boolean = false,
+    val plain: Boolean = false,
 ) : InlineNode
 
 data class CashNode(

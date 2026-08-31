@@ -23,7 +23,7 @@ class MFMParserStressTest {
         val depth = 2_000
         val input = "\$[x ".repeat(depth) + "a" + "]".repeat(depth)
 
-        val result = MFMParser().parse(input)
+        val result = MFMParser(nestLimit = Int.MAX_VALUE).parse(input)
 
         var current: Node = result.content.single()
         repeat(depth) {

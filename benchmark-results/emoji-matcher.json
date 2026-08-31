@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-08-31",
+  "jvm": {
+    "machine": "Apple M1 Ultra",
+    "runtime": "Amazon Corretto 21.0.6",
+    "jmh": "1.37",
+    "heap": "512 MiB",
+    "warmups": "3 x 1 s",
+    "measurements": "5 x 1 s",
+    "threads": 1,
+    "forks": 1,
+    "scoreUnit": "ns/op",
+    "allocationUnit": "B/op",
+    "results": [
+      {"benchmark":"combinedComplexEmoji","baseline":{"score":943.4508448383212,"error":26.31627432111574,"allocation":464.0064700552108},"optimized":{"score":934.5257561634389,"error":35.38670166907785,"allocation":368.0064006930919},"delta":{"latencyPercent":-0.9460046300993841,"allocationPercent":-20.68938162666053}},
+      {"benchmark":"combinedFlagEmoji","baseline":{"score":1813.5814310517428,"error":126.3818635535357,"allocation":440.01243024689904},"optimized":{"score":1771.937314811934,"error":39.96219133446536,"allocation":368.012113530158},"delta":{"latencyPercent":-2.2962363600987246,"allocationPercent":-16.363246073830318}},
+      {"benchmark":"fastAsciiMiss","baseline":{"score":2.8109436681620807,"error":0.032310657365582744,"allocation":0.000019139744203499014},"optimized":{"score":2.8170673358150866,"error":0.03707762619803019,"allocation":0.000019211137740005768},"delta":{"latencyPercent":0.21785095597486315,"allocationPercent":0.0}},
+      {"benchmark":"fastCjkMiss","baseline":{"score":3.128876822572921,"error":0.051798659781387174,"allocation":0.00002130864696903974},"optimized":{"score":3.2904257314778462,"error":0.0274850090248954,"allocation":0.000022515466107558986},"delta":{"latencyPercent":5.163159755585434,"allocationPercent":0.0}},
+      {"benchmark":"fastComplexFallback","baseline":{"score":10.807339336238872,"error":0.8428524424086659,"allocation":0.00007387906969140383},"optimized":{"score":10.948620833842666,"error":0.3175146060309003,"allocation":0.00007499022591703596},"delta":{"latencyPercent":1.307273633298922,"allocationPercent":0.0}},
+      {"benchmark":"fastComponentEmoji","baseline":{"score":21.021425168723503,"error":0.4263761964654072,"allocation":0.0001436104416297161},"optimized":{"score":12.416891882760483,"error":0.6689635412935805,"allocation":0.00008503187748167607},"delta":{"latencyPercent":-40.93220710251929,"allocationPercent":0.0}},
+      {"benchmark":"fastPunctuationMiss","baseline":{"score":17.08217104288682,"error":0.96793777709376,"allocation":0.0001169552678472621},"optimized":{"score":16.8610461032586,"error":1.3651305316353575,"allocation":0.0001152477791717734},"delta":{"latencyPercent":-1.2944779622745761,"allocationPercent":0.0}},
+      {"benchmark":"fastSimpleEmoji","baseline":{"score":12.880940279017148,"error":0.6963584704786083,"allocation":0.00008806746905138933},"optimized":{"score":12.68093930856829,"error":0.9185650673901372,"allocation":0.00008658584587025658},"delta":{"latencyPercent":-1.552689214580527,"allocationPercent":0.0}},
+      {"benchmark":"fastVariationEmoji","baseline":{"score":14.90256442244593,"error":0.4142040008353265,"allocation":0.00010218300220604156},"optimized":{"score":14.424126347455466,"error":0.36769012831199466,"allocation":0.00009877948656722597},"delta":{"latencyPercent":-3.210441246406226,"allocationPercent":0.0}},
+      {"benchmark":"regexCjkMiss","baseline":{"score":1720.5194359685997,"error":39.75663048119341,"allocation":320.01176899006975},"optimized":{"score":1647.2935679130646,"error":69.11819047085578,"allocation":320.0112110432784},"delta":{"latencyPercent":-4.2560325983362794,"allocationPercent":-0.00017435195995840758}},
+      {"benchmark":"regexComplexEmoji","baseline":{"score":1017.2478214819321,"error":45.59965693593278,"allocation":464.00698675051535},"optimized":{"score":927.9792178834639,"error":18.23240879018236,"allocation":368.0064105277507},"delta":{"latencyPercent":-8.77550206678459,"allocationPercent":-20.68946782354847}},
+      {"benchmark":"regexSimpleEmoji","baseline":{"score":2742.070679473543,"error":613.7508308813907,"allocation":440.01863095294965},"optimized":{"score":2299.802646200432,"error":25.221336227850465,"allocation":368.01572343371413},"delta":{"latencyPercent":-16.12898006546,"allocationPercent":-16.363604278141274}}
+    ]
+  },
+  "iosSimulator": {
+    "device": "iPhone 17 Pro",
+    "runtime": "iOS 27.0 Simulator",
+    "compiler": "Kotlin/Native 2.3.0 release",
+    "benchmark": "parseComplexUnicodeEmoji64KiB",
+    "operationsPerSample": 32,
+    "baseline": {"throughputOpsPerSecond":51.548336138461856,"standardDeviation":0.7678471099237727,"medianNsPerOp":19466204.4375,"samplesNsPerOp":[19638731.78125,19466204.4375,19704175.78125,19128020.84375,19076388.03125],"resultHash":516807788},
+    "optimized": {"throughputOpsPerSecond":51.78827587027429,"standardDeviation":0.8278521805366362,"medianNsPerOp":19266510.40625,"samplesNsPerOp":[19840901.03125,19066342.46875,19085972.65625,19307269.53125,19266510.40625],"resultHash":516807788},
+    "delta": {"throughputPercent":0.4654655218510717,"medianLatencyPercent":-1.0258498614414302}
+  },
+  "validation": {
+    "exhaustiveFastTableInputs": 383238,
+    "jvmTests": 98,
+    "iosSimulatorTests": 96,
+    "officialDifferentialInputs": 7225,
+    "officialDifferentialMismatches": 0
+  }
+}

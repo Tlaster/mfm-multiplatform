@@ -1,5 +1,7 @@
 # iOS Simulator benchmark
 
+> 本文记录直接 AST 迁移完成时的历史快照。后续官方行为对齐见 [MFM 官方行为对齐报告](../MFM_SPEC_AUDIT.md)，最新 iOS A/B 数据见 [P0/P1 性能优化报告](P0_P1_OPTIMIZATION.md)。原始 JSON 保留不改写。
+
 ## 结论
 
 在 iPhone 17 Pro / iOS 27.0 Simulator 的 Kotlin/Native release 构建中，直接 AST 在正常负载上提升 **14.955×–42.200×**。批量 1,000 条消息的中位延迟从 **626.56 ms** 降至 **29.64 ms**。
